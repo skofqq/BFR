@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Boxy</string>
+
+    <!-- Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_apps">Apps</string>
+    <string name="tab_logs">Logs</string>
+    <string name="tab_tools">Tools</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="home_title">Boxy</string>
+    <string name="home_subtitle">Status &amp; metrics</string>
+    <string name="home_service_status">Service status</string>
+    <string name="status_running">Running</string>
+    <string name="status_stopped">Stopped</string>
+    <string name="status_starting">Starting</string>
+    <string name="status_stopping">Stopping</string>
+    <string name="status_checking">Checking</string>
+    <string name="status_unavailable">Unavailable</string>
+    <string name="home_tap_start">Tap Start to enable</string>
+    <string name="home_pid">PID %1$s</string>
+    <string name="action_start">Start</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_restart">Restart</string>
+    <string name="home_core">Core</string>
+    <string name="home_mode">Mode</string>
+    <string name="home_ipv6">IPv6</string>
+    <string name="common_on">On</string>
+    <string name="common_off">Off</string>
+    <string name="common_dash">—</string>
+
+    <!-- Environment -->
+    <string name="env_root_title">Root required</string>
+    <string name="env_root_body">Boxy needs root access to control the Box service. Grant it in Magisk / KernelSU / APatch and reopen the app.</string>
+    <string name="env_module_title">Module not installed</string>
+    <string name="env_module_body">Box for Root module was not found in /data/adb/modules.</string>
+    <string name="env_scripts_title">Scripts missing</string>
+    <string name="env_scripts_body">Box scripts were not found in /data/adb/box/scripts.</string>
+    <string name="action_retry">Retry</string>
+
+    <!-- Placeholders -->
+    <string name="coming_soon">Coming in the next stage</string>
+    <string name="apps_title">Apps</string>
+    <string name="apps_subtitle">Proxy mode &amp; app rules</string>
+    <string name="logs_title">Logs</string>
+    <string name="logs_subtitle">Inspect runtime logs</string>
+
+    <!-- Tools -->
+    <string name="tools_title">Tools</string>
+    <string name="tools_subtitle">Module preferences</string>
+    <string name="tools_config">Config</string>
+    <string name="tools_config_sub">Manage &amp; select active config</string>
+    <string name="tools_network">Network control</string>
+    <string name="tools_network_sub">Wi‑Fi based module control</string>
+    <string name="tools_update">Update</string>
+    <string name="tools_update_sub">Cores, subscription, WebUI</string>
+    <string name="tools_row_manage">Manage</string>
+    <string name="tools_row_manage_sub">Browse / search / create</string>
+    <string name="tools_row_select">Select</string>
+    <string name="tools_row_select_sub">Choose active config</string>
+    <string name="tools_row_open">Open</string>
+    <string name="tools_row_open_sub">Configure Wi‑Fi rules</string>
+    <string name="tools_row_apps_sub">Manage app rules</string>
+    <string name="tools_row_logs_sub">Open logs view</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_subtitle">App preferences</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_appearance_sub">Theme &amp; display</string>
+    <string name="settings_theme">Theme mode</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">Follow system</string>
+    <string name="theme_material">Material</string>
+    <string name="theme_light_desc">Always use light theme</string>
+    <string name="theme_dark_desc">Always use dark theme</string>
+    <string name="theme_system_desc">Match system settings</string>
+    <string name="theme_material_desc">Dynamic colors from your wallpaper (Android 12+)</string>
+    <string name="settings_true_black">True black</string>
+    <string name="settings_true_black_sub">Make dark theme backgrounds pure black</string>
+    <string name="settings_language">Language</string>
+    <string name="lang_system">Follow system</string>
+    <string name="settings_navigation">Navigation</string>
+    <string name="settings_navigation_sub">Navigation panel settings</string>
+    <string name="nav_apps_desc">Show the Apps page in the navigation bar</string>
+    <string name="nav_logs_desc">Show the Logs page in the navigation bar</string>
+    <string name="settings_about">About</string>
+    <string name="settings_about_sub">App &amp; module info</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_module_version">Module version</string>
+    <string name="settings_credits">Design based on BFR by boxproxy · module by taamarin</string>
+    <string name="tools_more">More</string>
+    <string name="tools_more_sub">Pages hidden from the navigation bar</string>
+    <string name="settings_author">Author</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_back">Back</string>
+</resources>

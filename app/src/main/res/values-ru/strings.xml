@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_home">Главная</string>
+    <string name="tab_apps">Приложения</string>
+    <string name="tab_logs">Журнал</string>
+    <string name="tab_tools">Утилиты</string>
+    <string name="tab_settings">Настройки</string>
+
+    <string name="home_subtitle">Статус и метрики</string>
+    <string name="home_service_status">Статус сервиса</string>
+    <string name="status_running">Запущен</string>
+    <string name="status_stopped">Остановлен</string>
+    <string name="status_starting">Запуск</string>
+    <string name="status_stopping">Остановка</string>
+    <string name="status_checking">Проверка</string>
+    <string name="status_unavailable">Недоступен</string>
+    <string name="home_tap_start">Нажмите «Старт» для запуска</string>
+    <string name="home_pid">PID %1$s</string>
+    <string name="action_start">Старт</string>
+    <string name="action_stop">Стоп</string>
+    <string name="action_restart">Перезапуск</string>
+    <string name="home_core">Ядро</string>
+    <string name="home_mode">Режим</string>
+    <string name="common_on">Вкл.</string>
+    <string name="common_off">Выкл.</string>
+
+    <string name="env_root_title">Нужен root</string>
+    <string name="env_root_body">Для управления сервисом Box приложению нужен root-доступ. Выдайте его в Magisk / KernelSU / APatch и откройте приложение снова.</string>
+    <string name="env_module_title">Модуль не установлен</string>
+    <string name="env_module_body">Модуль Box for Root не найден в /data/adb/modules.</string>
+    <string name="env_scripts_title">Нет скриптов</string>
+    <string name="env_scripts_body">Скрипты Box не найдены в /data/adb/box/scripts.</string>
+    <string name="action_retry">Повторить</string>
+
+    <string name="coming_soon">Появится на следующем этапе</string>
+    <string name="apps_title">Приложения</string>
+    <string name="apps_subtitle">Режим прокси и правила приложений</string>
+    <string name="logs_title">Журнал</string>
+    <string name="logs_subtitle">Просмотр логов работы</string>
+
+    <string name="tools_title">Утилиты</string>
+    <string name="tools_subtitle">Параметры модуля</string>
+    <string name="tools_config">Конфигурация</string>
+    <string name="tools_config_sub">Управление и выбор активной конфигурации</string>
+    <string name="tools_network">Управление сетью</string>
+    <string name="tools_network_sub">Управление модулем по Wi‑Fi</string>
+    <string name="tools_update">Обновление</string>
+    <string name="tools_update_sub">Ядра, подписка, WebUI</string>
+    <string name="tools_row_manage">Управление</string>
+    <string name="tools_row_manage_sub">Обзор / поиск / создание</string>
+    <string name="tools_row_select">Выбрать</string>
+    <string name="tools_row_select_sub">Выбор активной конфигурации</string>
+    <string name="tools_row_open">Открыть</string>
+    <string name="tools_row_open_sub">Настройка правил Wi‑Fi</string>
+    <string name="tools_row_apps_sub">Правила приложений</string>
+    <string name="tools_row_logs_sub">Открыть просмотр логов</string>
+
+    <string name="settings_title">Настройки</string>
+    <string name="settings_subtitle">Параметры приложения</string>
+    <string name="settings_appearance">Оформление</string>
+    <string name="settings_appearance_sub">Тема и отображение</string>
+    <string name="settings_theme">Тема</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_system">Как в системе</string>
+    <string name="theme_material">Material</string>
+    <string name="theme_light_desc">Всегда светлая тема</string>
+    <string name="theme_dark_desc">Всегда тёмная тема</string>
+    <string name="theme_system_desc">Как в настройках системы</string>
+    <string name="theme_material_desc">Цвета из обоев (Android 12+)</string>
+    <string name="settings_true_black">Чистый чёрный</string>
+    <string name="settings_true_black_sub">Делать фон тёмной темы полностью чёрным</string>
+    <string name="settings_language">Язык</string>
+    <string name="lang_system">Как в системе</string>
+    <string name="settings_navigation">Навигация</string>
+    <string name="settings_navigation_sub">Настройки панели навигации</string>
+    <string name="nav_apps_desc">Показывать страницу «Приложения» в панели навигации</string>
+    <string name="nav_logs_desc">Показывать страницу «Журнал» в панели навигации</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_about_sub">Приложение и модуль</string>
+    <string name="settings_version">Версия</string>
+    <string name="settings_module_version">Версия модуля</string>
+    <string name="settings_credits">Дизайн основан на BFR от boxproxy · модуль от taamarin</string>
+    <string name="tools_more">Ещё</string>
+    <string name="tools_more_sub">Страницы, скрытые из панели навигации</string>
+    <string name="settings_author">Автор</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_back">Назад</string>
+</resources>
