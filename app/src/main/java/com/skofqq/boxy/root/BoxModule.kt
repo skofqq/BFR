@@ -107,6 +107,18 @@ object BoxModule {
         sh("grep -m1 '^$key=' $SETTINGS 2>/dev/null").firstOrNull()?.substringAfter('=')?.trim()
     }
 
+    /** Raw values of several keys in one call; missing keys are absent from the map. */
+    suspend fun readSettingsRaw(keys: List<String>): Map<String, String> = withContext(Dispatchers.IO) {
+        val pattern = keys.joinToString("|")
+        sh("grep -E '^($pattern)=' $SETTINGS 2>/dev/null").mapNotNull { line ->
+            val k = line.substringBefore('=', "")
+            if (k.isEmpty()) null else k to line.substringAfter('=').trim()
+        }.toMap()
+    }
+
+    /** Unquoted scalar from a raw settings value. */
+    fun unquote(raw: String?): String? = raw?.trim()?.removeSurrounding("\"")?.removeSurrounding("'")
+
     /** Writes key="value" into settings.ini, replacing the line or appending it. */
     suspend fun writeSetting(key: String, value: String): Boolean = writeSettingRaw(key, "\"$value\"")
 

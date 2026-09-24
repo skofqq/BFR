@@ -53,9 +53,9 @@ import com.skofqq.boxy.ui.components.BottomBar
 import com.skofqq.boxy.ui.apps.AppsScreen
 import com.skofqq.boxy.ui.home.HomeScreen
 import com.skofqq.boxy.ui.panel.PanelScreen
-import com.skofqq.boxy.ui.screens.LogsScreen
+import com.skofqq.boxy.ui.logs.LogsScreen
 import com.skofqq.boxy.ui.screens.SettingsScreen
-import com.skofqq.boxy.ui.screens.ToolsScreen
+import com.skofqq.boxy.ui.tools.ToolsScreen
 import com.skofqq.boxy.ui.theme.Boxy
 import com.skofqq.boxy.ui.theme.BoxyIcons
 import com.skofqq.boxy.ui.theme.BoxyTheme
@@ -146,7 +146,7 @@ private fun MainScreen(prefs: Prefs) {
                 )
                 Tab.APPS -> AppsScreen(padding)
                 Tab.LOGS -> LogsScreen(padding)
-                Tab.TOOLS -> ToolsScreen(padding, prefs.navExtra) { subPage = if (it == NavExtra.LOGS) Overlay.LOGS else Overlay.APPS }
+                Tab.TOOLS -> ToolsScreen(padding, prefs.navExtra, active = subPage == null && pager.currentPage == index) { subPage = if (it == NavExtra.LOGS) Overlay.LOGS else Overlay.APPS }
                 Tab.SETTINGS -> SettingsScreen(padding, prefs)
             }
         }

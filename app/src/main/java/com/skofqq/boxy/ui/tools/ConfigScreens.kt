@@ -1,0 +1,391 @@
+package com.skofqq.boxy.ui.tools
+
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.skofqq.boxy.R
+import com.skofqq.boxy.root.BoxModule
+import com.skofqq.boxy.root.RootFile
+import com.skofqq.boxy.root.RootFiles
+import com.skofqq.boxy.ui.components.Badge
+import com.skofqq.boxy.ui.components.BoxyTextField
+import com.skofqq.boxy.ui.components.ConfirmDialog
+import com.skofqq.boxy.ui.components.HeaderAction
+import com.skofqq.boxy.ui.components.InputDialog
+import com.skofqq.boxy.ui.components.SectionCard
+import com.skofqq.boxy.ui.components.SubPageHeader
+import com.skofqq.boxy.ui.theme.Boxy
+import com.skofqq.boxy.ui.theme.BoxyIcons
+import com.skofqq.boxy.ui.theme.Tints
+import com.skofqq.boxy.util.Format
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
+
+/** Config folder and settings key of each core. */
+fun coreConfig(core: String): Pair<String, String> = when (core) {
+    "sing-box" -> "sing-box" to "name_sing_config"
+    "xray" -> "xray" to "name_xray_config"
+    "v2fly" -> "v2fly" to "name_v2fly_config"
+    "hysteria" -> "hysteria" to "name_hysteria_config"
+    else -> "clash" to "name_clash_config"
+}
+
+private val CONFIG_EXTENSIONS = setOf("yaml", "yml", "json")
+
+/** Choose the active config of the current core. */
+@Composable
+fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: (String) -> Unit, onManage: (String) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var core by remember { mutableStateOf<String?>(null) }
+    var active by remember { mutableStateOf<String?>(null) }
+    var files by remember { mutableStateOf<List<RootFile>?>(null) }
+    var reload by remember { mutableStateOf(0) }
+    var createDialog by remember { mutableStateOf(false) }
+    var downloadDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(reload) {
+        val c = BoxModule.readSetting("bin_name") ?: "clash"
+        core = c
+        val (dir, key) = coreConfig(c)
+        active = BoxModule.readSetting(key)
+        files = RootFiles.list("${BoxModule.BOX_DIR}/$dir").filter { !it.isDir && it.extension in CONFIG_EXTENSIONS }
+    }
+    val dir = "${BoxModule.BOX_DIR}/${coreConfig(core ?: "clash").first}"
+
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            SubPageHeader(
+                stringResource(R.string.tools_config),
+                files?.let { stringResource(R.string.config_files_active_summary, it.size, active ?: "—") },
+                onBack,
+            ) {
+                HeaderAction(BoxyIcons.Download, stringResource(R.string.config_download)) { downloadDialog = true }
+                HeaderAction(BoxyIcons.Folder, stringResource(R.string.tools_row_manage)) { onManage(dir) }
+            }
+        }
+        item {
+            SectionCard(stringResource(R.string.config_active), core) {
+                Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(BoxyIcons.File, null, Modifier.size(22.dp), tint = Boxy.colors.accent)
+                    Spacer(Modifier.width(12.dp))
+                    Text(active ?: stringResource(R.string.config_none), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
+                    if (active != null) {
+                        Text(
+                            stringResource(R.string.config_edit),
+                            Modifier.clip(RoundedCornerShape(50)).clickable { onEdit("$dir/$active") }.padding(horizontal = 12.dp, vertical = 6.dp),
+                            color = Boxy.colors.accent,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                }
+            }
+        }
+        item {
+            SectionCard(stringResource(R.string.config_files), stringResource(R.string.config_supported)) {
+                val list = files
+                when {
+                    list == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                    list.isEmpty() -> Column(Modifier.padding(horizontal = 18.dp, vertical = 8.dp)) {
+                        Text(stringResource(R.string.config_no_files), color = Boxy.colors.text2)
+                        Text(
+                            stringResource(R.string.config_create_file),
+                            Modifier.padding(top = 8.dp).clip(RoundedCornerShape(50)).clickable { createDialog = true }.padding(vertical = 6.dp),
+                            color = Boxy.colors.accent,
+                        )
+                    }
+                    else -> list.forEach { f ->
+                        val isActive = f.name == active
+                        Row(
+                            Modifier.fillMaxWidth().clickable {
+                                scope.launch {
+                                    val c = core ?: return@launch
+                                    if (BoxModule.writeSetting(coreConfig(c).second, f.name)) {
+                                        active = f.name
+                                        Toast.makeText(context, context.getString(R.string.config_selected, f.name), Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }.padding(horizontal = 18.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(Modifier.weight(1f)) {
+                                Text(f.name, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text("${Format.bytes(context, f.size)} · ${Format.dateTime(f.modified)}", style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2)
+                            }
+                            if (isActive) Badge(stringResource(R.string.config_badge_active), Tints.green)
+                            Spacer(Modifier.width(8.dp))
+                            Icon(BoxyIcons.Edit, stringResource(R.string.config_edit), Modifier.size(22.dp).clickable { onEdit(f.path) }, tint = Boxy.colors.text2)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (createDialog) {
+        val invalid = stringResource(R.string.config_name_invalid)
+        InputDialog(
+            stringResource(R.string.config_create_file),
+            listOf(stringResource(R.string.config_placeholder_name) to ""),
+            validate = { if (it[0].isBlank() || it[0].contains('/')) invalid else null },
+            onConfirm = { v ->
+                createDialog = false
+                scope.launch {
+                    RootFiles.createFile("$dir/${v[0]}")
+                    reload++
+                }
+            },
+            onDismiss = { createDialog = false },
+        )
+    }
+    if (downloadDialog) {
+        DownloadDialog(dir, onDone = { downloadDialog = false; reload++ }, onDismiss = { downloadDialog = false })
+    }
+}
+
+/** Browse /data/adb/box: folders, files, search, create, rename, delete, download. */
+@Composable
+fun FileManagerScreen(contentPadding: PaddingValues, dir: String, onBack: () -> Unit, onOpenDir: (String) -> Unit, onEdit: (String) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var files by remember { mutableStateOf<List<RootFile>?>(null) }
+    var reload by remember { mutableStateOf(0) }
+    var query by remember { mutableStateOf("") }
+    var searching by remember { mutableStateOf(false) }
+    var results by remember { mutableStateOf<List<RootFile>?>(null) }
+    var createMenu by remember { mutableStateOf(false) }
+    var createKind by remember { mutableStateOf<Boolean?>(null) } // true = folder, false = file
+    var downloadDialog by remember { mutableStateOf(false) }
+    var renameTarget by remember { mutableStateOf<RootFile?>(null) }
+    var deleteTarget by remember { mutableStateOf<RootFile?>(null) }
+
+    LaunchedEffect(dir, reload) { files = RootFiles.list(dir) }
+    LaunchedEffect(query) {
+        results = if (query.length >= 2) RootFiles.search(dir, query) else null
+    }
+
+    val shown = results ?: files?.filter { query.isBlank() || it.name.contains(query, true) }
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        item {
+            SubPageHeader(
+                if (dir == BoxModule.BOX_DIR) stringResource(R.string.config_files_folders) else dir.substringAfterLast('/'),
+                dir,
+                onBack,
+            ) {
+                HeaderAction(BoxyIcons.Search, stringResource(R.string.action_search)) {
+                    searching = !searching
+                    if (!searching) query = ""
+                }
+                Box {
+                    HeaderAction(BoxyIcons.Add, stringResource(R.string.config_menu_create)) { createMenu = true }
+                    DropdownMenu(createMenu, { createMenu = false }, containerColor = Boxy.colors.card) {
+                        DropdownMenuItem({ Text(stringResource(R.string.config_new_file)) }, { createMenu = false; createKind = false })
+                        DropdownMenuItem({ Text(stringResource(R.string.config_new_folder)) }, { createMenu = false; createKind = true })
+                        DropdownMenuItem({ Text(stringResource(R.string.config_download)) }, { createMenu = false; downloadDialog = true })
+                        DropdownMenuItem({ Text(stringResource(R.string.action_refresh)) }, { createMenu = false; reload++ })
+                    }
+                }
+            }
+        }
+        if (searching) {
+            item {
+                BoxyTextField(
+                    query,
+                    { query = it },
+                    stringResource(R.string.config_search_hint),
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    leading = { Icon(BoxyIcons.Search, null, Modifier.size(20.dp), tint = Boxy.colors.text2) },
+                )
+            }
+        }
+        item {
+            SectionCard(null) {
+                val list = shown
+                if (dir != BoxModule.BOX_DIR && results == null) {
+                    FileRow(BoxyIcons.Folder, "..", stringResource(R.string.config_parent_dir), null, onClick = onBack)
+                }
+                when {
+                    list == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                    list.isEmpty() -> Text(
+                        stringResource(if (query.isBlank()) R.string.config_dir_empty else R.string.config_no_match),
+                        Modifier.padding(18.dp),
+                        color = Boxy.colors.text2,
+                    )
+                    else -> list.forEach { f ->
+                        val sub = if (f.isDir) Format.dateTime(f.modified) else "${Format.bytes(context, f.size)} · ${Format.dateTime(f.modified)}"
+                        FileRow(
+                            if (f.isDir) BoxyIcons.Folder else BoxyIcons.File,
+                            f.name,
+                            if (results != null) f.path.removePrefix("$dir/") else sub,
+                            menu = { close ->
+                                if (!f.isDir) DropdownMenuItem({ Text(stringResource(R.string.config_edit)) }, { close(); onEdit(f.path) })
+                                DropdownMenuItem({ Text(stringResource(R.string.config_rename)) }, { close(); renameTarget = f })
+                                DropdownMenuItem({ Text(stringResource(R.string.action_delete), color = Tints.red.fg) }, { close(); deleteTarget = f })
+                            },
+                            onClick = { if (f.isDir) onOpenDir(f.path) else onEdit(f.path) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    createKind?.let { folder ->
+        val invalid = stringResource(R.string.config_name_invalid)
+        InputDialog(
+            stringResource(if (folder) R.string.config_create_folder else R.string.config_create_file),
+            listOf(stringResource(R.string.config_name) to ""),
+            message = stringResource(if (folder) R.string.config_create_folder_helper else R.string.config_create_file_helper),
+            validate = { if (it[0].isBlank() || it[0].contains('/')) invalid else null },
+            onConfirm = { v ->
+                createKind = null
+                scope.launch {
+                    val ok = if (folder) RootFiles.createDir("$dir/${v[0]}") else RootFiles.createFile("$dir/${v[0]}")
+                    if (!ok) Toast.makeText(context, R.string.op_failed, Toast.LENGTH_SHORT).show()
+                    reload++
+                }
+            },
+            onDismiss = { createKind = null },
+        )
+    }
+    renameTarget?.let { f ->
+        val invalid = stringResource(R.string.config_name_invalid)
+        InputDialog(
+            stringResource(R.string.config_rename),
+            listOf(stringResource(R.string.config_new_name) to f.name),
+            validate = { if (it[0].isBlank() || it[0].contains('/')) invalid else null },
+            onConfirm = { v ->
+                renameTarget = null
+                scope.launch {
+                    if (!RootFiles.rename(f.path, v[0])) Toast.makeText(context, R.string.op_failed, Toast.LENGTH_SHORT).show()
+                    reload++
+                }
+            },
+            onDismiss = { renameTarget = null },
+        )
+    }
+    deleteTarget?.let { f ->
+        ConfirmDialog(
+            stringResource(R.string.config_delete_title, f.name),
+            stringResource(if (f.isDir) R.string.config_delete_folder_warning else R.string.config_delete_file_warning),
+            stringResource(R.string.action_delete),
+            danger = true,
+            onConfirm = {
+                deleteTarget = null
+                scope.launch {
+                    RootFiles.delete(f.path)
+                    reload++
+                }
+            },
+            onDismiss = { deleteTarget = null },
+        )
+    }
+    if (downloadDialog) {
+        DownloadDialog(dir, onDone = { downloadDialog = false; reload++ }, onDismiss = { downloadDialog = false })
+    }
+}
+
+@Composable
+private fun FileRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    name: String,
+    subtitle: String?,
+    menu: (@Composable (close: () -> Unit) -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    var open by remember { mutableStateOf(false) }
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(start = 18.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(Boxy.colors.surface2), contentAlignment = Alignment.Center) {
+            Icon(icon, null, Modifier.size(22.dp), tint = if (icon == BoxyIcons.Folder) Tints.amber.fg else Boxy.colors.text2)
+        }
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(name, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (subtitle != null) Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        if (menu != null) {
+            Box {
+                Icon(BoxyIcons.MoreVert, stringResource(R.string.action_more), Modifier.size(40.dp).clip(RoundedCornerShape(50)).clickable { open = true }.padding(9.dp), tint = Boxy.colors.text2)
+                DropdownMenu(open, { open = false }, containerColor = Boxy.colors.card) { menu { open = false } }
+            }
+        }
+    }
+}
+
+/** Downloads a file by URL (in the app) and stores it in [dir] with root. */
+@Composable
+fun DownloadDialog(dir: String, onDone: () -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val invalidUrl = stringResource(R.string.config_url_invalid)
+    InputDialog(
+        stringResource(R.string.config_download),
+        listOf(stringResource(R.string.config_url_example) to "", stringResource(R.string.config_placeholder_name) to ""),
+        confirm = stringResource(R.string.config_menu_download),
+        message = stringResource(R.string.config_download_hint),
+        validate = { v -> if (!v[0].startsWith("http://") && !v[0].startsWith("https://")) invalidUrl else null },
+        onConfirm = { v ->
+            val url = v[0]
+            val name = v[1].ifBlank { url.substringAfterLast('/').substringBefore('?').ifBlank { "config.yaml" } }
+            scope.launch {
+                val text = withContext(Dispatchers.IO) {
+                    runCatching {
+                        val c = URL(url).openConnection() as HttpURLConnection
+                        c.connectTimeout = 15000
+                        c.readTimeout = 30000
+                        c.setRequestProperty("User-Agent", "clash.meta")
+                        try {
+                            if (c.responseCode in 200..299) c.inputStream.bufferedReader().readText() else null
+                        } finally {
+                            c.disconnect()
+                        }
+                    }.getOrNull()
+                }
+                val ok = text != null && RootFiles.write("$dir/$name", text)
+                Toast.makeText(context, if (ok) context.getString(R.string.config_download_ok, name) else context.getString(R.string.config_download_failed), Toast.LENGTH_SHORT).show()
+                onDone()
+            }
+        },
+        onDismiss = onDismiss,
+    )
+}
