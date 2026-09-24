@@ -97,7 +97,7 @@ class BoxStatusService : Service() {
         }
         val open = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         val b = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
+            .setSmallIcon(R.drawable.ic_tile)
             .setContentTitle(title)
             .setContentText(text)
             .setContentIntent(open)

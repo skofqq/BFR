@@ -10,3 +10,5 @@
 .cxx/
 *.keystore
 *.jks
+/keystore.properties
+/keystore/

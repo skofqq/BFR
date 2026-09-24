@@ -268,7 +268,16 @@ fun BackupScreen(contentPadding: PaddingValues, prefs: Prefs, onBack: () -> Unit
                     Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp).clip(RoundedCornerShape(16.dp)).background(Boxy.colors.surface2).clickable {
                         pickLauncher.launch(arrayOf("application/zip", "application/octet-stream", "*/*"))
                     }.padding(16.dp)) {
-                        Text(pickedUri?.lastPathSegment ?: stringResource(R.string.backup_file_pick), color = Boxy.colors.text)
+                        val pickedName = remember(pickedUri) {
+                            pickedUri?.let { uri ->
+                                runCatching {
+                                    context.contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                                        if (c.moveToFirst()) c.getString(0) else null
+                                    }
+                                }.getOrNull() ?: uri.lastPathSegment
+                            }
+                        }
+                        Text(pickedName ?: stringResource(R.string.backup_file_pick), color = Boxy.colors.text)
                         when {
                             detectFailed -> Text(stringResource(R.string.backup_detect_failed), color = Tints.red.fg, style = MaterialTheme.typography.bodySmall)
                             detected != null -> Text(stringResource(R.string.backup_detected, scopeName(detected!!)), color = Boxy.colors.text2, style = MaterialTheme.typography.bodySmall)
