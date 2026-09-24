@@ -51,7 +51,8 @@ import com.skofqq.boxy.data.Prefs
 import com.skofqq.boxy.ui.components.BarItem
 import com.skofqq.boxy.ui.components.BottomBar
 import com.skofqq.boxy.ui.screens.AppsScreen
-import com.skofqq.boxy.ui.screens.HomeScreen
+import com.skofqq.boxy.ui.home.HomeScreen
+import com.skofqq.boxy.ui.panel.PanelScreen
 import com.skofqq.boxy.ui.screens.LogsScreen
 import com.skofqq.boxy.ui.screens.SettingsScreen
 import com.skofqq.boxy.ui.screens.ToolsScreen
@@ -62,6 +63,9 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 private enum class Tab { HOME, APPS, LOGS, TOOLS, SETTINGS }
+
+/** Full-screen pages opened on top of the tabs. */
+private enum class Overlay { APPS, LOGS, PANEL, SUBSTORE }
 
 class MainActivity : ComponentActivity() {
 
@@ -109,8 +113,8 @@ private fun MainScreen(prefs: Prefs) {
         add(Tab.SETTINGS)
     }
     var current by rememberSaveable { mutableStateOf(Tab.HOME) }
-    var subPage by rememberSaveable { mutableStateOf<NavExtra?>(null) }
-    var lastSub by rememberSaveable { mutableStateOf(NavExtra.APPS) }
+    var subPage by rememberSaveable { mutableStateOf<Overlay?>(null) }
+    var lastSub by rememberSaveable { mutableStateOf(Overlay.APPS) }
     subPage?.let { lastSub = it }
     val pager = rememberPagerState(initialPage = tabs.indexOf(current).coerceAtLeast(0)) { tabs.size }
     val scope = rememberCoroutineScope()
@@ -130,10 +134,19 @@ private fun MainScreen(prefs: Prefs) {
     Box(Modifier.fillMaxSize().background(Boxy.colors.page)) {
         HorizontalPager(pager, Modifier.fillMaxSize(), beyondViewportPageCount = 1, key = { tabs[it] }) { index ->
             when (tabs[index]) {
-                Tab.HOME -> HomeScreen(padding)
+                Tab.HOME -> HomeScreen(
+                    padding,
+                    prefs,
+                    onOpenPanel = { subPage = Overlay.PANEL },
+                    onOpenLogs = {
+                        val i = tabs.indexOf(Tab.LOGS)
+                        if (i >= 0) scope.launch { pager.animateScrollToPage(i) } else subPage = Overlay.LOGS
+                    },
+                    onOpenSubStore = { subPage = Overlay.SUBSTORE },
+                )
                 Tab.APPS -> AppsScreen(padding)
                 Tab.LOGS -> LogsScreen(padding)
-                Tab.TOOLS -> ToolsScreen(padding, prefs.navExtra) { subPage = it }
+                Tab.TOOLS -> ToolsScreen(padding, prefs.navExtra) { subPage = if (it == NavExtra.LOGS) Overlay.LOGS else Overlay.APPS }
                 Tab.SETTINGS -> SettingsScreen(padding, prefs)
             }
         }
@@ -162,8 +175,9 @@ private fun MainScreen(prefs: Prefs) {
             val header: @Composable () -> Unit = { BackButton { subPage = null } }
             Box(Modifier.fillMaxSize().background(Boxy.colors.page)) {
                 when (lastSub) {
-                    NavExtra.LOGS -> LogsScreen(subPadding, header)
-                    else -> AppsScreen(subPadding, header)
+                    Overlay.LOGS -> LogsScreen(subPadding, header)
+                    Overlay.APPS -> AppsScreen(subPadding, header)
+                    Overlay.PANEL, Overlay.SUBSTORE -> PanelScreen(subPadding, header) { subPage = null }
                 }
             }
         }

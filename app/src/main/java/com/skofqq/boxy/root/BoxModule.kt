@@ -14,18 +14,42 @@ data class ServiceState(
     val mode: String?,
     val ipv6: Boolean?,
     val moduleVersion: String?,
+    /** Seconds since the pid file was written, null when stopped. */
+    val uptimeSec: Long?,
 )
+
+data class ServiceDetails(
+    val pid: String?,
+    val coreVersion: String?,
+    val memoryBytes: Long?,
+    val currentCpu: String?,
+    val cpuAffinity: String?,
+)
+
+data class SystemEnvironment(
+    val android: String,
+    val kernel: String?,
+    val totalMemoryBytes: Long?,
+    val ipset: IpsetStatus,
+)
+
+enum class IpsetStatus { AVAILABLE, MISSING_BINARY, NOT_SUPPORTED }
+
+/** Cores the module can run and the routing modes it supports (see settings.ini). */
+val CORES = listOf("clash", "sing-box", "xray", "v2fly", "hysteria")
+val NETWORK_MODES = listOf("redirect", "tproxy", "mixed", "enhance", "tun")
 
 /**
  * Thin wrapper around the Box for Root module files and scripts.
- * Paths and commands follow the module's own action.sh / box.service.
+ * Paths and commands follow the module's own action.sh / box.service / box.tool.
  */
 object BoxModule {
     const val BOX_DIR = "/data/adb/box"
     const val MODULE_DIR = "/data/adb/modules/box_for_root"
-    private const val SCRIPTS = "$BOX_DIR/scripts"
-    private const val PID_FILE = "$BOX_DIR/run/box.pid"
-    private const val SETTINGS = "$BOX_DIR/settings.ini"
+    const val SCRIPTS = "$BOX_DIR/scripts"
+    const val RUN_DIR = "$BOX_DIR/run"
+    const val SETTINGS = "$BOX_DIR/settings.ini"
+    private const val PID_FILE = "$RUN_DIR/box.pid"
 
     suspend fun environment(): Environment = withContext(Dispatchers.IO) {
         // A shell opened before the user answered the root prompt stays non-root; reopen it once.
@@ -43,17 +67,24 @@ object BoxModule {
     }
 
     suspend fun state(): ServiceState = withContext(Dispatchers.IO) {
-        val pid = sh("cat $PID_FILE 2>/dev/null").firstOrNull()?.trim()?.takeIf { it.isNotEmpty() }
-        val running = pid != null && exists("/proc/$pid")
-        val ini = readIni()
-        val version = sh("grep '^version=' $MODULE_DIR/module.prop 2>/dev/null").firstOrNull()?.substringAfter('=')
+        val out = Poll.run(
+            """
+            p=${'$'}(cat $PID_FILE 2>/dev/null)
+            if [ -n "${'$'}p" ] && [ -e /proc/${'$'}p ]; then echo "pid=${'$'}p"; echo "age=${'$'}(( ${'$'}(date +%s) - ${'$'}(stat -c %Y $PID_FILE) ))"; fi
+            grep -E '^(bin_name|network_mode|ipv6)=' $SETTINGS 2>/dev/null
+            grep '^version=' $MODULE_DIR/module.prop 2>/dev/null
+            """.trimIndent(),
+        )
+        val kv = parseKv(out)
+        val pid = kv["pid"]
         ServiceState(
-            running = running,
-            pid = pid.takeIf { running },
-            core = ini["bin_name"],
-            mode = ini["network_mode"],
-            ipv6 = ini["ipv6"]?.let { it == "true" },
-            moduleVersion = version,
+            running = pid != null,
+            pid = pid,
+            core = kv["bin_name"],
+            mode = kv["network_mode"],
+            ipv6 = kv["ipv6"]?.let { it == "true" },
+            moduleVersion = kv["version"],
+            uptimeSec = kv["age"]?.toLongOrNull(),
         )
     }
 
@@ -64,18 +95,170 @@ object BoxModule {
 
     suspend fun restart(): Boolean = stop().let { start() }
 
+    /** Asks the running core to re-read its config (box.tool reload). */
+    suspend fun reloadConfig(): Boolean = run("$SCRIPTS/box.tool reload")
+
+    suspend fun readSetting(key: String): String? = withContext(Dispatchers.IO) {
+        parseKv(sh("grep -m1 '^$key=' $SETTINGS 2>/dev/null"))[key]
+    }
+
+    /** Raw right-hand side of key=... (keeps bash arrays intact). */
+    suspend fun readSettingRaw(key: String): String? = withContext(Dispatchers.IO) {
+        sh("grep -m1 '^$key=' $SETTINGS 2>/dev/null").firstOrNull()?.substringAfter('=')?.trim()
+    }
+
+    /** Writes key="value" into settings.ini, replacing the line or appending it. */
+    suspend fun writeSetting(key: String, value: String): Boolean = writeSettingRaw(key, "\"$value\"")
+
+    /** Writes key=<raw> (raw may be a quoted string or a bash array). */
+    suspend fun writeSettingRaw(key: String, raw: String): Boolean = withContext(Dispatchers.IO) {
+        val sedValue = raw.replace("\\", "\\\\").replace("/", "\\/").replace("&", "\\&").replace("'", "'\\''")
+        val echoValue = raw.replace("'", "'\\''")
+        Shell.cmd(
+            "if grep -q '^$key=' $SETTINGS; then sed -i 's/^$key=.*/$key=$sedValue/' $SETTINGS; " +
+                "else echo '$key=$echoValue' >> $SETTINGS; fi",
+        ).exec().isSuccess
+    }
+
+    suspend fun details(state: ServiceState): ServiceDetails = withContext(Dispatchers.IO) {
+        val pid = state.pid ?: return@withContext ServiceDetails(null, null, null, null, null)
+        val core = state.core ?: "clash"
+        val out = Poll.run(
+            """
+            b=$BOX_DIR/bin/$core
+            [ -x "${'$'}b" ] || b=${'$'}(readlink /proc/$pid/exe)
+            case "$core" in
+              clash) v=${'$'}("${'$'}b" -v 2>/dev/null | head -n1) ;;
+              *) v=${'$'}("${'$'}b" version 2>/dev/null | head -n1) ;;
+            esac
+            echo "ver=${'$'}v"
+            echo "rss=${'$'}(grep '^VmRSS:' /proc/$pid/status | awk '{print ${'$'}2}')"
+            echo "cpu=${'$'}(awk '{print ${'$'}39}' /proc/$pid/stat)"
+            echo "aff=${'$'}(grep '^Cpus_allowed_list:' /proc/$pid/status | awk '{print ${'$'}2}')"
+            """.trimIndent(),
+        )
+        val kv = parseKv(out)
+        ServiceDetails(
+            pid = pid,
+            coreVersion = kv["ver"]?.substringBefore(" linux")?.substringBefore(" android")?.trim()?.takeIf { it.isNotBlank() },
+            memoryBytes = kv["rss"]?.toLongOrNull()?.times(1024),
+            currentCpu = kv["cpu"]?.takeIf { it.isNotBlank() },
+            cpuAffinity = kv["aff"]?.takeIf { it.isNotBlank() },
+        )
+    }
+
+    /** CPU ticks of the process and of the whole system, plus resident memory, for CPU% sampling. */
+    data class ProcSample(val procTicks: Long, val totalTicks: Long, val rssBytes: Long, val cpuCount: Int)
+
+    suspend fun sample(pid: String): ProcSample? = withContext(Dispatchers.IO) {
+        val out = Poll.run(
+            "awk '{print ${'$'}14+${'$'}15}' /proc/$pid/stat 2>/dev/null; " +
+                "head -n1 /proc/stat; grep '^VmRSS:' /proc/$pid/status | awk '{print ${'$'}2}'; grep -c '^processor' /proc/cpuinfo",
+        )
+        if (out.size < 4) return@withContext null
+        val proc = out[0].trim().toLongOrNull() ?: return@withContext null
+        val total = out[1].trim().split(Regex("\\s+")).drop(1).sumOf { it.toLongOrNull() ?: 0L }
+        ProcSample(proc, total, (out[2].trim().toLongOrNull() ?: 0L) * 1024, out[3].trim().toIntOrNull() ?: 1)
+    }
+
+    suspend fun systemEnvironment(): SystemEnvironment = withContext(Dispatchers.IO) {
+        val out = Poll.run(
+            """
+            echo "kernel=${'$'}(uname -r)"
+            echo "mem=${'$'}(grep '^MemTotal:' /proc/meminfo | awk '{print ${'$'}2}')"
+            if [ -r /proc/config.gz ] && (zcat /proc/config.gz 2>/dev/null || gzip -dc /proc/config.gz 2>/dev/null) | grep -q '^CONFIG_IP_SET=[ym]${'$'}'; then k=yes; else k=no; fi
+            if command -v ipset >/dev/null 2>&1 || [ -x /system/bin/ipset ]; then b=yes; else b=no; fi
+            echo "ipset=${'$'}k,${'$'}b"
+            """.trimIndent(),
+        )
+        val kv = parseKv(out)
+        val flags = (kv["ipset"] ?: "no,no").split(',').map { it == "yes" }
+        val kernelOk = flags.getOrElse(0) { false }
+        val binOk = flags.getOrElse(1) { false }
+        SystemEnvironment(
+            android = "${android.os.Build.VERSION.RELEASE} (API ${android.os.Build.VERSION.SDK_INT})",
+            kernel = kv["kernel"],
+            totalMemoryBytes = kv["mem"]?.toLongOrNull()?.times(1024),
+            ipset = when {
+                !kernelOk -> IpsetStatus.NOT_SUPPORTED
+                !binOk -> IpsetStatus.MISSING_BINARY
+                else -> IpsetStatus.AVAILABLE
+            },
+        )
+    }
+
+    /** Total bytes received / sent on all interfaces except loopback. */
+    suspend fun netCounters(): Pair<Long, Long>? = withContext(Dispatchers.IO) {
+        val lines = runCatching { java.io.File("/proc/net/dev").readLines() }.getOrNull()
+            ?.takeIf { it.size > 2 } ?: Poll.run("cat /proc/net/dev 2>/dev/null")
+        var rx = 0L
+        var tx = 0L
+        var any = false
+        lines.drop(2).forEach { line ->
+            val name = line.substringBefore(':').trim()
+            if (name.isEmpty() || name == "lo" || name.startsWith("dummy")) return@forEach
+            val f = line.substringAfter(':').trim().split(Regex("\\s+"))
+            if (f.size >= 9) {
+                rx += f[0].toLongOrNull() ?: 0L
+                tx += f[8].toLongOrNull() ?: 0L
+                any = true
+            }
+        }
+        if (any) rx to tx else null
+    }
+
+    suspend fun subStoreInstalled(): Boolean = withContext(Dispatchers.IO) { exists("/data/adb/modules/sub_store") }
+
+    suspend fun readFile(path: String): String? = withContext(Dispatchers.IO) {
+        val r = Shell.cmd("cat '$path' 2>/dev/null").exec()
+        if (r.isSuccess) r.out.joinToString("\n") else null
+    }
+
     private suspend fun run(cmd: String): Boolean = withContext(Dispatchers.IO) {
         Shell.cmd("$cmd >/dev/null 2>&1").exec().isSuccess
     }
 
-    private fun readIni(): Map<String, String> =
-        sh("grep -E '^(bin_name|network_mode|ipv6)=' $SETTINGS 2>/dev/null").mapNotNull { line ->
-            val key = line.substringBefore('=', "").trim()
-            val value = line.substringAfter('=').trim().trim('"', '\'')
-            key.takeIf { it.isNotEmpty() }?.let { it to value }
-        }.toMap()
+    fun parseKv(lines: List<String>): Map<String, String> = lines.mapNotNull { line ->
+        val key = line.substringBefore('=', "").trim()
+        val value = line.substringAfter('=').trim().trim('"', '\'')
+        key.takeIf { it.isNotEmpty() }?.let { it to value }
+    }.toMap()
+
+    /** Parses a bash array value like ("a" "b") or a plain value into a list. */
+    fun parseArray(raw: String?): List<String> {
+        val s = raw?.trim() ?: return emptyList()
+        val inner = s.removePrefix("(").removeSuffix(")").trim()
+        if (inner.isEmpty()) return emptyList()
+        val quoted = Regex("\"([^\"]*)\"").findAll(inner).map { it.groupValues[1] }.toList()
+        return (quoted.ifEmpty { inner.split(Regex("\\s+")) }).map { it.trim().trim('"', '\'') }.filter { it.isNotEmpty() }
+    }
+
+    /** Formats a list as a bash array: ("a" "b"). */
+    fun toArray(items: List<String>): String = items.joinToString(" ", "(", ")") { "\"${it.replace("\"", "")}\"" }
 
     private fun exists(path: String): Boolean = Shell.cmd("[ -e '$path' ]").exec().isSuccess
 
     private fun sh(cmd: String): List<String> = Shell.cmd(cmd).exec().out
+}
+
+/**
+ * Separate root shell for frequent read-only polling, so status and metrics
+ * keep updating while the main shell is busy starting or stopping the service.
+ */
+object Poll {
+    private var shell: Shell? = null
+
+    @Synchronized
+    private fun get(): Shell {
+        val s = shell
+        if (s != null && s.isAlive) return s
+        return Shell.Builder.create().setFlags(Shell.FLAG_MOUNT_MASTER).setTimeout(10).build().also { shell = it }
+    }
+
+    @Synchronized
+    fun run(cmd: String): List<String> = runCatching {
+        val sh = get()
+        if (!sh.isRoot) return emptyList()
+        sh.newJob().add(cmd).to(ArrayList(), null).exec().out
+    }.getOrDefault(emptyList())
 }
