@@ -1,0 +1,132 @@
+package com.skofqq.boxy.ui.components
+
+import android.graphics.RenderEffect
+import android.graphics.RuntimeShader
+import android.graphics.Shader
+import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asComposeRenderEffect
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+/** How glass surfaces look; built from the appearance settings. */
+data class GlassStyle(
+    val enabled: Boolean,
+    val translucent: Boolean,
+    /** 0..1 */
+    val blur: Float,
+    /** 0..1 */
+    val lens: Float,
+    val sheetBlur: Boolean,
+) {
+    val blurRadius: Dp get() = (6 + blur * 34).dp
+}
+
+val LocalGlass = staticCompositionLocalOf { GlassStyle(false, true, 0.5f, 0.5f, false) }
+
+/** Screen content recorded for glass surfaces to sample from. */
+val LocalBackdrop = staticCompositionLocalOf<GraphicsLayer?> { null }
+
+/** Number of open bottom sheets; the main content is blurred while it is above zero. */
+object SheetBlurState {
+    var open by mutableIntStateOf(0)
+}
+
+/** Records the content into [layer] and draws it as usual. */
+fun Modifier.backdropSource(layer: GraphicsLayer): Modifier = drawWithContent {
+    layer.record { this@drawWithContent.drawContent() }
+    drawLayer(layer)
+}
+
+private const val LENS_SHADER = """
+uniform shader content;
+uniform float2 size;
+uniform float radius;
+uniform float strength;
+half4 main(float2 p) {
+    float2 c = size * 0.5;
+    float2 q = abs(p - c) - (c - float2(radius));
+    float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
+    float t = clamp(1.0 + d / radius, 0.0, 1.0);
+    float2 dir = normalize(p - c + float2(0.001, 0.001));
+    return content.eval(p - dir * t * t * strength);
+}
+"""
+
+/**
+ * Liquid glass: the backdrop under this surface, refracted near the edges (Android 13+),
+ * blurred (Android 12+) and tinted. Falls back to a solid tint when blur is unavailable or off.
+ */
+@Composable
+fun GlassSurface(
+    shape: Shape,
+    tint: Color,
+    cornerRadius: Dp,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val glass = LocalGlass.current
+    val backdrop = LocalBackdrop.current
+    val active = glass.enabled && backdrop != null && Build.VERSION.SDK_INT >= 31
+    var pos by remember { mutableStateOf(Offset.Zero) }
+    Box(modifier.onGloballyPositioned { pos = it.positionInRoot() }.clip(shape)) {
+        if (active && backdrop != null) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .graphicsLayer {
+                        val blurPx = glass.blurRadius.toPx()
+                        val blur = RenderEffect.createBlurEffect(blurPx, blurPx, Shader.TileMode.CLAMP)
+                        renderEffect = if (Build.VERSION.SDK_INT >= 33 && glass.lens > 0.01f) {
+                            val shader = RuntimeShader(LENS_SHADER)
+                            shader.setFloatUniform("size", size.width, size.height)
+                            shader.setFloatUniform("radius", cornerRadius.toPx().coerceAtMost(size.minDimension / 2))
+                            shader.setFloatUniform("strength", glass.lens * 26.dp.toPx())
+                            RenderEffect.createChainEffect(blur, RenderEffect.createRuntimeShaderEffect(shader, "content")).asComposeRenderEffect()
+                        } else {
+                            blur.asComposeRenderEffect()
+                        }
+                        clip = true
+                        this.shape = shape
+                    }
+                    .drawBehind { translate(-pos.x, -pos.y) { drawLayer(backdrop) } },
+            )
+            Box(Modifier.matchParentSize().background(tint.copy(alpha = if (glass.translucent) 0.45f else 0.78f)))
+            // Light edge that sells the glass; stronger with a stronger lens.
+            Box(
+                Modifier.matchParentSize().border(
+                    1.dp,
+                    Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.18f + glass.lens * 0.3f), Color.White.copy(alpha = 0.04f))),
+                    shape,
+                ),
+            )
+        } else {
+            Box(Modifier.matchParentSize().background(tint))
+        }
+        content()
+    }
+}

@@ -253,6 +253,7 @@ private fun GroupTitle(text: String) {
     )
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun AppRow(vm: AppsViewModel, app: AppEntry, checked: Boolean) {
     val icon = remember(app.packageName) { vm.icon(app) }
@@ -278,8 +279,19 @@ private fun AppRow(vm: AppsViewModel, app: AppEntry, checked: Boolean) {
             Text(app.label, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(app.packageName, style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (app.userId != 0 || app.system || !app.network) {
-                Row(Modifier.padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (app.userId != 0) Tag(stringResource(R.string.apps_user_space_n, vm.userName(app.userId)), Tints.purple.fg)
+                androidx.compose.foundation.layout.FlowRow(
+                    Modifier.padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (app.userId != 0) {
+                        val label = when {
+                            vm.isWork(app.userId) -> stringResource(R.string.apps_work_profile)
+                            app.userId == 999 -> stringResource(R.string.apps_clone)
+                            else -> stringResource(R.string.apps_user_space_n, vm.userName(app.userId))
+                        }
+                        Tag(label, Tints.purple.fg)
+                    }
                     if (app.system) Tag(stringResource(R.string.apps_filter_system), Tints.amber.fg)
                     if (!app.network) Tag(stringResource(R.string.apps_no_network), Tints.gray.fg)
                 }

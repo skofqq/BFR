@@ -22,7 +22,7 @@ enum class HomeSection { HERO, QUICK, LATENCY, GRID }
 enum class MetricCard { IP, SPEED, SUBSCRIPTION, SYSTEM }
 
 /** Where the subscription card takes its numbers from. */
-enum class SubscriptionSource { URL, PROVIDERS }
+enum class SubscriptionSource { URL, PROVIDERS, CORE_API }
 
 data class LatencyTarget(val name: String, val url: String)
 
@@ -61,6 +61,74 @@ class Prefs(context: Context) {
         private set
     var subscriptionSource by mutableStateOf(enumOf(sp.getString(KEY_SUB_SOURCE, null), SubscriptionSource.URL))
         private set
+
+    // Appearance extras
+    var opaqueStatusBar by mutableStateOf(sp.getBoolean("opaque_status_bar", false))
+        private set
+    var opaqueNavBar by mutableStateOf(sp.getBoolean("opaque_nav_bar", false))
+        private set
+    var blurEffects by mutableStateOf(sp.getBoolean("blur_effects", true))
+        private set
+    var sheetBlur by mutableStateOf(sp.getBoolean("sheet_blur", true))
+        private set
+    var glassTranslucent by mutableStateOf(sp.getBoolean("glass_translucent", true))
+        private set
+    var blurStrength by mutableStateOf(sp.getFloat("blur_strength", 0.5f))
+        private set
+    var lensStrength by mutableStateOf(sp.getFloat("lens_strength", 0.5f))
+        private set
+    var uiScale by mutableStateOf(sp.getInt("ui_scale", 100))
+        private set
+
+    // Behaviour
+    var openPanelOnLaunch by mutableStateOf(sp.getBoolean("open_panel_on_launch", false))
+        private set
+    var notifications by mutableStateOf(sp.getBoolean("notifications", false))
+        private set
+    var onboardingDone by mutableStateOf(sp.getBoolean("onboarding_done", false))
+        private set
+    var filterChains by mutableStateOf(sp.getString("filter_chains", "") ?: "")
+        private set
+    var githubMirror by mutableStateOf(sp.getString("github_mirror", "") ?: "")
+        private set
+
+    fun updateGithubMirror(v: String) { githubMirror = v; sp.edit().putString("github_mirror", v).apply() }
+
+    fun updateOpaqueStatusBar(v: Boolean) { opaqueStatusBar = v; sp.edit().putBoolean("opaque_status_bar", v).apply() }
+    fun updateOpaqueNavBar(v: Boolean) { opaqueNavBar = v; sp.edit().putBoolean("opaque_nav_bar", v).apply() }
+    fun updateBlurEffects(v: Boolean) { blurEffects = v; sp.edit().putBoolean("blur_effects", v).apply() }
+    fun updateSheetBlur(v: Boolean) { sheetBlur = v; sp.edit().putBoolean("sheet_blur", v).apply() }
+    fun updateGlassTranslucent(v: Boolean) { glassTranslucent = v; sp.edit().putBoolean("glass_translucent", v).apply() }
+    fun updateBlurStrength(v: Float) { blurStrength = v; sp.edit().putFloat("blur_strength", v).apply() }
+    fun updateLensStrength(v: Float) { lensStrength = v; sp.edit().putFloat("lens_strength", v).apply() }
+    fun updateUiScale(v: Int) { uiScale = v.coerceIn(80, 120); sp.edit().putInt("ui_scale", uiScale).apply() }
+    fun updateOpenPanelOnLaunch(v: Boolean) { openPanelOnLaunch = v; sp.edit().putBoolean("open_panel_on_launch", v).apply() }
+    fun updateNotifications(v: Boolean) { notifications = v; sp.edit().putBoolean("notifications", v).apply() }
+    fun updateOnboardingDone(v: Boolean) { onboardingDone = v; sp.edit().putBoolean("onboarding_done", v).apply() }
+    fun updateFilterChains(v: String) { filterChains = v; sp.edit().putString("filter_chains", v).apply() }
+
+    /** Chain names excluded from Clash API speed (e.g. DIRECT, REJECT). */
+    val filterChainSet: Set<String>
+        get() = filterChains.split(',', '\n', ';').map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+
+    /** All app preferences as key → value, for backups. */
+    fun exportAll(): Map<String, *> = sp.all
+
+    /** Restores a backup and re-reads every value. */
+    fun importAll(values: Map<String, Any?>) {
+        val e = sp.edit().clear()
+        values.forEach { (k, v) ->
+            when (v) {
+                is Boolean -> e.putBoolean(k, v)
+                is Int -> e.putInt(k, v)
+                is Long -> e.putLong(k, v)
+                is Float -> e.putFloat(k, v)
+                is Double -> e.putFloat(k, v.toFloat())
+                is String -> e.putString(k, v)
+            }
+        }
+        e.commit()
+    }
 
     fun updateTheme(mode: ThemeMode) {
         themeMode = mode

@@ -46,10 +46,17 @@ fun BoxySheet(
     skipPartiallyExpanded: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val glass = LocalGlass.current
+    val blurBehind = glass.enabled && glass.sheetBlur && android.os.Build.VERSION.SDK_INT >= 31
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        SheetBlurState.open++
+        onDispose { SheetBlurState.open-- }
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded),
-        containerColor = Boxy.colors.page,
+        containerColor = if (blurBehind) Boxy.colors.page.copy(alpha = 0.9f) else Boxy.colors.page,
+        scrimColor = if (blurBehind) androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.2f) else androidx.compose.material3.BottomSheetDefaults.ScrimColor,
         contentColor = Boxy.colors.text,
     ) {
         Column(

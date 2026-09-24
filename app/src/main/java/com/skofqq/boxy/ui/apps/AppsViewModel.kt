@@ -109,6 +109,8 @@ class AppsViewModel(app: Application) : AndroidViewModel(app) {
     private fun isWorkOrClone(u: AndroidUser): Boolean =
         u.id == 999 || u.name.contains("work", true) || u.name.contains("clone", true) || u.name.contains("dual", true)
 
+    fun isWork(id: Int): Boolean = users.firstOrNull { it.id == id }?.let { it.name.contains("work", true) } ?: false
+
     fun userName(id: Int): String = users.firstOrNull { it.id == id }?.name ?: id.toString()
 
     fun toggle(app: AppEntry) {

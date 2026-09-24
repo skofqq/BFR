@@ -166,7 +166,17 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
     private suspend fun speedLoop() {
         while (true) {
             val api = if (prefs.useClashApi && state?.running == true) Net.clashApi(state?.core) else null
-            if (api != null) {
+            val filter = prefs.filterChainSet
+            if (api != null && filter.isNotEmpty()) {
+                // Sum traffic of connections whose chains are not filtered out (e.g. DIRECT).
+                var prev: Pair<Long, Long>? = null
+                repeat(30) {
+                    val cur = Net.clashConnectionTotals(api, filter)
+                    if (prev != null && cur != null) pushSpeed(cur.first - prev!!.first, cur.second - prev!!.second)
+                    prev = cur
+                    delay(1000)
+                }
+            } else if (api != null) {
                 Net.clashTraffic(api).catch { }.collect { (down, up) -> pushSpeed(down, up) }
                 delay(2000)
             } else {
@@ -225,8 +235,12 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
     fun refreshSubscription() {
         viewModelScope.launch {
             val list = when (prefs.subscriptionSource) {
-                SubscriptionSource.PROVIDERS -> Net.clashApi(state?.core ?: BoxModule.readSetting("bin_name"))
+                SubscriptionSource.CORE_API -> Net.clashApi(state?.core ?: BoxModule.readSetting("bin_name"))
                     ?.let { Net.clashProviders(it) }.orEmpty()
+                SubscriptionSource.PROVIDERS -> {
+                    val urls = Net.providerUrls()
+                    coroutineScope { urls.map { (name, url) -> async { Net.subscription(url)?.copy(name = name) } }.awaitAll() }.filterNotNull()
+                }
                 SubscriptionSource.URL -> {
                     val urls = BoxModule.parseArray(BoxModule.readSettingRaw("subscription_url_clash"))
                     coroutineScope { urls.map { url -> async { Net.subscription(url) } }.awaitAll() }.filterNotNull()

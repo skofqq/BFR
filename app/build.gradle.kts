@@ -48,5 +48,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.libsu.core)
     implementation(libs.sora.editor)
+    implementation(libs.haze)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

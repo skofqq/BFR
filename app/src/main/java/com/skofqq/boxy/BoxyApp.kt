@@ -11,6 +11,13 @@ class BoxyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         prefs = Prefs(this)
+        com.skofqq.boxy.net.Mirrors.current = prefs.githubMirror
+        com.skofqq.boxy.service.BoxStatusService.createChannel(this)
+    }
+
+    /** Re-reads preferences after a restore. */
+    fun reloadPrefs() {
+        prefs = Prefs(this)
     }
 
     companion object {

@@ -215,6 +215,56 @@ object Net {
         }.getOrDefault(emptyList())
     }
 
+    /** Download / upload totals of live connections, skipping those routed through [excluded] chains. */
+    suspend fun clashConnectionTotals(api: ClashApi, excluded: Set<String>): Pair<Long, Long>? = withContext(Dispatchers.IO) {
+        runCatching {
+            val c = openApi(api, "/connections")
+            try {
+                val arr = JSONObject(c.inputStream.bufferedReader().readText()).optJSONArray("connections") ?: return@runCatching 0L to 0L
+                var down = 0L
+                var up = 0L
+                for (i in 0 until arr.length()) {
+                    val conn = arr.getJSONObject(i)
+                    val chains = conn.optJSONArray("chains")
+                    val skip = chains != null && (0 until chains.length()).any { chains.optString(it) in excluded }
+                    if (!skip) {
+                        down += conn.optLong("download")
+                        up += conn.optLong("upload")
+                    }
+                }
+                down to up
+            } finally {
+                c.disconnect()
+            }
+        }.getOrNull()
+    }
+
+    /** Names and URLs of proxy-providers declared in the active Clash config. */
+    suspend fun providerUrls(): List<Pair<String, String>> {
+        val name = BoxModule.readSetting("name_clash_config") ?: "config.yaml"
+        val text = BoxModule.readFile("${BoxModule.BOX_DIR}/clash/$name") ?: return emptyList()
+        val result = mutableListOf<Pair<String, String>>()
+        var inProviders = false
+        var current: String? = null
+        text.lines().forEach { raw ->
+            val line = raw.substringBefore(" #")
+            if (line.isNotBlank() && !line.startsWith(" ") && !line.startsWith("\t")) {
+                inProviders = line.trim().startsWith("proxy-providers:")
+                current = null
+                return@forEach
+            }
+            if (!inProviders) return@forEach
+            val indent = line.length - line.trimStart().length
+            val t = line.trim()
+            if (indent in 1..4 && t.endsWith(":") && !t.startsWith("-")) current = t.removeSuffix(":").trim('"', '\'')
+            if (t.startsWith("url:")) {
+                val url = t.removePrefix("url:").trim().trim('"', '\'')
+                if (url.startsWith("http")) result += (current ?: url) to url
+            }
+        }
+        return result
+    }
+
     /** PUT /configs?force=true reloads the config of a running mihomo core. */
     suspend fun clashReload(api: ClashApi): Boolean = withContext(Dispatchers.IO) {
         runCatching {

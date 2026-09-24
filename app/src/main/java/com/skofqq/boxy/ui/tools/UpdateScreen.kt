@@ -67,6 +67,7 @@ private val CORE_TARGETS = listOf(
 fun UpdateScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var coreSheet by remember { mutableStateOf(false) }
+    var dashboardSheet by remember { mutableStateOf(false) }
     var smartSupported by remember { mutableStateOf(false) }
     var taskTitle by remember { mutableStateOf<String?>(null) }
     val taskLines = remember { mutableStateListOf<String>() }
@@ -116,9 +117,7 @@ fun UpdateScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
                 UpdateRow(BoxyIcons.Subscriptions, subsTitle, stringResource(R.string.update_subscription_sub)) {
                     launchTask(subsTitle, "${BoxModule.SCRIPTS}/box.tool subs")
                 }
-                UpdateRow(BoxyIcons.Web, webuiTitle, stringResource(R.string.update_webui_sub)) {
-                    launchTask(webuiTitle, "${BoxModule.SCRIPTS}/box.tool upxui")
-                }
+                UpdateRow(BoxyIcons.Web, webuiTitle, stringResource(R.string.update_webui_sub)) { dashboardSheet = true }
             }
         }
     }
@@ -144,6 +143,8 @@ fun UpdateScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
             }
         }
     }
+
+    if (dashboardSheet) com.skofqq.boxy.ui.panel.DashboardSheet(onDismiss = { dashboardSheet = false })
 
     taskTitle?.let { title ->
         TaskSheet(title, taskLines, taskDone, taskOk) { if (taskDone) taskTitle = null }
