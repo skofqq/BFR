@@ -12,3 +12,4 @@
 *.jks
 /keystore.properties
 /keystore/
+/module/*.zip

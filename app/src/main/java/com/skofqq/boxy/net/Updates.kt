@@ -65,6 +65,27 @@ object Updates {
         }.getOrNull()
     }
 
+    /**
+     * Downloads the release APK (through the GitHub mirror) and installs it with root.
+     * The install runs detached, because replacing the package stops this process; the app is reopened afterwards.
+     */
+    suspend fun installApp(context: android.content.Context, apkUrl: String, onProgress: (Float) -> Unit, onLog: (String) -> Unit): Boolean {
+        val file = java.io.File(context.cacheDir, "boxy-update.apk")
+        if (!Mirrors.download(apkUrl, file, onProgress, onLog)) return false
+        val tmp = "/data/local/tmp/boxy-update.apk"
+        val (ok, out) = BoxModule.exec("cp '${file.absolutePath}' $tmp && chmod 644 $tmp")
+        file.delete()
+        if (!ok) {
+            out.forEach(onLog)
+            return false
+        }
+        onLog("pm install")
+        BoxModule.exec(
+            "setsid sh -c 'pm install -r $tmp >/dev/null 2>&1; rm -f $tmp; am start -n ${context.packageName}/.MainActivity >/dev/null 2>&1' </dev/null >/dev/null 2>&1 &",
+        )
+        return true
+    }
+
     /** Compares dotted versions like 0.1.0 and 0.2; true when [latest] is newer. */
     fun isNewer(latest: String, current: String): Boolean {
         val a = latest.split('.', '-').map { it.toIntOrNull() ?: 0 }

@@ -500,4 +500,7 @@
     <string name="dashboard_unsupported">%1$s 核心没有 Web UI</string>
     <string name="apps_work_profile">工作资料</string>
     <string name="apps_clone">应用分身</string>
+    <string name="about_install_update">安装更新</string>
+    <string name="about_installing">正在安装… 应用将重新启动</string>
+    <string name="about_install_failed">无法安装更新</string>
 </resources>

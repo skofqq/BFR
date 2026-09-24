@@ -394,6 +394,11 @@ fun AppUpdateSheet(currentVersion: String, onDismiss: () -> Unit) {
     var releases by remember { mutableStateOf<List<AppRelease>?>(null) }
     var failed by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
+    var installing by remember { mutableStateOf<String?>(null) }
+    var progress by remember { mutableStateOf(-1f) }
+    var installLog by remember { mutableStateOf("") }
+    var installFailed by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         val r = Updates.appReleases()
         if (r == null) failed = true else releases = r
@@ -438,10 +443,46 @@ fun AppUpdateSheet(currentVersion: String, onDismiss: () -> Unit) {
                         if (r.prerelease) {
                             Text(stringResource(R.string.about_prerelease_warning), Modifier.padding(horizontal = 16.dp, vertical = 4.dp), style = MaterialTheme.typography.bodySmall, color = Tints.amber.fg)
                         }
+                        if (installing == r.version) {
+                            Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                                if (progress >= 0f) {
+                                    androidx.compose.material3.LinearProgressIndicator(progress = { progress }, Modifier.fillMaxWidth(), color = Boxy.colors.accent)
+                                } else {
+                                    androidx.compose.material3.LinearProgressIndicator(Modifier.fillMaxWidth(), color = Boxy.colors.accent)
+                                }
+                                Text(installLog, style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2, maxLines = 2)
+                            }
+                        }
+                        if (installFailed && installing == null) {
+                            Text(
+                                stringResource(R.string.about_install_failed) + "\n" + installLog,
+                                Modifier.padding(horizontal = 16.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Tints.red.fg,
+                            )
+                        }
                         Row(Modifier.padding(horizontal = 16.dp)) {
+                            val canInstall = r.apkUrl != null && Updates.isNewer(r.version, currentVersion)
                             SheetButtons(
-                                stringResource(if (r.apkUrl != null) R.string.about_download_app else R.string.about_view_browser),
-                                { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r.apkUrl ?: r.pageUrl))) } },
+                                stringResource(if (canInstall) R.string.about_install_update else R.string.about_view_browser),
+                                {
+                                    if (canInstall && installing == null) {
+                                        installing = r.version
+                                        installFailed = false
+                                        progress = -1f
+                                        scope.launch {
+                                            val ok = Updates.installApp(context, r.apkUrl!!, { progress = it }, { installLog = it })
+                                            if (!ok) {
+                                                installFailed = true
+                                                installing = null
+                                            } else {
+                                                installLog = context.getString(R.string.about_installing)
+                                            }
+                                        }
+                                    } else if (!canInstall) {
+                                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r.pageUrl))) }
+                                    }
+                                },
                             )
                         }
                         Spacer(Modifier.height(8.dp))

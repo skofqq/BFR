@@ -43,6 +43,11 @@ Languages: English, Русский, 中文.
 - Backup and restore of module files and app preferences
 - App updates (GitHub releases) and module updates (`updateJson`)
 
+## Module
+
+The `module/` folder holds the Box for Root module used with Boxy (upstream v1.10.2 plus fixes, Russian installer,
+BSSID matching and hotspot MAC filter). See [module/README.md](module/README.md).
+
 ## Build
 
 Requirements: Android Studio (JDK 17+), Android SDK 37.

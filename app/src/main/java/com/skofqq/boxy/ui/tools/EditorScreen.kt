@@ -129,7 +129,16 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
                                 setColor(EditorColorScheme.SELECTION_HANDLE, colors.accent.toArgb())
                                 setColor(EditorColorScheme.SELECTED_TEXT_BACKGROUND, colors.accent.copy(alpha = 0.3f).toArgb())
                                 setColor(EditorColorScheme.MATCHED_TEXT_BACKGROUND, colors.accent.copy(alpha = 0.25f).toArgb())
+                                // Syntax colours (see ConfigLanguage): keys, strings, numbers / booleans, punctuation, comments.
+                                val dark = colors.isDark
+                                setColor(EditorColorScheme.KEYWORD, if (dark) 0xFF79C0FF.toInt() else 0xFF0550AE.toInt())
+                                setColor(EditorColorScheme.LITERAL, if (dark) 0xFFA5D6FF.toInt() else 0xFF0A3069.toInt())
+                                setColor(EditorColorScheme.FUNCTION_NAME, if (dark) 0xFFFFA657.toInt() else 0xFF953800.toInt())
+                                setColor(EditorColorScheme.OPERATOR, if (dark) 0xFFFF7B72.toInt() else 0xFFCF222E.toInt())
+                                setColor(EditorColorScheme.COMMENT, if (dark) 0xFF8B949E.toInt() else 0xFF6E7781.toInt())
                             }
+                            val ext = path.substringAfterLast('.', "").lowercase()
+                            if (ext == "json" || ext == "yaml" || ext == "yml") setEditorLanguage(ConfigLanguage(json = ext == "json"))
                             setText(content)
                             subscribeEvent(ContentChangeEvent::class.java) { _, _ -> modified = true }
                             editor = this

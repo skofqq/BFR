@@ -110,6 +110,12 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
         if (env == null) env = BoxModule.environment()
         if (env != Environment.READY) return@coroutineScope
         subStore = BoxModule.subStoreInstalled()
+        launch {
+            val mirror = prefs.githubMirror
+            if (mirror.isNotBlank() && com.skofqq.boxy.net.Mirrors.moduleMirror() != mirror) {
+                com.skofqq.boxy.net.Mirrors.applyToModule(mirror)
+            }
+        }
         launch { while (true) { refreshState(); delay(2000) } }
         launch { speedLoop() }
         launch { systemLoop() }

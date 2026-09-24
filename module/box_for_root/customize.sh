@@ -1,0 +1,357 @@
+#!/system/bin/sh
+
+# Script configuration variables
+SKIPUNZIP=1
+SKIPMOUNT=false
+PROPFILE=true
+POSTFSDATA=false
+LATESTARTSERVICE=true
+
+# Installer language: Russian when the system language is Russian, English otherwise.
+# BOX_LANG=ru|en can force a language.
+if [ -z "$BOX_LANG" ]; then
+  sys_locale=$(getprop persist.sys.locale)
+  [ -z "$sys_locale" ] && sys_locale=$(getprop ro.product.locale)
+  [ -z "$sys_locale" ] && sys_locale=$(getprop persist.sys.language)
+  case "$sys_locale" in
+    ru*) BOX_LANG="ru" ;;
+    *) BOX_LANG="en" ;;
+  esac
+fi
+
+# t "English" "Русский"
+t() {
+  if [ "$BOX_LANG" = "ru" ]; then
+    printf '%s' "$2"
+  else
+    printf '%s' "$1"
+  fi
+}
+
+ask_keys() {
+  ui_print "— $(t '[ Vol UP(+): Yes ]' '[ Громкость +: Да ]')"
+  ui_print "— $(t '[ Vol DOWN(-): No ]' '[ Громкость −: Нет ]')"
+}
+
+# Check installation conditions
+if [ "$BOOTMODE" != true ]; then
+  abort "-----------------------------------------------------------"
+  ui_print "! $(t 'Please install in Magisk/KernelSU/APatch Manager' 'Устанавливайте через Magisk/KernelSU/APatch')"
+  ui_print "! $(t 'Install from recovery is NOT supported' 'Установка из recovery НЕ поддерживается')"
+  abort "-----------------------------------------------------------"
+elif [ "$KSU" = true ] && [ "$KSU_VER_CODE" -lt 10670 ]; then
+  abort "-----------------------------------------------------------"
+  ui_print "! $(t 'Please update your KernelSU and KernelSU Manager' 'Обновите KernelSU и KernelSU Manager')"
+  abort "-----------------------------------------------------------"
+fi
+
+service_dir="/data/adb/service.d"
+if [ "$KSU" = "true" ]; then
+  ui_print "— $(t 'KernelSU version' 'Версия KernelSU'): $KSU_VER ($KSU_VER_CODE)"
+  [ "$KSU_VER_CODE" -lt 10683 ] && service_dir="/data/adb/ksu/service.d"
+elif [ "$APATCH" = "true" ]; then
+  APATCH_VER=$(cat "/data/adb/ap/version")
+  ui_print "— $(t 'APatch version' 'Версия APatch'): $APATCH_VER"
+else
+  ui_print "— $(t 'Magisk version' 'Версия Magisk'): $MAGISK_VER ($MAGISK_VER_CODE)"
+fi
+ui_print "— $(t 'Installer language: English' 'Язык установщика: русский')"
+
+# Set up service directory and clean old installations
+mkdir -p "${service_dir}"
+if [ -d "/data/adb/modules/box_for_magisk" ]; then
+  rm -rf "/data/adb/modules/box_for_magisk"
+  ui_print "— $(t 'Old module deleted.' 'Старый модуль удалён.')"
+fi
+
+# Extract files and configure directories
+ui_print "— $(t 'Installing Box for Magisk/KernelSU/APatch' 'Установка Box для Magisk/KernelSU/APatch')"
+unzip -o "$ZIPFILE" -x 'META-INF/*' -x 'webroot/*' -d "$MODPATH" >&2
+if [ -d "/data/adb/box" ]; then
+  ui_print "— $(t 'Backup existing box data' 'Резервная копия текущих данных box')"
+  temp_bak=$(mktemp -d "/data/adb/box/box.XXXXXXXXXX")
+  temp_dir="${temp_bak}"
+  mv /data/adb/box/* "${temp_dir}/"
+  mv "$MODPATH/box/"* /data/adb/box/
+  backup_box="true"
+else
+  mv "$MODPATH/box" /data/adb/
+fi
+
+# Directory creation and file extraction
+ui_print "— $(t 'Create directories...' 'Создание папок...')"
+mkdir -p /data/adb/box/ /data/adb/box/run/ /data/adb/box/bin/xclash/
+mkdir -p $MODPATH/system/bin
+
+ui_print "— $(t 'Extracting...' 'Распаковка...')"
+ui_print "     ↳  uninstall.sh → $MODPATH"
+ui_print "     ↳  box_service.sh → ${service_dir}"
+ui_print "     ↳  sbfr → $MODPATH/system/bin"
+unzip -j -o "$ZIPFILE" 'uninstall.sh' -d "$MODPATH" >&2
+unzip -j -o "$ZIPFILE" 'box_service.sh' -d "${service_dir}" >&2
+unzip -j -o "$ZIPFILE" 'sbfr' -d "$MODPATH/system/bin" >&2
+
+# Set permissions
+ui_print "— $(t 'Setting permissions...' 'Настройка прав доступа...')"
+set_perm_recursive $MODPATH 0 0 0755 0644
+set_perm_recursive /data/adb/box/ 0 3005 0755 0644
+set_perm_recursive /data/adb/box/scripts/ 0 3005 0755 0700
+set_perm ${service_dir}/box_service.sh 0 0 0755
+set_perm $MODPATH/uninstall.sh 0 0 0755
+set_perm $MODPATH/system/bin/sbfr 0 0 0755
+
+chmod ugo+x ${service_dir}/box_service.sh $MODPATH/uninstall.sh /data/adb/box/scripts/*
+
+apply_mirror() {
+  ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  ui_print "— $(t "Do you want to use the 'ghfast.top' ?" 'Использовать зеркало «ghfast.top»?')"
+  ui_print "     ↳  $(t 'mirror to speed up downloads' 'ускоряет загрузку с GitHub')"
+  ask_keys
+  START_TIME=$(date +%s)
+  while true ; do
+    NOW_TIME=$(date +%s)
+    timeout 1 getevent -lc 1 2>&1 | grep KEY_VOLUME > "$TMPDIR/events"
+    if [ $(( NOW_TIME - START_TIME )) -gt 9 ]; then
+      ui_print "— $(t 'No input detected after 10 seconds...' 'Нет ответа за 10 секунд...')"
+      ui_print "— $(t 'ghfast acceleration enabled.' 'Ускорение ghfast включено.')"
+      sed -i 's/use_ghproxy=.*/use_ghproxy="true"/' /data/adb/box/scripts/box.tool
+      break
+    elif $(cat $TMPDIR/events | grep -q KEY_VOLUMEUP); then
+      ui_print "— $(t 'ghfast acceleration enabled.' 'Ускорение ghfast включено.')"
+      sed -i 's/use_ghproxy=.*/use_ghproxy="true"/' /data/adb/box/scripts/box.tool
+      break
+    elif $(cat $TMPDIR/events | grep -q KEY_VOLUMEDOWN); then
+      ui_print "— $(t 'ghfast acceleration disabled.' 'Ускорение ghfast выключено.')"
+      sed -i 's/use_ghproxy=.*/use_ghproxy="false"/' /data/adb/box/scripts/box.tool
+      break
+    fi
+  done
+}
+
+apply_mirror
+timeout 1 getevent -cl >/dev/null
+
+find_bin() {
+  bin_dir="$temp_bak"
+
+  check_bin() {
+    local name="$1"
+    local path="$bin_dir/bin/$name"
+    if [ -e "$path" ]; then
+        ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        ui_print "— $name → ⭕ $(t 'FOUND' 'НАЙДЕН')"
+    else
+        ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        ui_print "— $name → ❌ $(t 'NOT FOUND' 'НЕ НАЙДЕН')"
+    fi
+  }
+
+  handle_download() {
+    local bin="$1"
+    local action=""
+    case "$bin" in
+      yq) action="upyq" ;;
+      curl) action="upcurl" ;;
+      *) action="all $bin" ;;
+    esac
+
+  START_TIME=$(date +%s)
+  while true; do
+    NOW_TIME=$(date +%s)
+    timeout 1 getevent -lc 1 2>&1 | grep KEY_VOLUME > "$TMPDIR/events"
+
+    if [ $(( NOW_TIME - START_TIME )) -gt 9 ]; then
+      ui_print "— $(t 'No input detected after 10 seconds...' 'Нет ответа за 10 секунд...')"
+      if [ "$bin" = "clash" ]; then
+        ui_print "— $(t 'Download enabled for clash.' 'Загрузка clash включена.')"
+        /data/adb/box/scripts/box.tool $action
+      else
+        ui_print "— $(t "Download disabled for $bin." "Загрузка $bin пропущена.")"
+      fi
+      break
+    elif grep -q KEY_VOLUMEUP "$TMPDIR/events"; then
+      ui_print "— $(t 'Download enabled.' 'Загрузка включена.')"
+      /data/adb/box/scripts/box.tool $action
+      break
+    elif grep -q KEY_VOLUMEDOWN "$TMPDIR/events"; then
+      ui_print "— $(t 'Download disabled.' 'Загрузка пропущена.')"
+      break
+    fi
+    done
+  }
+
+  # List of binaries to check
+  for bin in yq curl sing-box v2fly xray hysteria; do
+    timeout 1 getevent -cl >/dev/null
+
+    check_bin "$bin"
+    ui_print "— $(t 'Do you want to download or update it?' 'Скачать или обновить?')"
+    ask_keys
+    handle_download "$bin"
+    sleep 1
+  done
+
+  # Special case for clash
+  if [ -e "$bin_dir/bin/xclash/mihomo" ]; then
+      ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      ui_print "— mihomo → ⭕ $(t 'FOUND' 'НАЙДЕН')"
+      ui_print "— $(t 'Do you want to download or update clash?' 'Скачать или обновить clash?')"
+      ask_keys
+      handle_download "clash"
+  else
+      ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      ui_print "— mihomo → ❌ $(t 'NOT FOUND' 'НЕ НАЙДЕН')"
+      ui_print "— $(t 'Do you want to download or update mihomo?' 'Скачать или обновить mihomo?')"
+      ask_keys
+      handle_download "clash"
+  fi
+}
+
+find_bin
+timeout 1 getevent -cl >/dev/null
+
+restore_ini() {
+  backup_ini="$temp_dir/settings.ini"
+  target_ini="/data/adb/box/settings.ini"
+
+  # List of keys to restore (separate with spaces)
+  keys="network_mode bin_name ipv6 xclash_option renew update_subscription run_crontab interva_update update_geo subscription_url_clash subscription_url_singbox name_clash_config clash_config name_provide_clash_config clash_provide_path custom_rules_subs name_provide_clash_rules name_sing_config name_xray_config name_v2fly_config name_hysteria_config tproxy_port redir_port box_user_group cgroup_memcg memcg_limit cgroup_cpuset allow_cpu cgroup_blkio weight enable_network_service_control use_module_on_wifi_disconnect use_module_on_wifi use_ssid_matching use_wifi_list_mode wifi_ssids_list wifi_bssids_list mac_filter mac_mode macs_list inotify_log_enabled"
+
+  for key in $keys; do
+      value=$(grep "^$key=" "$backup_ini")
+      if [ -n "$value" ]; then
+          # Escape special characters to make it safe for sed
+          esc_value=$(printf '%s\n' "$value" | sed -e 's/[&/\]/\\&/g')
+
+          if grep -q "^$key=" "$target_ini"; then
+              # Replace old line
+              # sed -i "s|^$key=.*|$value|" "$target_ini"
+              sed -i "s|^$key=.*|$esc_value|" "$target_ini"
+          else
+              # Append at the end of the file
+              echo "$value" >> "$target_ini"
+          fi
+          ui_print "— $(t 'Restored' 'Восстановлено'): $key"
+      else
+          ui_print "— $(t "Skipped: $key not found in backup" "Пропущено: $key нет в резервной копии")"
+      fi
+  done
+}
+
+apply_ini() {
+  ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  ui_print "— $(t 'Would you like to restore settings.ini?' 'Восстановить settings.ini?')"
+  ask_keys
+  START_TIME=$(date +%s)
+  while true ; do
+    NOW_TIME=$(date +%s)
+    timeout 1 getevent -lc 1 2>&1 | grep KEY_VOLUME > "$TMPDIR/events"
+    if [ $(( NOW_TIME - START_TIME )) -gt 9 ]; then
+      ui_print "— $(t 'No input detected, keeping your settings.ini values' 'Нет ответа, ваши значения settings.ini сохраняются')"
+      restore_ini
+      break
+    elif $(cat $TMPDIR/events | grep -q KEY_VOLUMEUP); then
+      restore_ini
+      break
+    elif $(cat $TMPDIR/events | grep -q KEY_VOLUMEDOWN); then
+      ui_print "— $(t 'Skipped restoring settings.ini' 'Восстановление settings.ini пропущено')"
+      break
+    fi
+  done
+}
+
+[ "${backup_box}" = "true" ] && [ -f "$temp_dir/settings.ini" ] && apply_ini
+timeout 1 getevent -cl >/dev/null
+
+# Restore backup configurations if present
+if [ "${backup_box}" = "true" ]; then
+  ui_print "— $(t 'Restoring configurations...' 'Восстановление конфигураций...')"
+  ui_print "     ↳  xray"
+  ui_print "     ↳  hysteria"
+  ui_print "     ↳  clash"
+  ui_print "     ↳  sing-box"
+  ui_print "     ↳  v2fly"
+  restore_config() {
+    config_dir="$1"
+    [ -d "${temp_dir}/${config_dir}" ] && cp -rf "${temp_dir}/${config_dir}/"* "/data/adb/box/${config_dir}/"
+  }
+  for dir in clash xray v2fly sing-box hysteria; do
+    restore_config "$dir"
+  done
+
+  restore_kernel() {
+    kernel_name="$1"
+    if [ ! -f "/data/adb/box/bin/$kernel_name" ] && [ -f "${temp_dir}/bin/${kernel_name}" ]; then
+      ui_print "— $(t "Restoring kernel ${kernel_name}..." "Восстановление ядра ${kernel_name}...")"
+      cp -rf "${temp_dir}/bin/${kernel_name}" "/data/adb/box/bin/${kernel_name}"
+    fi
+  }
+
+  for kernel in curl yq xray sing-box v2fly hysteria xclash/mihomo xclash/premium; do
+    restore_kernel "$kernel"
+  done
+
+  ui_print "— $(t 'Restoring...' 'Восстановление...')"
+  ui_print "     ↳  *.logs"
+  ui_print "     ↳  box.pid"
+  ui_print "     ↳  uid.list"
+  cp -rf "${temp_dir}/run/"* "/data/adb/box/run/"
+
+  ui_print "— $(t 'Restoring...' 'Восстановление...')"
+  ui_print "     ↳  ap.list.cfg"
+  ui_print "     ↳  crontab.cfg"
+  ui_print "     ↳  package.list.cfg"
+  ui_print "     ↳  gid.list.cfg"
+  cp -rf "${temp_dir}/gid.list.cfg" "/data/adb/box/gid.list.cfg"
+  cp -rf "${temp_dir}/ap.list.cfg" "/data/adb/box/ap.list.cfg"
+  cp -rf "${temp_dir}/crontab.cfg" "/data/adb/box/crontab.cfg"
+  cp -rf "${temp_dir}/package.list.cfg" "/data/adb/box/package.list.cfg"
+fi
+
+# create_resolv() {
+  # # Check if the resolv.conf file exists
+  # if [ ! -f /system/etc/resolv.conf ]; then
+    # # Ensure the target directory exists before writing the file
+    # mkdir -p "$MODPATH/system/etc/security/cacerts/"
+    # # Create resolv.conf with the specified nameservers
+    # cat > "$MODPATH/system/etc/resolv.conf" <<EOF
+# # nameserver 8.8.8.8
+# # nameserver 1.1.1.1
+# # nameserver 114.114.114.114
+# EOF
+  # fi
+  # ui_print "— create $MODPATH/system/etc/resolv.conf"
+# }
+# create_resolv
+
+# Module description in the manager's module list
+if [ "$BOX_LANG" = "ru" ]; then
+  sed -i "s/^description=.*/description=Прокси-туннель на Android через sing-box, clash, v2ray, hysteria и xray/" $MODPATH/module.prop
+fi
+
+# Update module description if no kernel binaries are found
+[ -z "$(find /data/adb/box/bin -type f)" ] && sed -Ei "s/^description=(\[.*][[:space:]]*)?/description=[ 😱 $(t 'Module installed but manual Kernel download required' 'Модуль установлен, но ядро нужно скачать вручную') ] /g" $MODPATH/module.prop
+
+# Customize module name based on environment
+if [ "$KSU" = "true" ]; then
+  sed -i "s/name=.*/name=Box for KernelSU/g" $MODPATH/module.prop
+elif [ "$APATCH" = "true" ]; then
+  sed -i "s/name=.*/name=Box for APatch/g" $MODPATH/module.prop
+else
+  sed -i "s/name=.*/name=Box for Magisk/g" $MODPATH/module.prop
+fi
+unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
+
+# Clean up temporary files
+ui_print "— $(t 'Cleaning up leftover files' 'Удаление временных файлов')"
+rm -rf /data/adb/box/bin/.bin $MODPATH/box $MODPATH/sbfr $MODPATH/box_service.sh
+
+ui_print ""
+# Create a symbolic link to run /dev/sbfr as a shortcut to sbfr
+ln -sf "$MODPATH/system/bin/sbfr" /dev/sbfr
+ui_print "— $(t "Shortcut '/dev/sbfr' created." 'Создан ярлык «/dev/sbfr».')"
+ui_print "     ↳  $(t 'You can now run: su -c /dev/sbfr' 'Теперь можно запускать: su -c /dev/sbfr')"
+ui_print ""
+# Complete installation
+ui_print "— $(t 'Installation complete. Please reboot your device.' 'Установка завершена. Перезагрузите устройство.')"
+ui_print "— $(t 'Report issues to t.me.taamarin' 'О проблемах сообщайте: t.me/taamarin')"

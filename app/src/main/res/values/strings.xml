@@ -553,4 +553,8 @@
 
     <string name="apps_work_profile">Work profile</string>
     <string name="apps_clone">App clone</string>
+
+    <string name="about_install_update">Install update</string>
+    <string name="about_installing">Installing… the app will restart</string>
+    <string name="about_install_failed">Could not install the update</string>
 </resources>

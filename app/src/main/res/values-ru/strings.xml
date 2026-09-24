@@ -541,4 +541,8 @@
 
     <string name="apps_work_profile">Рабочий профиль</string>
     <string name="apps_clone">Клон приложения</string>
+
+    <string name="about_install_update">Установить обновление</string>
+    <string name="about_installing">Установка… приложение перезапустится</string>
+    <string name="about_install_failed">Не удалось установить обновление</string>
 </resources>
