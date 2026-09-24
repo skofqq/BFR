@@ -66,7 +66,7 @@ fun HomeCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, conte
 }
 
 @Composable
-private fun CardTitle(title: String, badge: String?, tint: Tint) {
+private fun CardTitle(title: String, badge: String?, tint: Tint, onBadgeClick: (() -> Unit)? = null) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
             title,
@@ -78,7 +78,7 @@ private fun CardTitle(title: String, badge: String?, tint: Tint) {
         )
         if (badge != null) {
             Spacer(Modifier.width(6.dp))
-            Badge(badge, tint)
+            Badge(badge, tint, if (onBadgeClick != null) Modifier.clip(RoundedCornerShape(50)).clickable(onClick = onBadgeClick) else Modifier)
         }
     }
 }
@@ -273,18 +273,18 @@ fun LatencyCard(results: List<LatencyResult>, badge: LatencyBadge, onClick: () -
 // ---------- Metrics ----------
 
 @Composable
-fun IpCard(lan: LanAddress?, wan: GeoIp?, running: Boolean, modifier: Modifier, onClick: () -> Unit) {
-    val showWan = running && wan != null
+fun IpCard(lan: LanAddress?, wan: GeoIp?, wanMode: Boolean, modifier: Modifier, onToggle: () -> Unit, onClick: () -> Unit) {
+    val showWan = wanMode && wan != null
     val badge = if (showWan) {
         stringResource(R.string.badge_wan) + flagEmoji(wan.countryCode).let { if (it.isEmpty()) "" else " $it" }
     } else {
         stringResource(R.string.badge_lan)
     }
     HomeCard(modifier, onClick) {
-        CardTitle(stringResource(R.string.card_ip), badge, if (showWan) Tints.blue else Tints.green)
+        CardTitle(stringResource(R.string.card_ip), if (wanMode && wan == null) stringResource(R.string.badge_wan) else badge, if (wanMode) Tints.blue else Tints.green, onToggle)
         Spacer(Modifier.height(16.dp))
         Text(
-            (if (showWan) wan.ip else lan?.ip) ?: stringResource(R.string.common_dash),
+            (if (showWan) wan.ip else if (wanMode) null else lan?.ip) ?: stringResource(R.string.common_dash),
             style = MaterialTheme.typography.titleLarge.copy(fontSize = 21.sp),
             color = Boxy.colors.text,
             maxLines = 1,

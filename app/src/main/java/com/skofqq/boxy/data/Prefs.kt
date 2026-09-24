@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 enum class ThemeMode { LIGHT, DARK, SYSTEM, MATERIAL }
 
-enum class AppLanguage(val tag: String?) { SYSTEM(null), ENGLISH("en"), RUSSIAN("ru") }
+enum class AppLanguage(val tag: String?) { SYSTEM(null), ENGLISH("en"), RUSSIAN("ru"), CHINESE("zh-CN") }
 
 /** Extra bottom-navigation page between Home and Tools (at most one, or none). */
 enum class NavExtra { NONE, APPS, LOGS }
@@ -91,6 +91,11 @@ class Prefs(context: Context) {
         private set
     var githubMirror by mutableStateOf(sp.getString("github_mirror", "") ?: "")
         private set
+    /** IP card shows the public (WAN) address instead of the local one. */
+    var ipWan by mutableStateOf(sp.getString("ip_mode_v1", "lan") == "wan")
+        private set
+
+    fun updateIpWan(v: Boolean) { ipWan = v; sp.edit().putString("ip_mode_v1", if (v) "wan" else "lan").apply() }
 
     fun updateGithubMirror(v: String) { githubMirror = v; sp.edit().putString("github_mirror", v).apply() }
 

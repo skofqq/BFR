@@ -131,7 +131,7 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
     fun refreshIp() {
         viewModelScope.launch {
             lan = Net.lanAddress()
-            wan = if (state?.running == true) Net.geoIp(false) else null
+            wan = if (prefs.ipWan) Net.geoIp(false) else null
         }
     }
 

@@ -139,6 +139,7 @@ private fun SettingsMain(contentPadding: PaddingValues, prefs: Prefs, push: (Str
         Choice(AppLanguage.SYSTEM, stringResource(R.string.lang_system)),
         Choice(AppLanguage.ENGLISH, "English"),
         Choice(AppLanguage.RUSSIAN, "Русский"),
+        Choice(AppLanguage.CHINESE, "中文"),
     )
     val sourceChoices = listOf(
         Choice(SubscriptionSource.URL, stringResource(R.string.settings_url_mode), stringResource(R.string.settings_url_mode_desc)),

@@ -13,7 +13,6 @@
     <string name="status_starting">Запуск</string>
     <string name="status_stopping">Остановка</string>
     <string name="status_checking">Проверка</string>
-    <string name="status_unavailable">Недоступен</string>
     <string name="home_tap_start">Нажмите «Старт» для запуска</string>
     <string name="home_pid">PID %1$s</string>
     <string name="action_start">Старт</string>
@@ -31,10 +30,7 @@
     <string name="env_scripts_title">Нет скриптов</string>
     <string name="env_scripts_body">Скрипты Box не найдены в /data/adb/box/scripts.</string>
     <string name="action_retry">Повторить</string>
-
-    <string name="coming_soon">Появится на следующем этапе</string>
     <string name="apps_title">Приложения</string>
-    <string name="apps_subtitle">Режим прокси и правила приложений</string>
     <string name="logs_title">Журнал</string>
     <string name="logs_subtitle">Просмотр логов работы</string>
 
@@ -165,9 +161,6 @@
     <string name="sub_upload">Отдача</string>
     <string name="sub_download">Загрузка</string>
     <string name="sub_remaining">Осталось</string>
-    <string name="sub_used_value">Использовано %1$s</string>
-    <string name="sub_total_value">Всего %1$s</string>
-    <string name="sub_expires">Действует до: %1$s</string>
     <string name="sub_updated">Обновлено %1$s</string>
     <string name="sysenv_title">Системное окружение</string>
     <string name="sysenv_android">Android</string>

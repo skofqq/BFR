@@ -18,7 +18,6 @@
     <string name="status_starting">Starting</string>
     <string name="status_stopping">Stopping</string>
     <string name="status_checking">Checking</string>
-    <string name="status_unavailable">Unavailable</string>
     <string name="home_tap_start">Tap Start to enable</string>
     <string name="home_pid">PID %1$s</string>
     <string name="action_start">Start</string>
@@ -41,9 +40,7 @@
     <string name="action_retry">Retry</string>
 
     <!-- Placeholders -->
-    <string name="coming_soon">Coming in the next stage</string>
     <string name="apps_title">Apps</string>
-    <string name="apps_subtitle">Proxy mode &amp; app rules</string>
     <string name="logs_title">Logs</string>
     <string name="logs_subtitle">Inspect runtime logs</string>
 
@@ -176,9 +173,6 @@
     <string name="sub_upload">Upload</string>
     <string name="sub_download">Download</string>
     <string name="sub_remaining">Remaining</string>
-    <string name="sub_used_value">Used %1$s</string>
-    <string name="sub_total_value">Total %1$s</string>
-    <string name="sub_expires">Expires: %1$s</string>
     <string name="sub_updated">Updated %1$s</string>
     <string name="sysenv_title">System environment</string>
     <string name="sysenv_android">Android</string>

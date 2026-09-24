@@ -126,7 +126,7 @@ fun HomeScreen(
                                         pair.forEach { card ->
                                             val mod = Modifier.weight(1f).fillMaxHeight()
                                             when (card) {
-                                                MetricCard.IP -> IpCard(vm.lan, vm.wan, running, mod) { vm.loadGeoDetails(); sheet = HomeSheet.GEO }
+                                                MetricCard.IP -> IpCard(vm.lan, vm.wan, prefs.ipWan, mod, onToggle = { prefs.updateIpWan(!prefs.ipWan); vm.refreshIp() }) { vm.loadGeoDetails(); sheet = HomeSheet.GEO }
                                                 MetricCard.SPEED -> SpeedCard(vm.speed, mod) { sheet = HomeSheet.SPEED }
                                                 MetricCard.SUBSCRIPTION -> SubscriptionCard(vm.subscriptions, mod) { vm.refreshSubscription(); sheet = HomeSheet.SUBSCRIPTION }
                                                 MetricCard.SYSTEM -> SystemCard(vm.system, running, mod) { vm.loadSystemEnvironment(); sheet = HomeSheet.SYSTEM }
