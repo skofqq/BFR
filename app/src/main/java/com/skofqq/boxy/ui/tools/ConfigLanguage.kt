@@ -40,11 +40,6 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
 
         private val SCALAR_WORDS = setOf("true", "false", "null", "~", "yes", "no", "on", "off")
 
-        private fun isScalarLiteral(v: String): Boolean {
-            val t = v.trim()
-            return t.lowercase() in SCALAR_WORDS || t.toDoubleOrNull() != null
-        }
-
         private fun yamlLine(b: MappedSpans.Builder, line: Int, s: String) {
             b.addIfNeeded(line, 0, NORMAL)
             var i = 0
@@ -55,10 +50,9 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
             }
             // List markers
             while (i + 1 <= s.length && i < s.length && s[i] == '-' && (i + 1 == s.length || s[i + 1] == ' ')) {
-                b.addIfNeeded(line, i, PUNCT)
+                b.addIfNeeded(line, i, NORMAL)
                 i++
                 while (i < s.length && s[i] == ' ') i++
-                b.addIfNeeded(line, i, NORMAL)
             }
             // key: value
             val colon = keyColon(s, i)
@@ -89,49 +83,47 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
             return -1
         }
 
+        /**
+         * YAML scalar after "key:" or "- ": quoted and plain strings are teal, numbers green,
+         * booleans / null stay plain, a trailing " #" starts a comment.
+         */
         private fun value(b: MappedSpans.Builder, line: Int, s: String, from: Int) {
             var i = from
             while (i < s.length && s[i] == ' ') i++
             if (i >= s.length) return
-            var tokenStart = i
-            while (i < s.length) {
-                val c = s[i]
-                when {
-                    c == '#' && (i == 0 || s[i - 1] == ' ') -> {
-                        b.addIfNeeded(line, i, COMMENT)
-                        return
-                    }
-                    c == '"' || c == '\'' -> {
-                        b.addIfNeeded(line, i, STRING)
-                        var j = i + 1
-                        while (j < s.length && s[j] != c) {
-                            if (c == '"' && s[j] == '\\') j++
-                            j++
-                        }
-                        i = minOf(j + 1, s.length)
-                        b.addIfNeeded(line, i, NORMAL)
-                        tokenStart = i
-                        continue
-                    }
-                    c == ',' || c == '[' || c == ']' || c == '{' || c == '}' || c == '|' || c == '>' || c == '&' || c == '*' -> {
-                        styleWord(b, line, s, tokenStart, i)
-                        b.addIfNeeded(line, i, PUNCT)
-                        b.addIfNeeded(line, i + 1, NORMAL)
-                        tokenStart = i + 1
-                    }
-                }
-                i++
+            if (s[i] == '#') {
+                b.addIfNeeded(line, i, COMMENT)
+                return
             }
-            styleWord(b, line, s, tokenStart, s.length)
-        }
-
-        private fun styleWord(b: MappedSpans.Builder, line: Int, s: String, from: Int, to: Int) {
-            if (from >= to) return
-            val word = s.substring(from, to)
-            val lead = word.length - word.trimStart().length
-            if (isScalarLiteral(word)) {
-                b.addIfNeeded(line, from + lead, NUMBER)
-                b.addIfNeeded(line, to, NORMAL)
+            // Find where a comment starts (outside quotes).
+            var quote: Char? = null
+            var commentAt = -1
+            var j = i
+            while (j < s.length) {
+                val c = s[j]
+                if (quote != null) {
+                    if (c == quote) quote = null
+                } else if (c == '"' || c == '\'') {
+                    quote = c
+                } else if (c == '#' && s[j - 1] == ' ') {
+                    commentAt = j
+                    break
+                }
+                j++
+            }
+            val valueEnd = if (commentAt >= 0) commentAt else s.length
+            val raw = s.substring(i, valueEnd).trimEnd()
+            val style = when {
+                raw.isEmpty() -> NORMAL
+                raw.lowercase() in SCALAR_WORDS -> NORMAL
+                raw.toDoubleOrNull() != null -> NUMBER
+                raw == "|" || raw == ">" || raw == "|-" || raw == ">-" -> PUNCT
+                else -> STRING
+            }
+            b.addIfNeeded(line, i, style)
+            if (commentAt >= 0) {
+                b.addIfNeeded(line, i + raw.length, NORMAL)
+                b.addIfNeeded(line, commentAt, COMMENT)
             }
         }
 
@@ -162,7 +154,7 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
                     c.isDigit() || c == '-' || c.isLetter() -> {
                         var j = i
                         while (j < s.length && (s[j].isLetterOrDigit() || s[j] in ".-+eE")) j++
-                        if (isScalarLiteral(s.substring(i, j))) {
+                        if (s.substring(i, j).toDoubleOrNull() != null) {
                             b.addIfNeeded(line, i, NUMBER)
                             b.addIfNeeded(line, j, NORMAL)
                         }

@@ -557,4 +557,10 @@
     <string name="about_install_update">Install update</string>
     <string name="about_installing">Installing… the app will restart</string>
     <string name="about_install_failed">Could not install the update</string>
+    <string name="net_hotspot_title">Hotspot</string>
+    <string name="net_hotspot_sub">Devices connected to this phone’s Wi‑Fi hotspot or USB tethering</string>
+    <string name="net_hotspot_proxy">Proxy hotspot clients</string>
+    <string name="net_hotspot_proxy_on">Connected devices go through the proxy</string>
+    <string name="net_hotspot_proxy_off">Connected devices use a direct connection</string>
+    <string name="editor_wrap">Wrap lines</string>
 </resources>

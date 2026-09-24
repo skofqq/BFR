@@ -89,7 +89,9 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     var macModeSheet by remember { mutableStateOf(false) }
     var wifiPickFor by remember { mutableStateOf<Pair<Boolean, Int>?>(null) } // (isBssid, index)
     var macPickFor by remember { mutableStateOf<Int?>(null) }
+    var hotspotProxy by remember { mutableStateOf<Boolean?>(null) }
 
+    LaunchedEffect(Unit) { hotspotProxy = BoxModule.hotspotProxyEnabled() }
     LaunchedEffect(Unit) {
         val raw = BoxModule.readSettingsRaw(NET_KEYS)
         fun bool(k: String, d: Boolean) = BoxModule.unquote(raw[k])?.let { it == "true" } ?: d
@@ -180,7 +182,28 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
                     }
                 }
             }
-            if (s.macFilter != null && s.macs != null) {
+            item {
+                SectionCard(stringResource(R.string.net_hotspot_title), stringResource(R.string.net_hotspot_sub)) {
+                    SwitchRow(
+                        BoxyIcons.Hotspot,
+                        stringResource(R.string.net_hotspot_proxy),
+                        stringResource(if (hotspotProxy != false) R.string.net_hotspot_proxy_on else R.string.net_hotspot_proxy_off),
+                        checked = hotspotProxy == true,
+                        enabled = hotspotProxy != null,
+                        showDivider = false,
+                    ) { on ->
+                        scope.launch {
+                            if (BoxModule.setHotspotProxy(on)) {
+                                hotspotProxy = on
+                                Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, R.string.net_save_failed, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+            }
+            if (s.macFilter != null && s.macs != null && hotspotProxy != false) {
                 item {
                     SectionCard(stringResource(R.string.net_mac_title), stringResource(R.string.net_mac_sub)) {
                         SwitchRow(BoxyIcons.Hotspot, stringResource(R.string.net_mac_enable), stringResource(R.string.net_mac_enable_sub), s.macFilter) { state = s.copy(macFilter = it) }

@@ -177,12 +177,17 @@ private fun RowDivider() {
 
 /** Round action button used in page headers. */
 @Composable
-fun HeaderAction(icon: ImageVector, contentDescription: String?, onClick: () -> Unit) {
+fun HeaderAction(
+    icon: ImageVector,
+    contentDescription: String?,
+    tint: androidx.compose.ui.graphics.Color = Boxy.colors.text,
+    onClick: () -> Unit,
+) {
     Box(
         Modifier.size(44.dp).clip(RoundedCornerShape(50)).background(Boxy.colors.surface2).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription, Modifier.size(22.dp), tint = Boxy.colors.text)
+        Icon(icon, contentDescription, Modifier.size(22.dp), tint = tint)
     }
 }
 

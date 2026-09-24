@@ -138,7 +138,7 @@ fun PanelScreen(contentPadding: PaddingValues, header: @Composable () -> Unit, k
         header()
         SubPageHeader(
             if (kind == PanelKind.CORE) stringResource(R.string.panel_title) else stringResource(R.string.substore_title),
-            current?.let { "${it.name} · ${it.url}" },
+            current?.name,
             null,
         ) {
             if (kind == PanelKind.CORE) {
@@ -177,8 +177,12 @@ fun PanelScreen(contentPadding: PaddingValues, header: @Composable () -> Unit, k
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.databaseEnabled = true
-                            settings.loadWithOverviewMode = true
-                            settings.useWideViewPort = true
+                            // AndroidView gives the WebView WRAP_CONTENT, and a wrap-content WebView reports a 0 px
+                            // viewport height to CSS (vh / dvh / % heights), so full-height dashboards render empty.
+                            layoutParams = android.view.ViewGroup.LayoutParams(
+                                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                            )
                             webViewClient = WebViewClient()
                             setBackgroundColor(android.graphics.Color.TRANSPARENT)
                             loadUrl(current.url)

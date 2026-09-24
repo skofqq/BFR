@@ -545,4 +545,10 @@
     <string name="about_install_update">Установить обновление</string>
     <string name="about_installing">Установка… приложение перезапустится</string>
     <string name="about_install_failed">Не удалось установить обновление</string>
+    <string name="net_hotspot_title">Точка доступа</string>
+    <string name="net_hotspot_sub">Устройства, подключённые к точке доступа Wi‑Fi или USB-модему этого телефона</string>
+    <string name="net_hotspot_proxy">Проксировать клиентов точки доступа</string>
+    <string name="net_hotspot_proxy_on">Подключённые устройства идут через прокси</string>
+    <string name="net_hotspot_proxy_off">Подключённые устройства идут напрямую</string>
+    <string name="editor_wrap">Перенос строк</string>
 </resources>

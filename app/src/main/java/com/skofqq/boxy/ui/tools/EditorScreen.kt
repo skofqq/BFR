@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.skofqq.boxy.R
 import com.skofqq.boxy.root.RootFiles
+import com.skofqq.boxy.ui.components.BackPill
 import com.skofqq.boxy.ui.components.BoxyTextField
 import com.skofqq.boxy.ui.components.ConfirmDialog
 import com.skofqq.boxy.ui.components.HeaderAction
@@ -59,6 +63,8 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
     var searching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var discardDialog by remember { mutableStateOf(false) }
+    val sp = remember { context.getSharedPreferences("boxy", android.content.Context.MODE_PRIVATE) }
+    var wrap by remember { mutableStateOf(sp.getBoolean("editor_wrap", true)) }
     val colors = Boxy.colors
 
     LaunchedEffect(path) { text = RootFiles.read(path) ?: "" }
@@ -76,13 +82,30 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
     }
 
     Column(Modifier.fillMaxSize().padding(contentPadding).imePadding()) {
-        SubPageHeader(path.substringAfterLast('/') + if (modified) " •" else "", path, tryBack) {
-            HeaderAction(BoxyIcons.Search, stringResource(R.string.action_search)) {
-                searching = !searching
-                if (!searching) editor?.searcher?.stopSearch()
+        // Compact bar like BFR: back on the left, search / wrap / save on the right.
+        Row(Modifier.fillMaxWidth().padding(start = 0.dp, end = 16.dp, top = 0.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            BackPill(tryBack)
+            Spacer(Modifier.weight(1f))
+            Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                HeaderAction(BoxyIcons.Search, stringResource(R.string.action_search)) {
+                    searching = !searching
+                    if (!searching) editor?.searcher?.stopSearch()
+                }
+                HeaderAction(BoxyIcons.WrapText, stringResource(R.string.editor_wrap), tint = if (wrap) colors.accent else colors.text) {
+                    wrap = !wrap
+                    sp.edit().putBoolean("editor_wrap", wrap).apply()
+                    editor?.isWordwrap = wrap
+                }
+                HeaderAction(BoxyIcons.Save, stringResource(R.string.action_save), tint = if (modified) colors.accent else colors.text) { save() }
             }
-            HeaderAction(BoxyIcons.Save, stringResource(R.string.action_save)) { save() }
         }
+        Text(
+            path.substringAfterLast('/') + if (modified) " •" else "",
+            Modifier.padding(horizontal = 20.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = colors.text2,
+            maxLines = 1,
+        )
         if (searching) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 BoxyTextField(
@@ -102,7 +125,7 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
             }
         }
         Box(
-            Modifier.fillMaxSize().padding(12.dp).clip(RoundedCornerShape(20.dp)).background(colors.card),
+            Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 6.dp).clip(RoundedCornerShape(20.dp)).background(colors.card),
             contentAlignment = Alignment.Center,
         ) {
             val content = text
@@ -113,10 +136,14 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
                         CodeEditor(ctx).apply {
-                            typefaceText = Typeface.MONOSPACE
-                            typefaceLineNumber = Typeface.MONOSPACE
-                            setTextSize(13f)
-                            isWordwrap = false
+                            // Proportional font and larger size read better on a phone (as in BFR).
+                            typefaceText = Typeface.DEFAULT
+                            typefaceLineNumber = Typeface.DEFAULT
+                            setTextSize(16f)
+                            isWordwrap = wrap
+                            setLineSpacing(2f, 1.1f)
+                            isHighlightCurrentLine = false
+                            setDividerMargin(6f)
                             colorScheme = EditorColorScheme().apply {
                                 setColor(EditorColorScheme.WHOLE_BACKGROUND, colors.card.toArgb())
                                 setColor(EditorColorScheme.LINE_NUMBER_BACKGROUND, colors.card.toArgb())
@@ -129,13 +156,15 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
                                 setColor(EditorColorScheme.SELECTION_HANDLE, colors.accent.toArgb())
                                 setColor(EditorColorScheme.SELECTED_TEXT_BACKGROUND, colors.accent.copy(alpha = 0.3f).toArgb())
                                 setColor(EditorColorScheme.MATCHED_TEXT_BACKGROUND, colors.accent.copy(alpha = 0.25f).toArgb())
-                                // Syntax colours (see ConfigLanguage): keys, strings, numbers / booleans, punctuation, comments.
+                                // Syntax colours as in BFR (see ConfigLanguage): navy keys, purple punctuation,
+                                // teal string values, green numbers, plain booleans, grey comments.
                                 val dark = colors.isDark
-                                setColor(EditorColorScheme.KEYWORD, if (dark) 0xFF79C0FF.toInt() else 0xFF0550AE.toInt())
-                                setColor(EditorColorScheme.LITERAL, if (dark) 0xFFA5D6FF.toInt() else 0xFF0A3069.toInt())
-                                setColor(EditorColorScheme.FUNCTION_NAME, if (dark) 0xFFFFA657.toInt() else 0xFF953800.toInt())
-                                setColor(EditorColorScheme.OPERATOR, if (dark) 0xFFFF7B72.toInt() else 0xFFCF222E.toInt())
-                                setColor(EditorColorScheme.COMMENT, if (dark) 0xFF8B949E.toInt() else 0xFF6E7781.toInt())
+                                setColor(EditorColorScheme.KEYWORD, if (dark) 0xFF9FB4FF.toInt() else 0xFF1A237E.toInt())
+                                setColor(EditorColorScheme.OPERATOR, if (dark) 0xFFD59BF6.toInt() else 0xFF9C27B0.toInt())
+                                setColor(EditorColorScheme.LITERAL, if (dark) 0xFF4DD0C4.toInt() else 0xFF00897B.toInt())
+                                setColor(EditorColorScheme.FUNCTION_NAME, if (dark) 0xFF8BD68F.toInt() else 0xFF2E7D32.toInt())
+                                setColor(EditorColorScheme.COMMENT, if (dark) 0xFF8B949E.toInt() else 0xFF8A8F98.toInt())
+                                setColor(EditorColorScheme.LINE_DIVIDER, colors.outline.copy(alpha = 0.4f).toArgb())
                             }
                             val ext = path.substringAfterLast('.', "").lowercase()
                             if (ext == "json" || ext == "yaml" || ext == "yml") setEditorLanguage(ConfigLanguage(json = ext == "json"))

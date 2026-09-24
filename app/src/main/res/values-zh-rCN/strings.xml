@@ -503,4 +503,10 @@
     <string name="about_install_update">安装更新</string>
     <string name="about_installing">正在安装… 应用将重新启动</string>
     <string name="about_install_failed">无法安装更新</string>
+    <string name="net_hotspot_title">热点</string>
+    <string name="net_hotspot_sub">连接到本机 Wi‑Fi 热点或 USB 共享网络的设备</string>
+    <string name="net_hotspot_proxy">代理热点客户端</string>
+    <string name="net_hotspot_proxy_on">已连接设备通过代理</string>
+    <string name="net_hotspot_proxy_off">已连接设备直连</string>
+    <string name="editor_wrap">自动换行</string>
 </resources>

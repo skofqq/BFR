@@ -219,6 +219,22 @@ object BoxModule {
         if (any) rx to tx else null
     }
 
+    /**
+     * Hotspot / tethering clients are proxied through the "allow <iface>" lines of ap.list.cfg.
+     * Turning it off comments those lines out ("#allow ..."), so the choice survives restarts and module updates.
+     */
+    suspend fun hotspotProxyEnabled(): Boolean = withContext(Dispatchers.IO) {
+        Shell.cmd("grep -q '^allow ' $BOX_DIR/ap.list.cfg").exec().isSuccess
+    }
+
+    suspend fun setHotspotProxy(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
+        val sed = if (enabled) "s/^#allow /allow /" else "s/^allow /#allow /"
+        val ok = Shell.cmd("sed -i '$sed' $BOX_DIR/ap.list.cfg").exec().isSuccess
+        // Apply right away when the service runs.
+        if (ok) Shell.cmd("[ -f $PID_FILE ] && $SCRIPTS/box.iptables renew >/dev/null 2>&1").exec()
+        ok
+    }
+
     suspend fun subStoreInstalled(): Boolean = withContext(Dispatchers.IO) { exists("/data/adb/modules/sub_store") }
 
     suspend fun readFile(path: String): String? = withContext(Dispatchers.IO) {
