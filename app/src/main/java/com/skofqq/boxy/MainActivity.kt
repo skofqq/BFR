@@ -50,7 +50,7 @@ import com.skofqq.boxy.data.NavExtra
 import com.skofqq.boxy.data.Prefs
 import com.skofqq.boxy.ui.components.BarItem
 import com.skofqq.boxy.ui.components.BottomBar
-import com.skofqq.boxy.ui.screens.AppsScreen
+import com.skofqq.boxy.ui.apps.AppsScreen
 import com.skofqq.boxy.ui.home.HomeScreen
 import com.skofqq.boxy.ui.panel.PanelScreen
 import com.skofqq.boxy.ui.screens.LogsScreen

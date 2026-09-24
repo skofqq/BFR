@@ -19,10 +19,6 @@ import com.skofqq.boxy.ui.components.SectionCard
 import com.skofqq.boxy.ui.theme.Boxy
 
 @Composable
-fun AppsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {}) =
-    Placeholder(contentPadding, header, R.string.apps_title, R.string.apps_subtitle)
-
-@Composable
 fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {}) =
     Placeholder(contentPadding, header, R.string.logs_title, R.string.logs_subtitle)
 

@@ -93,7 +93,7 @@ object BoxModule {
 
     suspend fun stop(): Boolean = run("$SCRIPTS/box.iptables disable; $SCRIPTS/box.service stop")
 
-    suspend fun restart(): Boolean = stop().let { start() }
+    suspend fun restart(): Boolean = run("$SCRIPTS/box.service restart")
 
     /** Asks the running core to re-read its config (box.tool reload). */
     suspend fun reloadConfig(): Boolean = run("$SCRIPTS/box.tool reload")
@@ -212,6 +212,23 @@ object BoxModule {
     suspend fun readFile(path: String): String? = withContext(Dispatchers.IO) {
         val r = Shell.cmd("cat '$path' 2>/dev/null").exec()
         if (r.isSuccess) r.out.joinToString("\n") else null
+    }
+
+    /** Writes text to a root-owned file (content goes through base64, so any characters are safe). */
+    suspend fun writeFile(path: String, content: String): Boolean = withContext(Dispatchers.IO) {
+        val b64 = android.util.Base64.encodeToString(content.toByteArray(), android.util.Base64.NO_WRAP)
+        val job = Shell.getShell().newJob()
+        // Long files are sent in chunks to stay well under the shell's line limit.
+        job.add("rm -f '$path.boxy.tmp'")
+        b64.chunked(8000).forEach { job.add("printf '%s' '$it' >> '$path.boxy.tmp'") }
+        job.add("base64 -d '$path.boxy.tmp' > '$path' && rm -f '$path.boxy.tmp'")
+        job.exec().isSuccess
+    }
+
+    /** Runs a root command and returns its output lines (stdout and stderr). */
+    suspend fun exec(cmd: String): Pair<Boolean, List<String>> = withContext(Dispatchers.IO) {
+        val r = Shell.cmd("$cmd 2>&1").exec()
+        r.isSuccess to r.out
     }
 
     private suspend fun run(cmd: String): Boolean = withContext(Dispatchers.IO) {
