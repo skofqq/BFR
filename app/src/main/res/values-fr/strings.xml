@@ -545,4 +545,7 @@
     <string name="about_app_repo">Appli</string>
     <string name="about_based_on">Basé sur</string>
     <string name="about_check_updates">Rechercher des mises à jour</string>
+    <string name="about_up_to_date">À jour</string>
+    <string name="about_install_version">Installer %1$s</string>
+    <string name="about_error">Erreur</string>
 </resources>

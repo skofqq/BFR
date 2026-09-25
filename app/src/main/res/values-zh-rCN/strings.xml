@@ -515,4 +515,7 @@
     <string name="about_app_repo">应用</string>
     <string name="about_based_on">基于</string>
     <string name="about_check_updates">检查更新</string>
+    <string name="about_up_to_date">已是最新</string>
+    <string name="about_install_version">安装 %1$s</string>
+    <string name="about_error">错误</string>
 </resources>

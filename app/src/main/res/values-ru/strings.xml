@@ -557,4 +557,7 @@
     <string name="about_app_repo">Приложение</string>
     <string name="about_based_on">Основано на</string>
     <string name="about_check_updates">Проверить обновления</string>
+    <string name="about_up_to_date">Актуальная</string>
+    <string name="about_install_version">Установить %1$s</string>
+    <string name="about_error">Ошибка</string>
 </resources>

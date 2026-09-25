@@ -545,4 +545,7 @@
     <string name="about_app_repo">Қолданба</string>
     <string name="about_based_on">Негізі</string>
     <string name="about_check_updates">Жаңартуларды тексеру</string>
+    <string name="about_up_to_date">Өзекті</string>
+    <string name="about_install_version">%1$s орнату</string>
+    <string name="about_error">Қате</string>
 </resources>

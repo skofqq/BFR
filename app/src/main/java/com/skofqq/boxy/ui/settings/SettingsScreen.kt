@@ -103,7 +103,6 @@ private fun SettingsMain(contentPadding: PaddingValues, prefs: Prefs, push: (Str
     var barsDialog by remember { mutableStateOf(false) }
     var sourceDialog by remember { mutableStateOf(false) }
     var chainsDialog by remember { mutableStateOf(false) }
-    var aboutSheet by remember { mutableStateOf(false) }
     var infoSheet by remember { mutableStateOf(false) }
     var moduleSheet by remember { mutableStateOf(false) }
     var mirrorSheet by remember { mutableStateOf(false) }
@@ -281,8 +280,7 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
             onDismiss = { chainsDialog = false },
         )
     }
-    if (aboutSheet) AppUpdateSheet(versionName) { aboutSheet = false }
-    if (infoSheet) AppInfoSheet(versionName, moduleVersion, appUpdate, onCheckUpdates = { infoSheet = false; aboutSheet = true }) { infoSheet = false }
+    if (infoSheet) AppInfoSheet(versionName, moduleVersion) { infoSheet = false }
     if (mirrorSheet) MirrorSheet(prefs) { mirrorSheet = false }
     if (moduleSheet) ModuleUpdateSheet(moduleVersion, moduleInstalled) { moduleSheet = false }
 }

@@ -545,4 +545,7 @@
     <string name="about_app_repo">Застосунок</string>
     <string name="about_based_on">На основі</string>
     <string name="about_check_updates">Перевірити оновлення</string>
+    <string name="about_up_to_date">Актуальна</string>
+    <string name="about_install_version">Встановити %1$s</string>
+    <string name="about_error">Помилка</string>
 </resources>

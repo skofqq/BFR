@@ -545,4 +545,7 @@
     <string name="about_app_repo">アプリ</string>
     <string name="about_based_on">ベース</string>
     <string name="about_check_updates">更新を確認</string>
+    <string name="about_up_to_date">最新</string>
+    <string name="about_install_version">%1$s をインストール</string>
+    <string name="about_error">エラー</string>
 </resources>

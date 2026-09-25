@@ -545,4 +545,7 @@
     <string name="about_app_repo">Uygulama</string>
     <string name="about_based_on">Temel alınan</string>
     <string name="about_check_updates">Güncellemeleri denetle</string>
+    <string name="about_up_to_date">Güncel</string>
+    <string name="about_install_version">%1$s yükle</string>
+    <string name="about_error">Hata</string>
 </resources>
