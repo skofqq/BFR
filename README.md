@@ -1,6 +1,6 @@
 # Boxy
 
-**English** · [Русский](README.ru.md)
+🇬🇧 **English** · 🇷🇺 [Русский](README.ru.md)
 
 Open-source Android app for managing the [Box for Root](https://github.com/taamarin/box_for_magisk) module
 (Magisk / KernelSU / APatch). The design follows BFR by boxproxy; the code is written from scratch in Kotlin and Jetpack Compose.
