@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,12 +46,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.skofqq.boxy.R
-import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.RootFile
 import com.skofqq.boxy.root.RootFiles
 import com.skofqq.boxy.root.RootTask
-import com.skofqq.boxy.ui.components.BoxyTextField
+import com.skofqq.boxy.ui.components.PageSearchField
 import com.skofqq.boxy.ui.components.ConfirmDialog
 import com.skofqq.boxy.ui.components.HeaderAction
 import com.skofqq.boxy.ui.components.SubPageHeader
@@ -101,94 +102,85 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
             }
         }
     }
-    LaunchedEffect(shown.size) {
-        val n = shown.size
-        if (n > 0 && auto) listState.scrollToItem(n + 2)
-    }
 
     val status = if (current == "runs.log" || current == coreLog) stringResource(R.string.logs_status_current) else stringResource(R.string.logs_status_available)
     val palette = logPalette()
     val mark = Boxy.colors.accent.copy(alpha = 0.28f)
-    PinnedLazyPage(contentPadding, header = {
-header()
-SubPageHeader(
-                stringResource(R.string.logs_title),
-                current?.let { stringResource(R.string.logs_current, it, status) } ?: stringResource(R.string.logs_subtitle),
-                onBack,
-            ) {
-                HeaderAction(if (auto) BoxyIcons.Schedule else BoxyIcons.Refresh, stringResource(if (auto) R.string.logs_auto_on else R.string.logs_manual)) {
-                    if (auto) {
-                        auto = false
-                    } else {
-                        reload++
+    // Fixed page: header and one row of filters on top, a rounded card below whose text scrolls on its own.
+    Column(Modifier.fillMaxSize().padding(top = contentPadding.calculateTopPadding())) {
+        header()
+        SubPageHeader(
+            stringResource(R.string.logs_title),
+            current?.let { stringResource(R.string.logs_current, it, status) } ?: stringResource(R.string.logs_subtitle),
+            onBack,
+        ) {
+            if (!auto) HeaderAction(BoxyIcons.Refresh, stringResource(R.string.action_refresh)) { reload++ }
+            HeaderAction(BoxyIcons.Search, stringResource(R.string.action_search), tint = if (searching) Boxy.colors.accent else Boxy.colors.text) {
+                searching = !searching
+                if (!searching) query = ""
+            }
+            HeaderAction(BoxyIcons.Share, stringResource(R.string.logs_share)) {
+                val name = current ?: return@HeaderAction
+                scope.launch {
+                    if (!LogShare.share(context, "${BoxModule.RUN_DIR}/$name")) {
+                        Toast.makeText(context, R.string.op_failed, Toast.LENGTH_SHORT).show()
                     }
                 }
-                HeaderAction(BoxyIcons.Search, stringResource(R.string.action_search), tint = if (searching) Boxy.colors.accent else Boxy.colors.text) {
-                    searching = !searching
-                    if (!searching) query = ""
-                }
-                HeaderAction(BoxyIcons.Share, stringResource(R.string.logs_share)) {
-                    val name = current ?: return@HeaderAction
-                    scope.launch {
-                        if (!LogShare.share(context, "${BoxModule.RUN_DIR}/$name")) {
-                            Toast.makeText(context, R.string.op_failed, Toast.LENGTH_SHORT).show()
+            }
+            HeaderAction(BoxyIcons.Delete, stringResource(R.string.action_delete)) { if (current != null) deleteDialog = true }
+        }
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            // File: one chip with a menu instead of a chip per file.
+            val file = files?.firstOrNull { it.name == current }
+            MenuChip(
+                file?.let { "${it.name} · ${Format.bytes(context, it.size)}" } ?: stringResource(R.string.logs_no_files),
+                Boxy.colors.accent,
+                files.orEmpty().map { f ->
+                    "${f.name} · ${Format.bytes(context, f.size)}" to { current = f.name }
+                },
+            )
+            val (levelLabel, levelColor) = levelStyle(level)
+            MenuChip(
+                stringResource(levelLabel),
+                levelColor,
+                LogLevel.entries.map { lv -> stringResource(levelStyle(lv).first) to { level = lv } },
+                active = level != LogLevel.ALL,
+            )
+            Chip(stringResource(R.string.logs_auto_short), auto, Tints.green.fg) { auto = !auto }
+        }
+        if (searching) {
+            PageSearchField(query, { query = it }, stringResource(R.string.logs_search_hint), Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp))
+        }
+        Box(
+            Modifier.weight(1f).fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = contentPadding.calculateBottomPadding())
+                .clip(RoundedCornerShape(22.dp))
+                .background(Boxy.colors.card),
+        ) {
+            val l = lines?.let { shown }
+            when {
+                files == null || l == null -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                files?.isEmpty() == true -> Text(stringResource(R.string.logs_no_files), Modifier.padding(20.dp), color = Boxy.colors.text2)
+                l.isEmpty() -> Text(stringResource(R.string.logs_no_match), Modifier.padding(20.dp), color = Boxy.colors.text2)
+                else -> {
+                    val q = query.trim()
+                    // Runs with the list itself, so the first scroll to the newest line happens once it exists.
+                    LaunchedEffect(l.size, auto) { if (auto) listState.scrollToItem(l.size - 1) }
+                    LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(vertical = 10.dp)) {
+                        itemsIndexed(l, key = { i, _ -> i }) { _, line ->
+                            Text(
+                                remember(line, palette, q) { markMatches(highlight(line, palette), q, mark) },
+                                Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 1.dp),
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp,
+                                color = Boxy.colors.text,
+                            )
                         }
                     }
-                }
-                HeaderAction(BoxyIcons.Delete, stringResource(R.string.action_delete)) { if (current != null) deleteDialog = true }
-            }
-Row(
-                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Chip(stringResource(if (auto) R.string.logs_auto_on else R.string.logs_auto), auto, Tints.green.fg) { auto = !auto }
-                files?.forEach { f ->
-                    Chip("${f.name} · ${Format.bytes(context, f.size)}", f.name == current, Boxy.colors.accent) { current = f.name }
-                }
-            }
-Row(
-                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                LogLevel.entries.forEach { lv ->
-                    val (label, color) = when (lv) {
-                        LogLevel.ALL -> R.string.logs_level_all to Boxy.colors.accent
-                        LogLevel.ERROR -> R.string.logs_level_error to Tints.red.fg
-                        LogLevel.WARNING -> R.string.logs_level_warning to Tints.amber.fg
-                        LogLevel.INFO -> R.string.logs_level_info to Tints.blue.fg
-                        LogLevel.DEBUG -> R.string.logs_level_debug to Tints.teal.fg
-                    }
-                    Chip(stringResource(label), level == lv, color) { level = lv }
-                }
-            }
-if (searching) {
-                BoxyTextField(
-                    query,
-                    { query = it },
-                    stringResource(R.string.logs_search_hint),
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                )
-            }
-}, state = listState) {
-        val l = lines?.let { shown }
-        when {
-            files == null || l == null -> item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
-            files?.isEmpty() == true -> item { Text(stringResource(R.string.logs_no_files), Modifier.padding(24.dp), color = Boxy.colors.text2) }
-            else -> {
-                item { Box(Modifier.padding(top = 8.dp)) }
-                if (l.isEmpty()) {
-                    item { Text(stringResource(R.string.logs_no_match), Modifier.padding(24.dp), color = Boxy.colors.text2) }
-                }
-                val q = query.trim()
-                itemsIndexed(l, key = { i, _ -> i }) { _, line ->
-                    Text(
-                        remember(line, palette, q) { markMatches(highlight(line, palette), q, mark) },
-                        Modifier.fillMaxWidth().padding(horizontal = 16.dp).background(Boxy.colors.card).padding(horizontal = 12.dp, vertical = 1.dp),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 11.sp,
-                        lineHeight = 15.sp,
-                        color = Boxy.colors.text,
-                    )
                 }
             }
         }
@@ -323,6 +315,36 @@ private fun highlight(line: String, p: LogPalette): AnnotatedString = buildAnnot
     if (pos < line.length) {
         val rest = line.substring(pos)
         if (lineIsError) withStyle(SpanStyle(color = p.error)) { append(rest) } else append(rest)
+    }
+}
+
+@Composable
+private fun levelStyle(lv: LogLevel): Pair<Int, Color> = when (lv) {
+    LogLevel.ALL -> R.string.logs_all_levels to Boxy.colors.accent
+    LogLevel.ERROR -> R.string.logs_level_error to Tints.red.fg
+    LogLevel.WARNING -> R.string.logs_level_warning to Tints.amber.fg
+    LogLevel.INFO -> R.string.logs_level_info to Tints.blue.fg
+    LogLevel.DEBUG -> R.string.logs_level_debug to Tints.teal.fg
+}
+
+/** Chip that opens a menu of choices (log file, level). */
+@Composable
+private fun MenuChip(text: String, color: Color, items: List<Pair<String, () -> Unit>>, active: Boolean = true) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        Row(
+            Modifier.clip(RoundedCornerShape(50)).background(if (active) color.copy(alpha = 0.15f) else Boxy.colors.card)
+                .clickable { open = true }.padding(start = 14.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text, color = if (active) color else Boxy.colors.text, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal, maxLines = 1)
+            androidx.compose.material3.Icon(BoxyIcons.ExpandMore, null, Modifier.padding(start = 2.dp).size(20.dp), tint = if (active) color else Boxy.colors.text2)
+        }
+        androidx.compose.material3.DropdownMenu(open, { open = false }, containerColor = Boxy.colors.card) {
+            items.forEach { (label, action) ->
+                androidx.compose.material3.DropdownMenuItem({ Text(label) }, { open = false; action() })
+            }
+        }
     }
 }
 

@@ -617,5 +617,16 @@
     <string name="auto_example">例 (adb)</string>
     <string name="auto_intents_hint">パッケージを指定してブロードキャストで送信します。行をタップするとコピーできます。</string>
     <string name="auto_copied">コピーしました</string>
-    <string name="widget_description">サービスの状態と開始 / 停止ボタン</string>
+    <string name="widget_description">状態、コア、今日の通信量、再起動と開始 / 停止</string>
+    <string name="logs_all_levels">すべてのレベル</string>
+    <string name="logs_auto_short">自動</string>
+    <string name="widget_since">%1$s から</string>
+    <string name="widget_today">今日 %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy コンパクト</string>
+    <string name="widget_compact_description">電源ボタンとサービスの状態</string>
+    <string name="backup_export_scope">保存する内容</string>
+    <string name="backup_scope_modules_desc">settings.ini、アプリ一覧、コアの設定</string>
+    <string name="backup_scope_apps_desc">Boxy の設定: テーマ、ホーム、パネル、ミラー</string>
+    <string name="backup_scope_both_desc">モジュールのファイルと Boxy の設定</string>
 </resources>

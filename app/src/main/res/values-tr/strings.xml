@@ -617,5 +617,16 @@
     <string name="auto_example">Örnek (adb)</string>
     <string name="auto_intents_hint">Paketi belirterek broadcast olarak gönderin. Kopyalamak için bir satıra dokunun.</string>
     <string name="auto_copied">Kopyalandı</string>
-    <string name="widget_description">Hizmet durumu ve Başlat / Durdur düğmesi</string>
+    <string name="widget_description">Durum, çekirdek, bugünkü trafik, Yeniden başlat ve Başlat / Durdur</string>
+    <string name="logs_all_levels">Tüm düzeyler</string>
+    <string name="logs_auto_short">Otomatik</string>
+    <string name="widget_since">%1$s itibarıyla</string>
+    <string name="widget_today">Bugün %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy kompakt</string>
+    <string name="widget_compact_description">Güç düğmesi ve hizmet durumu</string>
+    <string name="backup_export_scope">Neler kaydedilsin</string>
+    <string name="backup_scope_modules_desc">settings.ini, uygulama listeleri, çekirdek yapılandırmaları</string>
+    <string name="backup_scope_apps_desc">Boxy ayarları: tema, ana sayfa, paneller, ayna</string>
+    <string name="backup_scope_both_desc">Modül dosyaları ve Boxy ayarları</string>
 </resources>

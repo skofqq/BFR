@@ -641,5 +641,16 @@
     <string name="auto_example">Example (adb)</string>
     <string name="auto_intents_hint">Send as a broadcast with the package set. Tap a line to copy it.</string>
     <string name="auto_copied">Copied</string>
-    <string name="widget_description">Service status and a Start / Stop button</string>
+    <string name="widget_description">Status, core, today\'s traffic, Restart and Start / Stop</string>
+    <string name="logs_all_levels">All levels</string>
+    <string name="logs_auto_short">Auto</string>
+    <string name="widget_since">since %1$s</string>
+    <string name="widget_today">Today %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy compact</string>
+    <string name="widget_compact_description">Power button and service status</string>
+    <string name="backup_export_scope">What to save</string>
+    <string name="backup_scope_modules_desc">settings.ini, app lists, core configs</string>
+    <string name="backup_scope_apps_desc">Boxy preferences: theme, layout, panels, mirror</string>
+    <string name="backup_scope_both_desc">Module files and Boxy preferences</string>
 </resources>

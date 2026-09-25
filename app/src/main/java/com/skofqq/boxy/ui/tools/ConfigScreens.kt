@@ -48,6 +48,7 @@ import com.skofqq.boxy.root.RootFile
 import com.skofqq.boxy.root.RootFiles
 import com.skofqq.boxy.ui.components.Badge
 import com.skofqq.boxy.ui.components.BoxyTextField
+import com.skofqq.boxy.ui.components.PageSearchField
 import com.skofqq.boxy.ui.components.ConfirmDialog
 import com.skofqq.boxy.ui.components.HeaderAction
 import com.skofqq.boxy.ui.components.InputDialog
@@ -318,13 +319,7 @@ SubPageHeader(
 }, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (searching) {
             item {
-                BoxyTextField(
-                    query,
-                    { query = it },
-                    stringResource(R.string.config_search_hint),
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    leading = { Icon(BoxyIcons.Search, null, Modifier.size(20.dp), tint = Boxy.colors.text2) },
-                )
+                PageSearchField(query, { query = it }, stringResource(R.string.config_search_hint), Modifier.fillMaxWidth().padding(horizontal = 16.dp))
             }
         }
         item {

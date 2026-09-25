@@ -23,7 +23,7 @@ object Backup {
     private val CORE_DIRS = listOf("clash", "sing-box", "xray", "v2fly", "hysteria")
     private val CONFIG_EXT = setOf("yaml", "yml", "json", "txt", "list", "conf")
 
-    suspend fun export(context: Context, uri: Uri, prefs: Prefs): Boolean = withContext(Dispatchers.IO) {
+    suspend fun export(context: Context, uri: Uri, prefs: Prefs, scope: BackupScope = BackupScope.BOTH): Boolean = withContext(Dispatchers.IO) {
         runCatching {
             context.contentResolver.openOutputStream(uri)?.use { os ->
                 ZipOutputStream(os).use { zip ->
@@ -32,18 +32,22 @@ object Backup {
                         zip.write(bytes)
                         zip.closeEntry()
                     }
-                    val files = ROOT_FILES.map { "${BoxModule.BOX_DIR}/$it" } +
-                        CORE_DIRS.flatMap { dir ->
-                            RootFiles.list("${BoxModule.BOX_DIR}/$dir").filter { !it.isDir && it.extension in CONFIG_EXT && it.size < 5_000_000 }.map { it.path }
+                    if (scope != BackupScope.APPS) {
+                        val files = ROOT_FILES.map { "${BoxModule.BOX_DIR}/$it" } +
+                            CORE_DIRS.flatMap { dir ->
+                                RootFiles.list("${BoxModule.BOX_DIR}/$dir").filter { !it.isDir && it.extension in CONFIG_EXT && it.size < 5_000_000 }.map { it.path }
+                            }
+                        files.forEach { path ->
+                            readBytes(path)?.let { put("modules/" + path.removePrefix(BoxModule.BOX_DIR + "/"), it) }
                         }
-                    files.forEach { path ->
-                        readBytes(path)?.let { put("modules/" + path.removePrefix(BoxModule.BOX_DIR + "/"), it) }
                     }
-                    val json = JSONObject()
-                    prefs.exportAll().forEach { (k, v) ->
-                        json.put(k, JSONObject().put("t", typeOf(v)).put("v", v))
+                    if (scope != BackupScope.MODULES) {
+                        val json = JSONObject()
+                        prefs.exportAll().forEach { (k, v) ->
+                            json.put(k, JSONObject().put("t", typeOf(v)).put("v", v))
+                        }
+                        put("apps/prefs.json", json.toString(2).toByteArray())
                     }
-                    put("apps/prefs.json", json.toString(2).toByteArray())
                     put("manifest.json", JSONObject().put("app", "Boxy").put("created", System.currentTimeMillis()).toString().toByteArray())
                 }
             } != null

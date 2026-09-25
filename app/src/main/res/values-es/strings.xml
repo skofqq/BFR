@@ -617,5 +617,16 @@
     <string name="auto_example">Ejemplo (adb)</string>
     <string name="auto_intents_hint">Envía un broadcast indicando el paquete. Toca una línea para copiarla.</string>
     <string name="auto_copied">Copiado</string>
-    <string name="widget_description">Estado del servicio y un botón Iniciar / Detener</string>
+    <string name="widget_description">Estado, núcleo, tráfico de hoy, Reiniciar e Iniciar / Detener</string>
+    <string name="logs_all_levels">Todos los niveles</string>
+    <string name="logs_auto_short">Auto</string>
+    <string name="widget_since">desde %1$s</string>
+    <string name="widget_today">Hoy %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy compacto</string>
+    <string name="widget_compact_description">Botón de encendido y estado del servicio</string>
+    <string name="backup_export_scope">Qué guardar</string>
+    <string name="backup_scope_modules_desc">settings.ini, listas de apps, configuraciones de núcleos</string>
+    <string name="backup_scope_apps_desc">Ajustes de Boxy: tema, inicio, paneles, espejo</string>
+    <string name="backup_scope_both_desc">Archivos del módulo y ajustes de Boxy</string>
 </resources>

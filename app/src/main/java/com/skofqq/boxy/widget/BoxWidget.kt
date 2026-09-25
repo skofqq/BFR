@@ -10,25 +10,34 @@ import android.view.View
 import android.widget.RemoteViews
 import com.skofqq.boxy.MainActivity
 import com.skofqq.boxy.R
+import com.skofqq.boxy.data.TrafficBucket
 import com.skofqq.boxy.data.TrafficStats
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.ServiceState
 import com.skofqq.boxy.service.BoxControl
+import com.skofqq.boxy.util.Format
 import com.skofqq.boxy.util.withAppLocale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
-/** Home screen widget: service state, core and mode, and a Start / Stop button. */
-class BoxWidget : AppWidgetProvider() {
+/**
+ * Detailed widget (4×2): state, core and mode, start time, today's traffic, Restart and Start / Stop.
+ * Nothing ticks: it is redrawn only when something happens (start / stop from any place, a traffic sample,
+ * the 30-minute system update), so it costs no battery while idle. The start time is shown instead of a
+ * running uptime for the same reason.
+ */
+open class BoxWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         val pending = goAsync()
         scope.launch {
             try {
-                render(context, runCatching { BoxModule.state() }.getOrNull(), busy = null)
-                TrafficStats.sample(context)
+                Widgets.render(context, runCatching { BoxModule.state() }.getOrNull(), busy = null)
             } finally {
                 pending.finish()
             }
@@ -37,13 +46,26 @@ class BoxWidget : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action != ACTION_TOGGLE) return
+        val action = intent.action ?: return
+        if (action != Widgets.ACTION_TOGGLE && action != Widgets.ACTION_RESTART) return
         val pending = goAsync()
         scope.launch {
             try {
                 val running = runCatching { BoxModule.state().running }.getOrDefault(false)
-                render(context, null, busy = if (running) R.string.status_stopping else R.string.status_starting)
-                if (running) BoxControl.stop(context) else BoxControl.start(context)
+                when {
+                    action == Widgets.ACTION_RESTART -> {
+                        Widgets.render(context, null, busy = R.string.status_restarting)
+                        BoxControl.restart(context)
+                    }
+                    running -> {
+                        Widgets.render(context, null, busy = R.string.status_stopping)
+                        BoxControl.stop(context)
+                    }
+                    else -> {
+                        Widgets.render(context, null, busy = R.string.status_starting)
+                        BoxControl.start(context)
+                    }
+                }
             } finally {
                 pending.finish()
             }
@@ -51,58 +73,100 @@ class BoxWidget : AppWidgetProvider() {
     }
 
     companion object {
-        private const val ACTION_TOGGLE = "com.skofqq.boxy.widget.TOGGLE"
-        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        internal val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-        /** Re-reads the service state and redraws every widget (no-op when none is placed). */
+        /** Re-reads the service state and redraws every placed widget (no-op when none is placed). */
         fun refresh(context: Context) {
             val app = context.applicationContext
-            if (ids(app).isEmpty()) return
-            scope.launch { render(app, runCatching { BoxModule.state() }.getOrNull(), busy = null) }
+            if (!Widgets.any(app)) return
+            scope.launch { Widgets.render(app, runCatching { BoxModule.state() }.getOrNull(), busy = null) }
         }
 
-        private fun ids(context: Context): IntArray =
-            AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, BoxWidget::class.java))
-
-        private fun render(context: Context, state: ServiceState?, busy: Int?) {
-            val ids = ids(context)
-            if (ids.isEmpty()) return
-            val res = context.withAppLocale()
-            val views = RemoteViews(context.packageName, R.layout.widget_box)
-            val running = state?.running == true
-            val status = res.getString(
-                busy ?: when {
-                    state == null -> R.string.status_checking
-                    running -> R.string.status_running
-                    else -> R.string.status_stopped
-                },
-            )
-            // Separate views per colour so the launcher resolves light / dark colours itself.
-            views.setTextViewText(R.id.widget_status_on, status)
-            views.setTextViewText(R.id.widget_status_off, status)
-            views.setViewVisibility(R.id.widget_status_on, if (running && busy == null) View.VISIBLE else View.GONE)
-            views.setViewVisibility(R.id.widget_status_off, if (running && busy == null) View.GONE else View.VISIBLE)
-            views.setTextViewText(
-                R.id.widget_detail,
-                listOfNotNull(state?.core, state?.mode).joinToString(" · ").ifEmpty { res.getString(R.string.app_name) },
-            )
-            views.setTextViewText(R.id.widget_stop, res.getString(R.string.action_stop))
-            views.setTextViewText(R.id.widget_start, res.getString(R.string.action_start))
-            val showStop = running && busy == null
-            views.setViewVisibility(R.id.widget_stop, if (showStop) View.VISIBLE else View.GONE)
-            views.setViewVisibility(R.id.widget_start, if (!showStop && busy == null && state != null) View.VISIBLE else View.GONE)
-
-            val toggle = PendingIntent.getBroadcast(
-                context,
-                0,
-                Intent(context, BoxWidget::class.java).setAction(ACTION_TOGGLE),
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-            )
-            views.setOnClickPendingIntent(R.id.widget_stop, toggle)
-            views.setOnClickPendingIntent(R.id.widget_start, toggle)
-            val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
-            views.setOnClickPendingIntent(R.id.widget_root, open)
-            AppWidgetManager.getInstance(context).updateAppWidget(ids, views)
+        /** Redraw with a state already read (traffic sampling), without another root call. */
+        fun refresh(context: Context, state: ServiceState) {
+            val app = context.applicationContext
+            if (Widgets.any(app)) Widgets.render(app, state, busy = null)
         }
     }
+}
+
+/** Compact widget (2×1): power button, state and core. */
+class BoxWidgetCompact : BoxWidget()
+
+internal object Widgets {
+    const val ACTION_TOGGLE = "com.skofqq.boxy.widget.TOGGLE"
+    const val ACTION_RESTART = "com.skofqq.boxy.widget.RESTART"
+
+    private fun ids(context: Context, cls: Class<*>): IntArray =
+        AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, cls))
+
+    fun any(context: Context) = ids(context, BoxWidget::class.java).isNotEmpty() || ids(context, BoxWidgetCompact::class.java).isNotEmpty()
+
+    fun render(context: Context, state: ServiceState?, busy: Int?) {
+        val manager = AppWidgetManager.getInstance(context)
+        val res = context.withAppLocale()
+        val running = state?.running == true && busy == null
+        val status = res.getString(
+            busy ?: when {
+                state == null -> R.string.status_checking
+                state.running -> R.string.status_running
+                else -> R.string.status_stopped
+            },
+        )
+        val detail = listOfNotNull(state?.core, state?.mode).joinToString(" · ").ifEmpty { res.getString(R.string.app_name) }
+        val toggle = broadcast(context, BoxWidget::class.java, ACTION_TOGGLE)
+        val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
+
+        ids(context, BoxWidgetCompact::class.java).takeIf { it.isNotEmpty() }?.let { compactIds ->
+            val v = RemoteViews(context.packageName, R.layout.widget_compact)
+            statusViews(v, status, running)
+            v.setTextViewText(R.id.widget_detail, detail)
+            v.setViewVisibility(R.id.widget_power_on, if (running) View.VISIBLE else View.GONE)
+            v.setViewVisibility(R.id.widget_power_off, if (running) View.GONE else View.VISIBLE)
+            v.setOnClickPendingIntent(R.id.widget_power, toggle)
+            v.setOnClickPendingIntent(R.id.widget_root, open)
+            manager.updateAppWidget(compactIds, v)
+        }
+
+        ids(context, BoxWidget::class.java).takeIf { it.isNotEmpty() }?.let { fullIds ->
+            val v = RemoteViews(context.packageName, R.layout.widget_box)
+            statusViews(v, status, running)
+            val since = state?.uptimeSec?.takeIf { running }?.let {
+                res.getString(R.string.widget_since, LocalTime.now().minusSeconds(it).format(DateTimeFormatter.ofPattern("HH:mm")))
+            }
+            v.setTextViewText(R.id.widget_detail, listOfNotNull(detail, since).joinToString(" · "))
+            val today = TrafficStats.days(context)[LocalDate.now()] ?: TrafficBucket.ZERO
+            v.setTextViewText(
+                R.id.widget_traffic,
+                res.getString(R.string.widget_today, "↓ ${Format.bytes(res, today.down)}  ↑ ${Format.bytes(res, today.up)}"),
+            )
+            v.setTextViewText(R.id.widget_stop, res.getString(R.string.action_stop))
+            v.setTextViewText(R.id.widget_start, res.getString(R.string.action_start))
+            v.setTextViewText(R.id.widget_restart, res.getString(R.string.action_restart))
+            v.setViewVisibility(R.id.widget_stop, if (running) View.VISIBLE else View.GONE)
+            v.setViewVisibility(R.id.widget_restart, if (running) View.VISIBLE else View.GONE)
+            v.setViewVisibility(R.id.widget_start, if (!running && busy == null && state != null) View.VISIBLE else View.GONE)
+            v.setOnClickPendingIntent(R.id.widget_stop, toggle)
+            v.setOnClickPendingIntent(R.id.widget_start, toggle)
+            v.setOnClickPendingIntent(R.id.widget_restart, broadcast(context, BoxWidget::class.java, ACTION_RESTART))
+            v.setOnClickPendingIntent(R.id.widget_root, open)
+            manager.updateAppWidget(fullIds, v)
+        }
+    }
+
+    // Separate views per colour so the launcher resolves light / dark colours itself.
+    private fun statusViews(v: RemoteViews, status: String, running: Boolean) {
+        v.setTextViewText(R.id.widget_status_on, status)
+        v.setTextViewText(R.id.widget_status_off, status)
+        v.setViewVisibility(R.id.widget_status_on, if (running) View.VISIBLE else View.GONE)
+        v.setViewVisibility(R.id.widget_status_off, if (running) View.GONE else View.VISIBLE)
+    }
+
+    private fun broadcast(context: Context, cls: Class<*>, action: String): PendingIntent =
+        PendingIntent.getBroadcast(
+            context,
+            action.hashCode(),
+            Intent(context, cls).setAction(action),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
 }

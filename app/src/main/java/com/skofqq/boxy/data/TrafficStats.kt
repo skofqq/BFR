@@ -42,6 +42,7 @@ object TrafficStats {
         val api = Net.clashApi(state.core) ?: return false
         val (down, up) = Net.clashTotals(api) ?: return false
         add(context, state.pid ?: "", down, up)
+        com.skofqq.boxy.widget.BoxWidget.refresh(context, state)
         return true
     }
 

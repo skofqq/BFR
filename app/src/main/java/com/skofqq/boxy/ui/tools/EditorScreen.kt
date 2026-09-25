@@ -41,6 +41,7 @@ import com.skofqq.boxy.root.CheckResult
 import com.skofqq.boxy.root.ConfigCheck
 import com.skofqq.boxy.root.RootFiles
 import com.skofqq.boxy.ui.components.ConfigErrorDialog
+import com.skofqq.boxy.ui.components.PageSearchField
 import com.skofqq.boxy.ui.components.BackPill
 import com.skofqq.boxy.ui.components.BoxyTextField
 import com.skofqq.boxy.ui.components.ConfirmDialog
@@ -131,7 +132,7 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
         )
         if (searching) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                BoxyTextField(
+                PageSearchField(
                     query,
                     { q ->
                         query = q
@@ -142,9 +143,9 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
                     Modifier.weight(1f),
                 )
                 Spacer(Modifier.width(8.dp))
-                SmallIconButton(BoxyIcons.ExpandLess, null) { runCatching { editor?.searcher?.gotoPrevious() } }
+                SmallIconButton(BoxyIcons.ExpandLess, null, container = Boxy.colors.card) { runCatching { editor?.searcher?.gotoPrevious() } }
                 Spacer(Modifier.width(6.dp))
-                SmallIconButton(BoxyIcons.ExpandMore, null) { runCatching { editor?.searcher?.gotoNext() } }
+                SmallIconButton(BoxyIcons.ExpandMore, null, container = Boxy.colors.card) { runCatching { editor?.searcher?.gotoNext() } }
             }
         }
         Box(

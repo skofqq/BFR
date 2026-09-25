@@ -617,5 +617,16 @@
     <string name="auto_example">Прыклад (adb)</string>
     <string name="auto_intents_hint">Адпраўляйце як broadcast з указаннем пакета. Націсніце на радок, каб скапіяваць.</string>
     <string name="auto_copied">Скапіявана</string>
-    <string name="widget_description">Стан сэрвісу і кнопка «Старт» / «Стоп»</string>
+    <string name="widget_description">Стан, ядро, трафік за сёння, «Перазапуск» і «Старт» / «Стоп»</string>
+    <string name="logs_all_levels">Усе ўзроўні</string>
+    <string name="logs_auto_short">Аўта</string>
+    <string name="widget_since">з %1$s</string>
+    <string name="widget_today">Сёння %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy кампактны</string>
+    <string name="widget_compact_description">Кнопка харчавання і стан сэрвісу</string>
+    <string name="backup_export_scope">Што захоўваць</string>
+    <string name="backup_scope_modules_desc">settings.ini, спісы праграм, канфігурацыі ядраў</string>
+    <string name="backup_scope_apps_desc">Налады Boxy: тэма, галоўная, панэлі, люстэрка</string>
+    <string name="backup_scope_both_desc">Файлы модуля і налады Boxy</string>
 </resources>

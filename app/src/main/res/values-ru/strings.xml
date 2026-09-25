@@ -629,5 +629,16 @@
     <string name="auto_example">Пример (adb)</string>
     <string name="auto_intents_hint">Отправляйте как broadcast с указанием пакета. Нажмите на строку, чтобы скопировать.</string>
     <string name="auto_copied">Скопировано</string>
-    <string name="widget_description">Статус сервиса и кнопка «Старт» / «Стоп»</string>
+    <string name="widget_description">Статус, ядро, трафик за сегодня, «Перезапуск» и «Старт» / «Стоп»</string>
+    <string name="logs_all_levels">Все уровни</string>
+    <string name="logs_auto_short">Авто</string>
+    <string name="widget_since">с %1$s</string>
+    <string name="widget_today">Сегодня %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy компактный</string>
+    <string name="widget_compact_description">Кнопка питания и статус сервиса</string>
+    <string name="backup_export_scope">Что сохранять</string>
+    <string name="backup_scope_modules_desc">settings.ini, списки приложений, конфигурации ядер</string>
+    <string name="backup_scope_apps_desc">Настройки Boxy: тема, главная, панели, зеркало</string>
+    <string name="backup_scope_both_desc">Файлы модуля и настройки Boxy</string>
 </resources>

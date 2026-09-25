@@ -216,9 +216,15 @@ private fun SheetButton(text: String, bg: androidx.compose.ui.graphics.Color, fg
 
 /** Round icon button used inside rows. */
 @Composable
-fun SmallIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, description: String?, enabled: Boolean = true, onClick: () -> Unit) {
+fun SmallIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    description: String?,
+    enabled: Boolean = true,
+    container: androidx.compose.ui.graphics.Color = Boxy.colors.surface2,
+    onClick: () -> Unit,
+) {
     Box(
-        Modifier.size(36.dp).clip(RoundedCornerShape(50)).background(Boxy.colors.surface2).clickable(enabled = enabled, onClick = onClick),
+        Modifier.size(36.dp).clip(RoundedCornerShape(50)).background(container).clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, description, Modifier.size(20.dp), tint = Boxy.colors.text.copy(alpha = if (enabled) 1f else 0.3f))

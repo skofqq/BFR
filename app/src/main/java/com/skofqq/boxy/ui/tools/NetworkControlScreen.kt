@@ -153,7 +153,7 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                     SwitchRow(BoxyIcons.Router, stringResource(R.string.net_on_disconnect), stringResource(R.string.net_on_disconnect_sub), s.onDisconnect, enabled = s.enabled) { state = s.copy(onDisconnect = it) }
                     SwitchRow(BoxyIcons.Check, stringResource(R.string.net_ssid_matching), stringResource(R.string.net_ssid_matching_sub), s.ssidMatching, enabled = s.enabled) { state = s.copy(ssidMatching = it) }
                     SettingsRow(
-                        BoxyIcons.FilterList,
+                        if (s.whitelist) BoxyIcons.CheckCircle else BoxyIcons.Block,
                         stringResource(R.string.net_list_mode),
                         stringResource(if (s.whitelist) R.string.net_mode_whitelist_sub else R.string.net_mode_blacklist_sub),
                     ) { modeSheet = true }
@@ -210,7 +210,7 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                     SectionCard(stringResource(R.string.net_mac_title), stringResource(R.string.net_mac_sub)) {
                         SwitchRow(BoxyIcons.Hotspot, stringResource(R.string.net_mac_enable), stringResource(R.string.net_mac_enable_sub), s.macFilter) { state = s.copy(macFilter = it) }
                         SettingsRow(
-                            BoxyIcons.FilterList,
+                            if (s.macWhitelist) BoxyIcons.CheckCircle else BoxyIcons.Block,
                             stringResource(if (s.macWhitelist) R.string.net_mac_whitelist else R.string.net_mac_blacklist),
                             stringResource(if (s.macWhitelist) R.string.net_mac_whitelist_sub else R.string.net_mac_blacklist_sub),
                             showDivider = false,

@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.focus.focusRequester
 import com.skofqq.boxy.R
 import com.skofqq.boxy.ui.theme.Boxy
 import com.skofqq.boxy.ui.theme.BoxyIcons
@@ -39,7 +40,7 @@ fun BackPill(onClick: () -> Unit) {
         Modifier
             .padding(start = 12.dp, top = 8.dp)
             .clip(RoundedCornerShape(50))
-            .background(Boxy.colors.surface2)
+            .background(Boxy.colors.card)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -64,6 +65,34 @@ fun SubPageHeader(title: String, subtitle: String?, onBack: (() -> Unit)?, actio
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, content = actions)
+        }
+    }
+}
+
+/** Search field on the page background: card-coloured pill with a search icon and a clear button. */
+@Composable
+fun PageSearchField(value: String, onChange: (String) -> Unit, hint: String, modifier: Modifier = Modifier) {
+    val focus = androidx.compose.runtime.remember { androidx.compose.ui.focus.FocusRequester() }
+    androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
+    Row(
+        modifier.clip(RoundedCornerShape(50)).background(Boxy.colors.card).padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(BoxyIcons.Search, null, Modifier.size(20.dp), tint = Boxy.colors.text2)
+        Spacer(Modifier.width(10.dp))
+        Box(Modifier.weight(1f)) {
+            if (value.isEmpty()) Text(hint, color = Boxy.colors.text2, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            BasicTextField(
+                value,
+                onChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(color = Boxy.colors.text),
+                cursorBrush = SolidColor(Boxy.colors.accent),
+                modifier = Modifier.fillMaxWidth().focusRequester(focus),
+            )
+        }
+        if (value.isNotEmpty()) {
+            Icon(BoxyIcons.Close, null, Modifier.size(20.dp).clickable { onChange("") }, tint = Boxy.colors.text2)
         }
     }
 }

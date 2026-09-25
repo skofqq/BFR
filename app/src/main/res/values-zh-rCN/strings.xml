@@ -587,5 +587,16 @@
     <string name="auto_example">示例（adb）</string>
     <string name="auto_intents_hint">以广播方式发送并指定包名。点击某行即可复制。</string>
     <string name="auto_copied">已复制</string>
-    <string name="widget_description">服务状态和启动 / 停止按钮</string>
+    <string name="widget_description">状态、核心、今日流量、重启和启动 / 停止</string>
+    <string name="logs_all_levels">全部级别</string>
+    <string name="logs_auto_short">自动</string>
+    <string name="widget_since">自 %1$s</string>
+    <string name="widget_today">今天 %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy 紧凑</string>
+    <string name="widget_compact_description">电源按钮和服务状态</string>
+    <string name="backup_export_scope">保存内容</string>
+    <string name="backup_scope_modules_desc">settings.ini、应用列表、核心配置</string>
+    <string name="backup_scope_apps_desc">Boxy 设置：主题、主页、面板、镜像</string>
+    <string name="backup_scope_both_desc">模块文件和 Boxy 设置</string>
 </resources>

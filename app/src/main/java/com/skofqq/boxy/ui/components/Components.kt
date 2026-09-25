@@ -186,7 +186,7 @@ fun HeaderAction(
     onClick: () -> Unit,
 ) {
     Box(
-        Modifier.size(44.dp).clip(RoundedCornerShape(50)).background(Boxy.colors.surface2).clickable(onClick = onClick),
+        Modifier.size(44.dp).clip(RoundedCornerShape(50)).background(Boxy.colors.card).clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(icon, contentDescription, Modifier.size(22.dp), tint = tint)

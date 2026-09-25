@@ -203,7 +203,7 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
         }
         item {
             SectionCard(stringResource(R.string.settings_misc), stringResource(R.string.settings_misc_sub)) {
-                SwitchRow(BoxyIcons.Web, stringResource(R.string.settings_open_panel), stringResource(R.string.settings_open_panel_sub), prefs.openPanelOnLaunch) {
+                SwitchRow(BoxyIcons.Dashboard, stringResource(R.string.settings_open_panel), stringResource(R.string.settings_open_panel_sub), prefs.openPanelOnLaunch) {
                     prefs.updateOpenPanelOnLaunch(it)
                 }
                 SwitchRow(BoxyIcons.Notifications, stringResource(R.string.settings_notifications), stringResource(R.string.settings_notifications_sub), prefs.notifications) { on ->

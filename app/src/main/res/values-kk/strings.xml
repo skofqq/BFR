@@ -617,5 +617,16 @@
     <string name="auto_example">Мысал (adb)</string>
     <string name="auto_intents_hint">Пакетті көрсетіп, broadcast ретінде жіберіңіз. Көшіру үшін жолды басыңыз.</string>
     <string name="auto_copied">Көшірілді</string>
-    <string name="widget_description">Қызмет күйі және «Бастау» / «Тоқтату» түймесі</string>
+    <string name="widget_description">Күй, ядро, бүгінгі трафик, «Қайта қосу» және «Бастау» / «Тоқтату»</string>
+    <string name="logs_all_levels">Барлық деңгейлер</string>
+    <string name="logs_auto_short">Авто</string>
+    <string name="widget_since">%1$s бастап</string>
+    <string name="widget_today">Бүгін %1$s</string>
+    <string name="widget_full_label">Boxy</string>
+    <string name="widget_compact_label">Boxy ықшам</string>
+    <string name="widget_compact_description">Қуат түймесі және қызмет күйі</string>
+    <string name="backup_export_scope">Нені сақтау</string>
+    <string name="backup_scope_modules_desc">settings.ini, қолданбалар тізімдері, ядро конфигурациялары</string>
+    <string name="backup_scope_apps_desc">Boxy баптаулары: тақырып, басты бет, панельдер, айна</string>
+    <string name="backup_scope_both_desc">Модуль файлдары және Boxy баптаулары</string>
 </resources>

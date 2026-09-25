@@ -3,7 +3,9 @@ package com.skofqq.boxy.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -94,14 +96,25 @@ fun ConfigErrorDialog(
             }
         },
         confirmButton = {
-            Row {
-                if (onEdit != null) TextButton(onClick = onEdit) { Text(stringResource(R.string.config_edit)) }
-                TextButton(onClick = onProceed) { Text(proceed, color = Tints.red.fg) }
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (onEdit != null) DialogButton(stringResource(R.string.config_edit), Boxy.colors.accent, androidx.compose.ui.graphics.Color.White, onEdit)
+                DialogButton(proceed, Tints.red.bg, Tints.red.fg, onProceed)
+                DialogButton(stringResource(R.string.action_cancel), Boxy.colors.surface2, Boxy.colors.text, onDismiss)
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
         containerColor = Boxy.colors.card,
     )
+}
+
+@Composable
+private fun DialogButton(text: String, bg: androidx.compose.ui.graphics.Color, fg: androidx.compose.ui.graphics.Color, onClick: () -> Unit) {
+    androidx.compose.foundation.layout.Box(
+        Modifier.fillMaxWidth().height(48.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(bg)
+            .clickable(onClick = onClick),
+        contentAlignment = androidx.compose.ui.Alignment.Center,
+    ) {
+        Text(text, color = fg, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+    }
 }
 
 @Composable

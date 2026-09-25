@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -58,6 +59,7 @@ import com.skofqq.boxy.ui.components.BoxyTextField
 import com.skofqq.boxy.ui.components.ConfirmDialog
 import com.skofqq.boxy.ui.components.InfoRow
 import com.skofqq.boxy.ui.components.SectionCard
+import com.skofqq.boxy.ui.components.SettingsRow
 import com.skofqq.boxy.ui.components.SheetButtons
 import com.skofqq.boxy.ui.components.SheetGroup
 import com.skofqq.boxy.ui.components.SubPageHeader
@@ -91,21 +93,21 @@ SubPageHeader(stringResource(R.string.settings_appearance_more), stringResource(
         item {
             SectionCard(stringResource(R.string.settings_glass), stringResource(R.string.settings_glass_sub)) {
                 SwitchRow(
-                    BoxyIcons.AutoAwesome,
+                    BoxyIcons.BlurOn,
                     stringResource(R.string.settings_blur_effects),
                     stringResource(if (blurSupported) R.string.settings_blur_effects_sub else R.string.settings_blur_unsupported),
                     prefs.blurEffects && blurSupported,
                     enabled = blurSupported,
                 ) { prefs.updateBlurEffects(it) }
                 SwitchRow(
-                    BoxyIcons.Web,
+                    BoxyIcons.BottomSheet,
                     stringResource(R.string.settings_sheet_blur),
                     stringResource(R.string.settings_sheet_blur_sub),
                     prefs.sheetBlur && blurSupported,
                     enabled = blurSupported && prefs.blurEffects,
                 ) { prefs.updateSheetBlur(it) }
                 SwitchRow(
-                    BoxyIcons.Palette,
+                    BoxyIcons.Opacity,
                     stringResource(R.string.settings_glass_translucent),
                     stringResource(R.string.settings_glass_translucent_sub),
                     prefs.glassTranslucent,
@@ -214,13 +216,14 @@ fun BackupScreen(contentPadding: PaddingValues, prefs: Prefs, onBack: () -> Unit
     var detected by remember { mutableStateOf<BackupScope?>(null) }
     var detectFailed by remember { mutableStateOf(false) }
     var scopeChoice by remember { mutableStateOf(BackupScope.BOTH) }
+    var exportScope by remember { mutableStateOf(BackupScope.BOTH) }
     var confirm by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
         if (uri != null) {
             busy = true
             scope.launch {
-                val ok = Backup.export(context, uri, prefs)
+                val ok = Backup.export(context, uri, prefs, exportScope)
                 busy = false
                 Toast.makeText(context, if (ok) R.string.backup_export_ok else R.string.backup_export_failed, Toast.LENGTH_SHORT).show()
             }
@@ -257,7 +260,8 @@ SubPageHeader(stringResource(R.string.settings_backup), stringResource(R.string.
         }
         if (!restoreTab) {
             item {
-                SectionCard(stringResource(R.string.backup_tab_backup), stringResource(R.string.backup_export_desc)) {
+                SectionCard(stringResource(R.string.backup_export_scope), stringResource(R.string.backup_export_desc)) {
+                    ScopeTiles(listOf(BackupScope.MODULES, BackupScope.APPS, BackupScope.BOTH), exportScope) { exportScope = it }
                     Box(Modifier.padding(horizontal = 18.dp)) {
                         SheetButtons(stringResource(R.string.backup_export), {
                             val stamp = SimpleDateFormat("yyyyMMdd-HHmm", Locale.US).format(Date())
@@ -296,15 +300,7 @@ SubPageHeader(stringResource(R.string.settings_backup), stringResource(R.string.
                             BackupScope.BOTH -> listOf(BackupScope.BOTH, BackupScope.MODULES, BackupScope.APPS)
                             else -> listOf(detected!!)
                         }
-                        options.forEach { s ->
-                            Row(
-                                Modifier.fillMaxWidth().clickable { scopeChoice = s }.padding(horizontal = 18.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Text(scopeLabel(s), Modifier.weight(1f), color = Boxy.colors.text)
-                                if (s == scopeChoice) Badge("✓", Tints.blue)
-                            }
-                        }
+                        ScopeTiles(options, scopeChoice, restore = true) { scopeChoice = it }
                         Box(Modifier.padding(horizontal = 18.dp)) {
                             SheetButtons(stringResource(R.string.backup_restore), { confirm = true })
                         }
@@ -339,6 +335,38 @@ SubPageHeader(stringResource(R.string.settings_backup), stringResource(R.string.
     }
 }
 
+/** Choice tiles as in BFR's backup screen: title, what it covers, a check on the selected one. */
+@Composable
+private fun ScopeTiles(options: List<BackupScope>, selected: BackupScope, restore: Boolean = false, onSelect: (BackupScope) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        options.forEach { s ->
+            val on = s == selected
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))
+                    .background(if (on) Boxy.colors.accent.copy(alpha = 0.14f) else Boxy.colors.surface2)
+                    .clickable { onSelect(s) }.padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(if (restore) scopeLabel(s) else scopeName(s), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
+                    Text(
+                        stringResource(
+                            when (s) {
+                                BackupScope.MODULES -> R.string.backup_scope_modules_desc
+                                BackupScope.APPS -> R.string.backup_scope_apps_desc
+                                BackupScope.BOTH -> R.string.backup_scope_both_desc
+                            },
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Boxy.colors.text2,
+                    )
+                }
+                if (on) Icon(BoxyIcons.Check, null, tint = Boxy.colors.accent)
+            }
+        }
+    }
+}
+
 @Composable
 private fun scopeName(s: BackupScope): String = stringResource(
     when (s) {
@@ -357,17 +385,25 @@ private fun scopeLabel(s: BackupScope): String = stringResource(
     },
 )
 
-private data class License(val name: String, val license: String, val url: String)
+private data class License(val name: String, val artifact: String, val license: String, val url: String)
+
+private const val APACHE = "Apache License 2.0"
 
 private val LICENSES = listOf(
-    License("Jetpack Compose, AndroidX", "Apache License 2.0", "https://developer.android.com/jetpack/androidx"),
-    License("Kotlin, kotlinx.coroutines", "Apache License 2.0", "https://github.com/Kotlin/kotlinx.coroutines"),
-    License("libsu (topjohnwu)", "Apache License 2.0", "https://github.com/topjohnwu/libsu"),
-    License("Sora Editor (Rosemoe)", "LGPL-2.1", "https://github.com/Rosemoe/sora-editor"),
-    License("Material Icons (Google)", "Apache License 2.0", "https://fonts.google.com/icons"),
-    License("Eva Icons (Akveo)", "MIT License", "https://github.com/akveo/eva-icons"),
-    License("Box for Root module (taamarin)", "GPL-3.0", "https://github.com/taamarin/box_for_magisk"),
-    License("BFR design (boxproxy)", "Design reference", "https://github.com/boxproxy"),
+    License("Jetpack Compose (UI, Foundation, Material 3)", "androidx.compose:compose-bom", APACHE, "https://developer.android.com/jetpack/androidx/releases/compose"),
+    License("AndroidX Activity Compose", "androidx.activity:activity-compose", APACHE, "https://developer.android.com/jetpack/androidx/releases/activity"),
+    License("AndroidX Lifecycle", "androidx.lifecycle:lifecycle-runtime-compose", APACHE, "https://developer.android.com/jetpack/androidx/releases/lifecycle"),
+    License("AndroidX Core", "androidx.core:core", APACHE, "https://developer.android.com/jetpack/androidx/releases/core"),
+    License("Kotlin Standard Library", "org.jetbrains.kotlin:kotlin-stdlib", APACHE, "https://github.com/JetBrains/kotlin"),
+    License("kotlinx.coroutines", "org.jetbrains.kotlinx:kotlinx-coroutines-android", APACHE, "https://github.com/Kotlin/kotlinx.coroutines"),
+    License("libsu", "com.github.topjohnwu.libsu:core", APACHE, "https://github.com/topjohnwu/libsu"),
+    License("Sora Editor", "io.github.rosemoe:editor", "LGPL-2.1", "https://github.com/Rosemoe/sora-editor"),
+    License("ZXing Android Embedded", "com.journeyapps:zxing-android-embedded", APACHE, "https://github.com/journeyapps/zxing-android-embedded"),
+    License("ZXing Core", "com.google.zxing:core", APACHE, "https://github.com/zxing/zxing"),
+    License("Material Icons", "Google", APACHE, "https://github.com/google/material-design-icons"),
+    License("Eva Icons", "Akveo", "MIT License", "https://github.com/akveo/eva-icons"),
+    License("Box for Root", "taamarin/box_for_magisk", "GPL-3.0", "https://github.com/taamarin/box_for_magisk"),
+    License("BFR", "boxproxy", "Design reference", "https://github.com/boxproxy"),
 )
 
 @Composable
@@ -376,15 +412,14 @@ fun LicensesScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     PinnedLazyPage(contentPadding, header = {
 SubPageHeader(stringResource(R.string.settings_licenses), stringResource(R.string.settings_licenses_sub), onBack)
 }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item {
-            SectionCard(null) {
-                LICENSES.forEach { l ->
-                    Column(
-                        Modifier.fillMaxWidth().clickable { runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(l.url))) } }
-                            .padding(horizontal = 18.dp, vertical = 10.dp),
-                    ) {
-                        Text(l.name, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
-                        Text(l.license, style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2)
+        LICENSES.forEach { l ->
+            item {
+                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(RoundedCornerShape(24.dp)).background(Boxy.colors.card).padding(vertical = 14.dp)) {
+                    Text(l.name, Modifier.padding(horizontal = 18.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = Boxy.colors.text)
+                    Text(l.artifact, Modifier.padding(horizontal = 18.dp), style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2)
+                    Spacer(Modifier.height(6.dp))
+                    SettingsRow(BoxyIcons.Description, l.license, l.url.removePrefix("https://"), showDivider = false) {
+                        runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(l.url))) }
                     }
                 }
             }
