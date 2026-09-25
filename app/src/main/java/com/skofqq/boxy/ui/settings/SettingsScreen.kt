@@ -136,12 +136,8 @@ private fun SettingsMain(contentPadding: PaddingValues, prefs: Prefs, push: (Str
             add(Choice(ThemeMode.MATERIAL, stringResource(R.string.theme_material), stringResource(R.string.theme_material_desc)))
         }
     }
-    val languageChoices = listOf(
-        Choice(AppLanguage.SYSTEM, stringResource(R.string.lang_system)),
-        Choice(AppLanguage.ENGLISH, "English"),
-        Choice(AppLanguage.RUSSIAN, "Русский"),
-        Choice(AppLanguage.CHINESE, "中文"),
-    )
+    val systemLanguage = stringResource(R.string.lang_system)
+    val languageChoices = AppLanguage.entries.map { Choice(it, it.nativeName ?: systemLanguage, leading = it.flag) }
     val sourceChoices = listOf(
         Choice(SubscriptionSource.URL, stringResource(R.string.settings_url_mode), stringResource(R.string.settings_url_mode_desc)),
         Choice(SubscriptionSource.PROVIDERS, stringResource(R.string.settings_providers_mode), stringResource(R.string.settings_providers_mode_desc)),

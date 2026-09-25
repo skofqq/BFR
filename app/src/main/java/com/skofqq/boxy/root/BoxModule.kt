@@ -22,6 +22,8 @@ data class ServiceDetails(
     val pid: String?,
     val coreVersion: String?,
     val memoryBytes: Long?,
+    val pssBytes: Long?,
+    val ussBytes: Long?,
     val currentCpu: String?,
     val cpuAffinity: String?,
 )
@@ -133,7 +135,7 @@ object BoxModule {
     }
 
     suspend fun details(state: ServiceState): ServiceDetails = withContext(Dispatchers.IO) {
-        val pid = state.pid ?: return@withContext ServiceDetails(null, null, null, null, null)
+        val pid = state.pid ?: return@withContext ServiceDetails(null, null, null, null, null, null, null)
         val core = state.core ?: "clash"
         val out = Poll.run(
             """
@@ -145,6 +147,7 @@ object BoxModule {
             esac
             echo "ver=${'$'}v"
             echo "rss=${'$'}(grep '^VmRSS:' /proc/$pid/status | awk '{print ${'$'}2}')"
+            awk '/^Pss:/{p=${'$'}2} /^Private_(Clean|Dirty):/{u+=${'$'}2} END{print "pss=" p; print "uss=" u}' /proc/$pid/smaps_rollup 2>/dev/null
             echo "cpu=${'$'}(awk '{print ${'$'}39}' /proc/$pid/stat)"
             echo "aff=${'$'}(grep '^Cpus_allowed_list:' /proc/$pid/status | awk '{print ${'$'}2}')"
             """.trimIndent(),
@@ -154,6 +157,8 @@ object BoxModule {
             pid = pid,
             coreVersion = kv["ver"]?.substringBefore(" linux")?.substringBefore(" android")?.trim()?.takeIf { it.isNotBlank() },
             memoryBytes = kv["rss"]?.toLongOrNull()?.times(1024),
+            pssBytes = kv["pss"]?.toLongOrNull()?.times(1024),
+            ussBytes = kv["uss"]?.toLongOrNull()?.times(1024),
             currentCpu = kv["cpu"]?.takeIf { it.isNotBlank() },
             cpuAffinity = kv["aff"]?.takeIf { it.isNotBlank() },
         )

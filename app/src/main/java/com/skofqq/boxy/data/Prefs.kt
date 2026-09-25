@@ -10,7 +10,21 @@ import org.json.JSONObject
 
 enum class ThemeMode { LIGHT, DARK, SYSTEM, MATERIAL }
 
-enum class AppLanguage(val tag: String?) { SYSTEM(null), ENGLISH("en"), RUSSIAN("ru"), CHINESE("zh-CN") }
+enum class AppLanguage(val tag: String?, val flag: String, val nativeName: String?) {
+    SYSTEM(null, "\uD83C\uDF10", null),
+    ENGLISH("en", "\uD83C\uDDEC\uD83C\uDDE7", "English"),
+    RUSSIAN("ru", "\uD83C\uDDF7\uD83C\uDDFA", "Русский"),
+    UKRAINIAN("uk", "\uD83C\uDDFA\uD83C\uDDE6", "Українська"),
+    BELARUSIAN("be", "\uD83C\uDDE7\uD83C\uDDFE", "Беларуская"),
+    KAZAKH("kk", "\uD83C\uDDF0\uD83C\uDDFF", "Қазақша"),
+    GERMAN("de", "\uD83C\uDDE9\uD83C\uDDEA", "Deutsch"),
+    SPANISH("es", "\uD83C\uDDEA\uD83C\uDDF8", "Español"),
+    FRENCH("fr", "\uD83C\uDDEB\uD83C\uDDF7", "Français"),
+    ITALIAN("it", "\uD83C\uDDEE\uD83C\uDDF9", "Italiano"),
+    TURKISH("tr", "\uD83C\uDDF9\uD83C\uDDF7", "Türkçe"),
+    CHINESE("zh-CN", "\uD83C\uDDE8\uD83C\uDDF3", "中文"),
+    JAPANESE("ja", "\uD83C\uDDEF\uD83C\uDDF5", "日本語"),
+}
 
 /** Extra bottom-navigation page between Home and Tools (at most one, or none). */
 enum class NavExtra { NONE, APPS, LOGS }

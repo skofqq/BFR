@@ -19,8 +19,8 @@ android {
         applicationId = "com.skofqq.boxy"
         minSdk = 28
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.1.4"
+        versionCode = 6
+        versionName = "0.1.5"
     }
 
     signingConfigs {
@@ -53,7 +53,7 @@ android {
     }
 
     androidResources {
-        localeFilters += listOf("en", "ru", "zh-rCN")
+        localeFilters += listOf("en", "ru", "uk", "be", "kk", "de", "es", "fr", "it", "tr", "zh-rCN", "ja")
     }
 }
 

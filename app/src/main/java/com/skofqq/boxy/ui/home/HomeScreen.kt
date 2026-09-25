@@ -129,7 +129,7 @@ PageHeader(stringResource(R.string.home_title), stringResource(R.string.home_sub
                                                 MetricCard.IP -> IpCard(vm.lan, vm.wan, prefs.ipWan, mod, onToggle = { prefs.updateIpWan(!prefs.ipWan); vm.refreshIp() }) { vm.loadGeoDetails(); sheet = HomeSheet.GEO }
                                                 MetricCard.SPEED -> SpeedCard(vm.speed, mod) { sheet = HomeSheet.SPEED }
                                                 MetricCard.SUBSCRIPTION -> SubscriptionCard(vm.subscriptions, mod) { vm.refreshSubscription(); sheet = HomeSheet.SUBSCRIPTION }
-                                                MetricCard.SYSTEM -> SystemCard(vm.system, running, mod) { vm.loadSystemEnvironment(); sheet = HomeSheet.SYSTEM }
+                                                MetricCard.SYSTEM -> SystemCard(vm.system, running, mod) { vm.loadSystemEnvironment(); vm.loadDetails(); sheet = HomeSheet.SYSTEM }
                                             }
                                         }
                                         if (pair.size == 1) Spacer(Modifier.weight(1f))

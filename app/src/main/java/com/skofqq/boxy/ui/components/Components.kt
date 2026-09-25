@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -191,7 +193,7 @@ fun HeaderAction(
     }
 }
 
-data class Choice<T>(val value: T, val title: String, val subtitle: String? = null)
+data class Choice<T>(val value: T, val title: String, val subtitle: String? = null, val leading: String? = null)
 
 /** Single-choice dialog with the selected option highlighted. */
 @Composable
@@ -208,7 +210,10 @@ fun <T> ChoiceDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
         title = { Text(title, fontWeight = FontWeight.SemiBold) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 choices.forEach { choice ->
                     val isSelected = choice.value == selected
                     Row(
@@ -220,6 +225,10 @@ fun <T> ChoiceDialog(
                             .padding(horizontal = 18.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        if (choice.leading != null) {
+                            Text(choice.leading, fontSize = 24.sp)
+                            Spacer(Modifier.width(14.dp))
+                        }
                         Column(Modifier.weight(1f)) {
                             Text(choice.title, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
                             if (choice.subtitle != null) {

@@ -67,11 +67,13 @@ fun BoxySheet(
                 .navigationBarsPadding()
                 .padding(bottom = 16.dp),
         ) {
-            Text(title, style = MaterialTheme.typography.titleLarge, color = Boxy.colors.text)
-            if (subtitle != null) {
-                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Boxy.colors.text2)
+            if (title.isNotEmpty()) {
+                Text(title, style = MaterialTheme.typography.titleLarge, color = Boxy.colors.text)
+                if (subtitle != null) {
+                    Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Boxy.colors.text2)
+                }
+                Spacer(Modifier.height(16.dp))
             }
-            Spacer(Modifier.height(16.dp))
             content()
         }
     }
@@ -84,6 +86,49 @@ fun SheetGroup(modifier: Modifier = Modifier, content: @Composable ColumnScope.(
         modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Boxy.colors.card).padding(vertical = 6.dp),
         content = content,
     )
+}
+
+/** Group with its own bold title inside the card, as in BFR's system sheet. */
+@Composable
+fun TitledSheetGroup(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Boxy.colors.card).padding(top = 18.dp, bottom = 10.dp),
+    ) {
+        Text(
+            title,
+            Modifier.padding(horizontal = 20.dp).padding(bottom = 6.dp),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            color = Boxy.colors.text,
+        )
+        content()
+    }
+}
+
+/** Icon, label and a one-line value on the right. */
+@Composable
+fun IconInfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    valueColor: androidx.compose.ui.graphics.Color = Boxy.colors.text,
+) {
+    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
+        androidx.compose.material3.Icon(icon, null, Modifier.size(22.dp), tint = Boxy.colors.text)
+        Spacer(Modifier.width(16.dp))
+        Text(label, style = MaterialTheme.typography.bodyLarge, color = Boxy.colors.text2, maxLines = 1)
+        Spacer(Modifier.width(16.dp))
+        Text(
+            value,
+            Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+            color = valueColor,
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
 }
 
 /** Label on the left, value on the right. */

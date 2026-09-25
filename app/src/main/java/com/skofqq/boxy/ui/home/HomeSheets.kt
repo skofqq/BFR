@@ -25,7 +25,9 @@ import com.skofqq.boxy.root.CORES
 import com.skofqq.boxy.root.IpsetStatus
 import com.skofqq.boxy.root.NETWORK_MODES
 import com.skofqq.boxy.ui.components.BoxySheet
+import com.skofqq.boxy.ui.components.IconInfoRow
 import com.skofqq.boxy.ui.components.InfoRow
+import com.skofqq.boxy.ui.components.TitledSheetGroup
 import com.skofqq.boxy.ui.components.OptionRow
 import com.skofqq.boxy.ui.components.SheetButtons
 import com.skofqq.boxy.ui.components.SheetGroup
@@ -135,13 +137,33 @@ fun HomeSheets(sheet: HomeSheet, vm: HomeViewModel, prefs: Prefs, onDismiss: () 
             SheetButtons(stringResource(R.string.action_refresh), vm::refreshSubscription)
         }
 
-        HomeSheet.SYSTEM -> BoxySheet(stringResource(R.string.sysenv_title), null, onDismiss) {
+        HomeSheet.SYSTEM -> BoxySheet("", null, onDismiss) {
+            // Same layout as BFR: service details, then the system environment.
+            val d = vm.details
+            TitledSheetGroup(stringResource(R.string.details_title)) {
+                IconInfoRow(BoxyIcons.Laptop, stringResource(R.string.details_pid), d?.pid ?: vm.state?.pid ?: dash)
+                IconInfoRow(
+                    BoxyIcons.Memory,
+                    stringResource(R.string.details_memory),
+                    d?.memoryBytes?.let { rss ->
+                        listOfNotNull(
+                            "RSS " + Format.bytes(context, rss),
+                            d.pssBytes?.let { "PSS " + Format.bytes(context, it) },
+                            d.ussBytes?.let { "USS " + Format.bytes(context, it) },
+                        ).joinToString(" / ")
+                    } ?: dash,
+                )
+                IconInfoRow(BoxyIcons.Info, stringResource(R.string.details_core_version), d?.coreVersion ?: dash)
+                IconInfoRow(BoxyIcons.Tune, stringResource(R.string.details_cpu_affinity), d?.cpuAffinity?.let(::expandCpuList) ?: dash)
+                IconInfoRow(BoxyIcons.CenterFocus, stringResource(R.string.details_current_cpu), d?.currentCpu?.let { "Core $it" } ?: dash)
+            }
+            Spacer(Modifier.height(14.dp))
             val e = vm.systemEnv
-            SheetGroup {
-                InfoRow(stringResource(R.string.sysenv_android), e?.android ?: dash)
-                InfoRow(stringResource(R.string.sysenv_kernel), e?.kernel ?: dash)
-                InfoRow(stringResource(R.string.sysenv_memory), e?.totalMemoryBytes?.let { Format.bytes(context, it) } ?: dash)
-                InfoRow(
+            TitledSheetGroup(stringResource(R.string.sysenv_title)) {
+                IconInfoRow(BoxyIcons.Android, stringResource(R.string.sysenv_android), e?.android ?: dash)
+                IconInfoRow(BoxyIcons.Laptop, stringResource(R.string.sysenv_kernel), e?.kernel ?: dash)
+                IconInfoRow(
+                    BoxyIcons.Code,
                     stringResource(R.string.sysenv_ipset),
                     when (e?.ipset) {
                         IpsetStatus.AVAILABLE -> stringResource(R.string.ipset_available)
@@ -155,19 +177,25 @@ fun HomeSheets(sheet: HomeSheet, vm: HomeViewModel, prefs: Prefs, onDismiss: () 
                         else -> Tints.amber.fg
                     },
                 )
-            }
-            vm.system?.let { s ->
-                Spacer(Modifier.height(12.dp))
-                SheetGroup {
-                    InfoRow(stringResource(R.string.system_cpu), String.format(java.util.Locale.getDefault(), "%.1f%%", s.cpuPercent))
-                    InfoRow(stringResource(R.string.system_ram), Format.bytes(context, s.rssBytes))
-                }
+                IconInfoRow(BoxyIcons.Memory, stringResource(R.string.sysenv_memory), e?.totalMemoryBytes?.let { Format.bytes(context, it) } ?: dash)
             }
         }
 
         HomeSheet.LAYOUT -> LayoutSheet(prefs, onDismiss)
     }
 }
+
+/** "0-3,6" -> "0,1,2,3,6", as BFR shows the CPU affinity. */
+private fun expandCpuList(list: String): String = list.split(',').flatMap { part ->
+    val r = part.trim().split('-')
+    val a = r[0].toIntOrNull()
+    val b = r.getOrNull(1)?.toIntOrNull()
+    when {
+        a == null -> listOf(part.trim())
+        b == null -> listOf(a.toString())
+        else -> (a..b).map { it.toString() }
+    }
+}.joinToString(",")
 
 @Composable
 private fun modeDescription(mode: String): String = when (mode) {
