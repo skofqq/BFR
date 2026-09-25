@@ -27,7 +27,7 @@ data class ModuleUpdate(
 
 /** Update checks: the app's GitHub releases and the module's own updateJson. */
 object Updates {
-    const val REPO = "skofqq/BFR"
+    const val REPO = "skofqq/Boxy"
 
     private fun get(url: String): String? = runCatching {
         val c = URL(url).openConnection() as HttpURLConnection

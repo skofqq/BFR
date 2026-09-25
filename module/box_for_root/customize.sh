@@ -382,4 +382,4 @@ ui_print "     ↳  $(t 'You can now run: su -c /dev/sbfr' 'Теперь мож�
 ui_print ""
 # Complete installation
 ui_print "— $(t 'Installation complete. Please reboot your device.' 'Установка завершена. Перезагрузите устройство.')"
-ui_print "— $(t 'Report issues: github.com/skofqq/BFR/issues' 'О проблемах сообщайте: github.com/skofqq/BFR/issues')"
+ui_print "— $(t 'Report issues: github.com/skofqq/Boxy/issues' 'О проблемах сообщайте: github.com/skofqq/Boxy/issues')"

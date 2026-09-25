@@ -59,7 +59,7 @@ import com.skofqq.boxy.ui.components.SwitchRow
 import com.skofqq.boxy.ui.theme.Boxy
 import com.skofqq.boxy.ui.theme.BoxyIcons
 
-const val GITHUB_URL = "https://github.com/skofqq/BFR"
+const val GITHUB_URL = "https://github.com/skofqq/Boxy"
 
 private const val ROUTE_MAIN = "main"
 private const val ROUTE_APPEARANCE = "appearance"
