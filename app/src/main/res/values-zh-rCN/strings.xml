@@ -610,4 +610,10 @@
     <string name="net_hint_sim">运营商或 MCC+MNC，例如 China Mobile 或 46000</string>
     <string name="net_sim_picker_title">手机中的 SIM 卡</string>
     <string name="net_sim_picker_empty">未找到 SIM 卡</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">将 DNS 重定向到核心</string>
+    <string name="net_dns_hijack_on">53 端口由核心的 DNS 处理</string>
+    <string name="net_dns_hijack_off">DNS 交给系统或其他模块（AdGuard Home）</string>
+    <string name="settings_autostart">开机自启</string>
+    <string name="settings_autostart_sub">手机开机时由模块启动服务</string>
 </resources>

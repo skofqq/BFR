@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Operatör veya MCC+MNC, ör. Turkcell veya 28601</string>
     <string name="net_sim_picker_title">Telefondaki SIM kartlar</string>
     <string name="net_sim_picker_empty">SIM bulunamadı</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">DNS’i çekirdeğe yönlendir</string>
+    <string name="net_dns_hijack_on">53. port çekirdeğin DNS’ine gider</string>
+    <string name="net_dns_hijack_off">DNS sisteme veya başka bir modüle kalır (AdGuard Home)</string>
+    <string name="settings_autostart">Açılışta başlat</string>
+    <string name="settings_autostart_sub">Telefon açılınca modül hizmeti başlatır</string>
 </resources>

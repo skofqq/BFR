@@ -240,6 +240,22 @@ object BoxModule {
         ok
     }
 
+    /** Start at boot unless /data/adb/box/manual exists (the module's manual mode). */
+    suspend fun autostartEnabled(): Boolean = withContext(Dispatchers.IO) { !exists("$BOX_DIR/manual") }
+
+    suspend fun setAutostart(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
+        Shell.cmd(if (enabled) "rm -f $BOX_DIR/manual" else "touch $BOX_DIR/manual").exec().isSuccess
+    }
+
+    /** dns_hijack in settings.ini (ru.3+): null when the installed module does not have it. */
+    suspend fun dnsHijack(): Boolean? = readSetting("dns_hijack")?.let { unquote(it) != "false" }
+
+    suspend fun setDnsHijack(enabled: Boolean): Boolean = withContext(Dispatchers.IO) {
+        val ok = writeSettingRaw("dns_hijack", enabled.toString())
+        if (ok) Shell.cmd("[ -f $PID_FILE ] && $SCRIPTS/box.iptables renew >/dev/null 2>&1").exec()
+        ok
+    }
+
     suspend fun subStoreInstalled(): Boolean = withContext(Dispatchers.IO) { exists("/data/adb/modules/sub_store") }
 
     suspend fun readFile(path: String): String? = withContext(Dispatchers.IO) {

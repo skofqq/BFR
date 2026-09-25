@@ -99,7 +99,9 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     var simPickFor by remember { mutableStateOf<Int?>(null) }
     var hotspotProxy by remember { mutableStateOf<Boolean?>(null) }
 
+    var dnsHijack by remember { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(Unit) { hotspotProxy = BoxModule.hotspotProxyEnabled() }
+    LaunchedEffect(Unit) { dnsHijack = BoxModule.dnsHijack() }
     LaunchedEffect(Unit) {
         val raw = BoxModule.readSettingsRaw(NET_KEYS)
         fun bool(k: String, d: Boolean) = BoxModule.unquote(raw[k])?.let { it == "true" } ?: d
@@ -223,6 +225,28 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                             onPick = { simPickFor = it },
                             pickIcon = BoxyIcons.SimCard,
                         )
+                    }
+                }
+            }
+            dnsHijack?.let { hijack ->
+                item {
+                    SectionCard(stringResource(R.string.net_dns_title), null) {
+                        SwitchRow(
+                            BoxyIcons.Router,
+                            stringResource(R.string.net_dns_hijack),
+                            stringResource(if (hijack) R.string.net_dns_hijack_on else R.string.net_dns_hijack_off),
+                            hijack,
+                            showDivider = false,
+                        ) { on ->
+                            scope.launch {
+                                if (BoxModule.setDnsHijack(on)) {
+                                    dnsHijack = on
+                                    Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, R.string.net_save_failed, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Operador o MCC+MNC, p. ej. Movistar o 21407</string>
     <string name="net_sim_picker_title">SIM del teléfono</string>
     <string name="net_sim_picker_empty">No se encontró SIM</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">Redirigir DNS al núcleo</string>
+    <string name="net_dns_hijack_on">El puerto 53 va al DNS del núcleo</string>
+    <string name="net_dns_hijack_off">El DNS queda para el sistema u otro módulo (AdGuard Home)</string>
+    <string name="settings_autostart">Iniciar al arrancar</string>
+    <string name="settings_autostart_sub">El módulo inicia el servicio al encender el teléfono</string>
 </resources>

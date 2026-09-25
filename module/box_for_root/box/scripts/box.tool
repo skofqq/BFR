@@ -8,8 +8,8 @@ fi
 scripts_dir="${0%/*}"
 source /data/adb/box/settings.ini
 
-# user agent
-user_agent="box_for_root"
+# user agent (settings.ini: user_agent, no spaces)
+user_agent="${user_agent:-box_for_root}"
 # whether use ghproxy to accelerate github download
 url_ghproxy="https://ghfast.top"
 use_ghproxy="false"
@@ -501,7 +501,7 @@ upsubs() {
                   $scripts_dir/box.service restart 2>/dev/null
                 fi
                 log Info "${bin_name} subscription update completed → $(date)"
-                exit 1
+                exit 0
               fi
             else
               log Error "update $bin_name subscription failed → ${token_url}"
@@ -537,7 +537,7 @@ upsubs() {
               $scripts_dir/box.service restart 2>/dev/null
             fi
             log Info "${bin_name} subscription update completed → $(date)"
-            exit 1
+            exit 0
           else
             log Error "update subscription failed"
             return 1
@@ -1237,7 +1237,9 @@ case "$1" in
       upgeox
     else
       upsubs
-      [ "${bin_name}" != "clash" ] && exit 1
+      rc=$?
+      [ "${bin_name}" != "clash" ] && exit $rc
+      [ $rc -ne 0 ] && exit $rc
     fi
     if [ -f "${box_pid}" ]; then
       kill -0 "$(<"${box_pid}" 2>/dev/null)" && reload

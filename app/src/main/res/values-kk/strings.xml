@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Оператор немесе MCC+MNC, мысалы Beeline не 40101</string>
     <string name="net_sim_picker_title">Телефондағы SIM карталар</string>
     <string name="net_sim_picker_empty">SIM табылмады</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">DNS-ті ядроға бағыттау</string>
+    <string name="net_dns_hijack_on">53-порт сұрауларын ядро өңдейді</string>
+    <string name="net_dns_hijack_off">DNS жүйеге немесе басқа модульге қалады (AdGuard Home)</string>
+    <string name="settings_autostart">Жүктелгенде іске қосу</string>
+    <string name="settings_autostart_sub">Телефон қосылғанда модуль қызметті іске қосады</string>
 </resources>

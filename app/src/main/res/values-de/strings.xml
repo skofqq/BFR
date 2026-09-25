@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Betreiber oder MCC+MNC, z. B. Telekom oder 26201</string>
     <string name="net_sim_picker_title">SIM-Karten im Telefon</string>
     <string name="net_sim_picker_empty">Keine SIM gefunden</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">DNS an den Kern umleiten</string>
+    <string name="net_dns_hijack_on">Port 53 geht an den DNS des Kerns</string>
+    <string name="net_dns_hijack_off">DNS bleibt beim System oder einem anderen Modul (AdGuard Home)</string>
+    <string name="settings_autostart">Beim Booten starten</string>
+    <string name="settings_autostart_sub">Das Modul startet den Dienst beim Einschalten</string>
 </resources>

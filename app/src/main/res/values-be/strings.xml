@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Аператар або MCC+MNC, напр. A1 або 25701</string>
     <string name="net_sim_picker_title">SIM-карты ў тэлефоне</string>
     <string name="net_sim_picker_empty">SIM не знойдзена</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">Перахоп DNS ядром</string>
+    <string name="net_dns_hijack_on">Запыты на порт 53 апрацоўвае ядро</string>
+    <string name="net_dns_hijack_off">DNS застаецца сістэме або іншаму модулю (AdGuard Home)</string>
+    <string name="settings_autostart">Аўтазапуск пры загрузцы</string>
+    <string name="settings_autostart_sub">Модуль запускае сэрвіс пры ўключэнні тэлефона</string>
 </resources>

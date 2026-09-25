@@ -640,4 +640,10 @@
     <string name="net_hint_sim">事業者名または MCC+MNC（例 docomo、44010）</string>
     <string name="net_sim_picker_title">端末の SIM カード</string>
     <string name="net_sim_picker_empty">SIM が見つかりません</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">DNS をコアへリダイレクト</string>
+    <string name="net_dns_hijack_on">ポート 53 はコアの DNS が処理</string>
+    <string name="net_dns_hijack_off">DNS はシステムや他のモジュール（AdGuard Home）に任せる</string>
+    <string name="settings_autostart">起動時に開始</string>
+    <string name="settings_autostart_sub">端末の起動時にモジュールがサービスを開始</string>
 </resources>

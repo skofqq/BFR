@@ -664,4 +664,10 @@
     <string name="net_hint_sim">Operator or MCC+MNC, e.g. MTS or 25001</string>
     <string name="net_sim_picker_title">SIM cards in the phone</string>
     <string name="net_sim_picker_empty">No SIM found</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">Redirect DNS to the core</string>
+    <string name="net_dns_hijack_on">Port 53 goes to the core\'s DNS</string>
+    <string name="net_dns_hijack_off">DNS is left to the system or another module (AdGuard Home)</string>
+    <string name="settings_autostart">Start at boot</string>
+    <string name="settings_autostart_sub">The module starts the service when the phone boots</string>
 </resources>

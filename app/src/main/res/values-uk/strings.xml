@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Оператор або MCC+MNC, напр. Kyivstar або 25503</string>
     <string name="net_sim_picker_title">SIM-картки в телефоні</string>
     <string name="net_sim_picker_empty">SIM не знайдено</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">Перехоплення DNS ядром</string>
+    <string name="net_dns_hijack_on">Запити на порт 53 обробляє ядро</string>
+    <string name="net_dns_hijack_off">DNS залишається системі або іншому модулю (AdGuard Home)</string>
+    <string name="settings_autostart">Автозапуск під час завантаження</string>
+    <string name="settings_autostart_sub">Модуль запускає сервіс під час увімкнення телефона</string>
 </resources>

@@ -33,6 +33,8 @@ pref="100"
 # disable or enable QUIC using iptables rules. Note that this may cause some websites to become inaccessible.
 quic="enable"
 clash_dns_forward="enable"
+# settings.ini: dns_hijack=false leaves port 53 to the system or another module (AdGuard Home)
+dns_hijack="${dns_hijack:-true}"
 fake_ip_range=""
 
 # ex: 7.1.1
@@ -262,7 +264,7 @@ start_redirect() {
   fi
 
   if [ "${iptables}" = "$IPV" ]; then
-    if [ "${bin_name}" = "clash" ]; then
+    if [ "${bin_name}" = "clash" ] && [ "${dns_hijack}" != "false" ]; then
       ${iptables} -t nat -A BOX_EXTERNAL -p udp --dport 53 -j REDIRECT --to-ports "${clash_dns_port}"
       ${iptables} -t nat -A BOX_LOCAL -p udp --dport 53 -j REDIRECT --to-ports "${clash_dns_port}"
     # else
@@ -416,7 +418,7 @@ start_tproxy() {
   # ${iptables} -t mangle -I BOX_EXTERNAL -i rmnet_data+ -j RETURN
   # ${iptables} -t mangle -I BOX_EXTERNAL -i ccmni+ -j RETURN
 
-  if [ "${clash_dns_forward}" = "enable" ] && [[ "${bin_name}" == @(clash|hysteria) ]] ; then
+  if [ "${dns_hijack}" = "false" ] || { [ "${clash_dns_forward}" = "enable" ] && [[ "${bin_name}" == @(clash|hysteria) ]]; } ; then
       [ ${network_mode} = "enhance" ] || ${iptables} -t mangle -A BOX_EXTERNAL -p tcp --dport 53 -j RETURN
       ${iptables} -t mangle -A BOX_EXTERNAL -p udp --dport 53 -j RETURN
   else
@@ -474,7 +476,7 @@ start_tproxy() {
     [ "${iptables}" = "$IPV" ] && log Info "${ignore_out_list[*]} ignore transparent proxy."
   fi
 
-  if [ "${clash_dns_forward}" = "enable" ] && [[ "${bin_name}" == @(clash|hysteria) ]] ; then
+  if [ "${dns_hijack}" = "false" ] || { [ "${clash_dns_forward}" = "enable" ] && [[ "${bin_name}" == @(clash|hysteria) ]]; } ; then
       [ ${network_mode} = "enhance" ] || ${iptables} -t mangle -A BOX_LOCAL -p tcp --dport 53 -j RETURN
       ${iptables} -t mangle -A BOX_LOCAL -p udp --dport 53 -j RETURN
   else
@@ -575,7 +577,7 @@ if [ ${network_mode} != "enhance" ]; then
 fi
 
   if [ "${iptables}" = "$IPV" ]; then
-    if [ "${clash_dns_forward}" = "enable" ] && [ "${bin_name}" = "clash" ]; then
+    if [ "${clash_dns_forward}" = "enable" ] && [ "${bin_name}" = "clash" ] && [ "${dns_hijack}" != "false" ]; then
       ${iptables} -t nat -N CLASH_DNS_EXTERNAL
       ${iptables} -t nat -F CLASH_DNS_EXTERNAL
       ${iptables} -t nat -A CLASH_DNS_EXTERNAL -p udp --dport 53 -j REDIRECT --to-ports "${clash_dns_port}"

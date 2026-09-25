@@ -47,6 +47,7 @@ import com.skofqq.boxy.data.ThemeMode
 import com.skofqq.boxy.net.ModuleUpdate
 import com.skofqq.boxy.net.Updates
 import com.skofqq.boxy.root.BoxModule
+import kotlinx.coroutines.launch
 import com.skofqq.boxy.service.BoxStatusService
 import com.skofqq.boxy.ui.components.Choice
 import com.skofqq.boxy.ui.components.ChoiceDialog
@@ -104,6 +105,9 @@ private fun SettingsMain(contentPadding: PaddingValues, prefs: Prefs, push: (Str
     var sourceDialog by remember { mutableStateOf(false) }
     var chainsDialog by remember { mutableStateOf(false) }
     var infoSheet by remember { mutableStateOf(false) }
+    var autostart by remember { mutableStateOf<Boolean?>(null) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    LaunchedEffect(Unit) { autostart = BoxModule.autostartEnabled() }
     var moduleSheet by remember { mutableStateOf(false) }
     var mirrorSheet by remember { mutableStateOf(false) }
     var moduleVersion by remember { mutableStateOf<String?>(null) }
@@ -203,6 +207,9 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
         }
         item {
             SectionCard(stringResource(R.string.settings_misc), stringResource(R.string.settings_misc_sub)) {
+                SwitchRow(BoxyIcons.Schedule, stringResource(R.string.settings_autostart), stringResource(R.string.settings_autostart_sub), autostart == true, enabled = autostart != null) { on ->
+                    scope.launch { if (BoxModule.setAutostart(on)) autostart = on }
+                }
                 SwitchRow(BoxyIcons.Dashboard, stringResource(R.string.settings_open_panel), stringResource(R.string.settings_open_panel_sub), prefs.openPanelOnLaunch) {
                     prefs.updateOpenPanelOnLaunch(it)
                 }

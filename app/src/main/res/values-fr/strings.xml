@@ -640,4 +640,10 @@
     <string name="net_hint_sim">Opérateur ou MCC+MNC, ex. Orange ou 20801</string>
     <string name="net_sim_picker_title">Cartes SIM du téléphone</string>
     <string name="net_sim_picker_empty">Aucune SIM trouvée</string>
+    <string name="net_dns_title">DNS</string>
+    <string name="net_dns_hijack">Rediriger le DNS vers le cœur</string>
+    <string name="net_dns_hijack_on">Le port 53 va au DNS du cœur</string>
+    <string name="net_dns_hijack_off">Le DNS reste au système ou à un autre module (AdGuard Home)</string>
+    <string name="settings_autostart">Démarrer au démarrage</string>
+    <string name="settings_autostart_sub">Le module lance le service à l’allumage du téléphone</string>
 </resources>
