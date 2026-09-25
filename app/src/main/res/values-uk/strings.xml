@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Історія трафіку, розклад, Tasker</string>
     <string name="traffic_title">Статистика трафіку</string>
     <string name="traffic_subtitle">Трафік через проксі за даними ядра</string>
-    <string name="traffic_row_sub">За днями та місяцями</string>
+    <string name="traffic_row_sub">За днями, тижнями та місяцями</string>
     <string name="traffic_today">Сьогодні</string>
     <string name="traffic_this_month">Цей місяць</string>
     <string name="traffic_by_day">Дні</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, списки застосунків, конфігурації ядер</string>
     <string name="backup_scope_apps_desc">Налаштування Boxy: тема, головна, панелі, дзеркало</string>
     <string name="backup_scope_both_desc">Файли модуля та налаштування Boxy</string>
+    <string name="traffic_by_week">Тижні</string>
 </resources>

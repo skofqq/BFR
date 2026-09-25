@@ -608,7 +608,7 @@
     <string name="tools_extra_sub">Traffic history, schedule, Tasker</string>
     <string name="traffic_title">Traffic statistics</string>
     <string name="traffic_subtitle">Proxy traffic counted by the core</string>
-    <string name="traffic_row_sub">By day and by month</string>
+    <string name="traffic_row_sub">By day, week and month</string>
     <string name="traffic_today">Today</string>
     <string name="traffic_this_month">This month</string>
     <string name="traffic_by_day">Days</string>
@@ -653,4 +653,5 @@
     <string name="backup_scope_modules_desc">settings.ini, app lists, core configs</string>
     <string name="backup_scope_apps_desc">Boxy preferences: theme, layout, panels, mirror</string>
     <string name="backup_scope_both_desc">Module files and Boxy preferences</string>
+    <string name="traffic_by_week">Weeks</string>
 </resources>

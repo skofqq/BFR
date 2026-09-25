@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Гісторыя трафіку, расклад, Tasker</string>
     <string name="traffic_title">Статыстыка трафіку</string>
     <string name="traffic_subtitle">Трафік праз проксі паводле даных ядра</string>
-    <string name="traffic_row_sub">Па днях і месяцах</string>
+    <string name="traffic_row_sub">Па днях, тыднях і месяцах</string>
     <string name="traffic_today">Сёння</string>
     <string name="traffic_this_month">Гэты месяц</string>
     <string name="traffic_by_day">Дні</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, спісы праграм, канфігурацыі ядраў</string>
     <string name="backup_scope_apps_desc">Налады Boxy: тэма, галоўная, панэлі, люстэрка</string>
     <string name="backup_scope_both_desc">Файлы модуля і налады Boxy</string>
+    <string name="traffic_by_week">Тыдні</string>
 </resources>

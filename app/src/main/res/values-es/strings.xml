@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Historial de tráfico, horario, Tasker</string>
     <string name="traffic_title">Estadísticas de tráfico</string>
     <string name="traffic_subtitle">Tráfico del proxy según el núcleo</string>
-    <string name="traffic_row_sub">Por días y meses</string>
+    <string name="traffic_row_sub">Por días, semanas y meses</string>
     <string name="traffic_today">Hoy</string>
     <string name="traffic_this_month">Este mes</string>
     <string name="traffic_by_day">Días</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, listas de apps, configuraciones de núcleos</string>
     <string name="backup_scope_apps_desc">Ajustes de Boxy: tema, inicio, paneles, espejo</string>
     <string name="backup_scope_both_desc">Archivos del módulo y ajustes de Boxy</string>
+    <string name="traffic_by_week">Semanas</string>
 </resources>

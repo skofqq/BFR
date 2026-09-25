@@ -66,7 +66,7 @@ fun TrafficScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     var days by remember { mutableStateOf<Map<LocalDate, TrafficBucket>?>(null) }
     var apiAvailable by remember { mutableStateOf(true) }
-    var byMonth by rememberSaveable { mutableStateOf(false) }
+    var period by rememberSaveable { mutableStateOf(0) } // 0 days, 1 weeks, 2 months
     var resetDialog by remember { mutableStateOf(false) }
     var reload by remember { mutableStateOf(0) }
 
@@ -89,6 +89,7 @@ fun TrafficScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
         val d = days ?: return@PinnedLazyPage
         val today = LocalDate.now()
         val months = TrafficStats.months(d)
+        val weeks = d.entries.groupBy({ weekStart(it.key) }, { it.value }).mapValues { (_, v) -> v.fold(TrafficBucket.ZERO) { a, b -> a + b } }
         item {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 TotalCard(stringResource(R.string.traffic_today), d[today] ?: TrafficBucket.ZERO, down, up, Modifier.weight(1f))
@@ -108,17 +109,21 @@ fun TrafficScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
         item {
             SectionCard(null) {
                 Row(Modifier.padding(horizontal = 18.dp).clip(RoundedCornerShape(50)).background(Boxy.colors.surface2).padding(4.dp)) {
-                    Segment(stringResource(R.string.traffic_by_day), !byMonth) { byMonth = false }
-                    Segment(stringResource(R.string.traffic_by_month), byMonth) { byMonth = true }
+                    Segment(stringResource(R.string.traffic_by_day), period == 0) { period = 0 }
+                    Segment(stringResource(R.string.traffic_by_week), period == 1) { period = 1 }
+                    Segment(stringResource(R.string.traffic_by_month), period == 2) { period = 2 }
                 }
                 val locale = appLocale
-                val bars: List<Pair<String, TrafficBucket>> = if (byMonth) {
-                    (11 downTo 0).map { i ->
+                val bars: List<Pair<String, TrafficBucket>> = when (period) {
+                    2 -> (11 downTo 0).map { i ->
                         val m = YearMonth.from(today).minusMonths(i.toLong())
                         m.month.getDisplayName(TextStyle.SHORT_STANDALONE, locale).take(3) to (months[m] ?: TrafficBucket.ZERO)
                     }
-                } else {
-                    (13 downTo 0).map { i ->
+                    1 -> (7 downTo 0).map { i ->
+                        val start = weekStart(today).minusWeeks(i.toLong())
+                        start.format(DateTimeFormatter.ofPattern("d.MM", locale)) to (weeks[start] ?: TrafficBucket.ZERO)
+                    }
+                    else -> (13 downTo 0).map { i ->
                         val day = today.minusDays(i.toLong())
                         day.dayOfMonth.toString() to (d[day] ?: TrafficBucket.ZERO)
                     }
@@ -133,13 +138,13 @@ fun TrafficScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
             }
         }
         item {
-            SectionCard(stringResource(if (byMonth) R.string.traffic_by_month else R.string.traffic_by_day)) {
-                val rows: List<Pair<String, TrafficBucket>> = if (byMonth) {
-                    months.entries.sortedByDescending { it.key }.map { (m, b) ->
+            SectionCard(stringResource(listOf(R.string.traffic_by_day, R.string.traffic_by_week, R.string.traffic_by_month)[period])) {
+                val rows: List<Pair<String, TrafficBucket>> = when (period) {
+                    2 -> months.entries.sortedByDescending { it.key }.map { (m, b) ->
                         m.format(DateTimeFormatter.ofPattern("LLLL yyyy", appLocale)).replaceFirstChar { it.titlecase() } to b
                     }
-                } else {
-                    d.entries.sortedByDescending { it.key }.take(60).map { (day, b) ->
+                    1 -> weeks.entries.sortedByDescending { it.key }.map { (start, b) -> weekRange(start, appLocale) to b }
+                    else -> d.entries.sortedByDescending { it.key }.take(60).map { (day, b) ->
                         day.format(DateTimeFormatter.ofPattern("d MMMM, EEE", appLocale)) to b
                     }
                 }
@@ -239,6 +244,18 @@ private fun Bars(bars: List<Pair<String, TrafficBucket>>, down: Color, up: Color
                 Text(label, Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = Boxy.colors.text2, textAlign = TextAlign.Center, maxLines = 1)
             }
         }
+    }
+}
+
+private fun weekStart(day: LocalDate): LocalDate = day.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+
+/** "22–28 сентября" or "29 сент. – 5 окт." */
+private fun weekRange(start: LocalDate, locale: Locale): String {
+    val end = start.plusDays(6)
+    return if (start.month == end.month) {
+        "${start.dayOfMonth}–" + end.format(DateTimeFormatter.ofPattern("d MMMM", locale))
+    } else {
+        start.format(DateTimeFormatter.ofPattern("d MMM", locale)) + " – " + end.format(DateTimeFormatter.ofPattern("d MMM", locale))
     }
 }
 

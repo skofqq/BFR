@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Historique du trafic, planning, Tasker</string>
     <string name="traffic_title">Statistiques de trafic</string>
     <string name="traffic_subtitle">Trafic du proxy selon le cœur</string>
-    <string name="traffic_row_sub">Par jour et par mois</string>
+    <string name="traffic_row_sub">Par jour, semaine et mois</string>
     <string name="traffic_today">Aujourd’hui</string>
     <string name="traffic_this_month">Ce mois-ci</string>
     <string name="traffic_by_day">Jours</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, listes d’applis, configurations des cœurs</string>
     <string name="backup_scope_apps_desc">Réglages de Boxy : thème, accueil, panneaux, miroir</string>
     <string name="backup_scope_both_desc">Fichiers du module et réglages de Boxy</string>
+    <string name="traffic_by_week">Semaines</string>
 </resources>

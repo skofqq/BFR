@@ -26,7 +26,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Detailed widget (4×2): state, core and mode, start time, today's traffic, Restart and Start / Stop.
+ * Detailed widget (4×1): state, core and mode, start time, today's traffic, Restart and Start / Stop.
  * Nothing ticks: it is redrawn only when something happens (start / stop from any place, a traffic sample,
  * the 30-minute system update), so it costs no battery while idle. The start time is shown instead of a
  * running uptime for the same reason.
@@ -140,9 +140,6 @@ internal object Widgets {
                 R.id.widget_traffic,
                 res.getString(R.string.widget_today, "↓ ${Format.bytes(res, today.down)}  ↑ ${Format.bytes(res, today.up)}"),
             )
-            v.setTextViewText(R.id.widget_stop, res.getString(R.string.action_stop))
-            v.setTextViewText(R.id.widget_start, res.getString(R.string.action_start))
-            v.setTextViewText(R.id.widget_restart, res.getString(R.string.action_restart))
             v.setViewVisibility(R.id.widget_stop, if (running) View.VISIBLE else View.GONE)
             v.setViewVisibility(R.id.widget_restart, if (running) View.VISIBLE else View.GONE)
             v.setViewVisibility(R.id.widget_start, if (!running && busy == null && state != null) View.VISIBLE else View.GONE)

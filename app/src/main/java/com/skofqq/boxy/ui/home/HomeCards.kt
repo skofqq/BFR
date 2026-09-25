@@ -280,8 +280,8 @@ fun IpCard(lan: LanAddress?, wan: GeoIp?, wanMode: Boolean, modifier: Modifier, 
     } else {
         stringResource(R.string.badge_lan)
     }
-    HomeCard(modifier, onClick) {
-        CardTitle(stringResource(R.string.card_ip), if (wanMode && wan == null) stringResource(R.string.badge_wan) else badge, if (wanMode) Tints.blue else Tints.green, onToggle)
+    HomeCard(modifier, onToggle) {
+        CardTitle(stringResource(R.string.card_ip), if (wanMode && wan == null) stringResource(R.string.badge_wan) else badge, Tints.green, if (wanMode) onClick else onToggle)
         Spacer(Modifier.height(16.dp))
         Text(
             (if (showWan) wan.ip else if (wanMode) null else lan?.ip) ?: stringResource(R.string.common_dash),
@@ -291,17 +291,28 @@ fun IpCard(lan: LanAddress?, wan: GeoIp?, wanMode: Boolean, modifier: Modifier, 
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(2.dp))
-        Text(
-            if (showWan) {
-                stringResource(R.string.ip_region, wan.country ?: wan.countryCode ?: "-")
-            } else {
-                stringResource(R.string.ip_interface, lan?.iface ?: "-")
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = Boxy.colors.text2,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                if (showWan) {
+                    stringResource(R.string.ip_region, wan.country ?: wan.countryCode ?: "-")
+                } else {
+                    stringResource(R.string.ip_interface, lan?.iface ?: "-")
+                },
+                Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Boxy.colors.text2,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (wanMode) {
+                Icon(
+                    BoxyIcons.ChevronRight,
+                    null,
+                    Modifier.size(28.dp).clip(RoundedCornerShape(50)).clickable(onClick = onClick).padding(2.dp),
+                    tint = Boxy.colors.text2,
+                )
+            }
+        }
     }
 }
 

@@ -554,7 +554,7 @@
     <string name="tools_extra_sub">流量记录、定时、Tasker</string>
     <string name="traffic_title">流量统计</string>
     <string name="traffic_subtitle">核心统计的代理流量</string>
-    <string name="traffic_row_sub">按天和按月</string>
+    <string name="traffic_row_sub">按天、周和月</string>
     <string name="traffic_today">今天</string>
     <string name="traffic_this_month">本月</string>
     <string name="traffic_by_day">按天</string>
@@ -599,4 +599,5 @@
     <string name="backup_scope_modules_desc">settings.ini、应用列表、核心配置</string>
     <string name="backup_scope_apps_desc">Boxy 设置：主题、主页、面板、镜像</string>
     <string name="backup_scope_both_desc">模块文件和 Boxy 设置</string>
+    <string name="traffic_by_week">按周</string>
 </resources>

@@ -210,22 +210,23 @@ private fun modeDescription(mode: String): String = when (mode) {
 private fun GeoGroup(title: String, geo: GeoIp?, loading: Boolean) {
     val dash = stringResource(R.string.common_dash)
     SheetGroup {
-        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(title, Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
+        Text(title, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
+        if (geo == null) {
             Text(
-                when {
-                    geo != null -> flagEmoji(geo.countryCode)
-                    loading -> stringResource(R.string.geo_loading)
-                    else -> stringResource(R.string.geo_unavailable)
-                },
+                stringResource(if (loading) R.string.geo_loading else R.string.geo_unavailable),
+                Modifier.padding(start = 16.dp, end = 16.dp, bottom = 10.dp),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Boxy.colors.text2,
             )
+        } else {
+            InfoRow(stringResource(R.string.geo_ip), geo.ip ?: dash)
+            InfoRow(
+                stringResource(R.string.geo_location),
+                (geo.location?.ifBlank { null } ?: dash) + flagEmoji(geo.countryCode).let { if (it.isEmpty()) "" else " $it" },
+            )
+            InfoRow(stringResource(R.string.geo_isp), geo.isp ?: dash)
+            InfoRow(stringResource(R.string.geo_asn), geo.asn ?: dash)
         }
-        InfoRow(stringResource(R.string.geo_ip), geo?.ip ?: dash)
-        InfoRow(stringResource(R.string.geo_location), geo?.location?.ifBlank { null } ?: dash)
-        InfoRow(stringResource(R.string.geo_isp), geo?.isp ?: dash)
-        InfoRow(stringResource(R.string.geo_asn), geo?.asn ?: dash)
     }
 }
 

@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">通信履歴、スケジュール、Tasker</string>
     <string name="traffic_title">通信量の統計</string>
     <string name="traffic_subtitle">コアが集計したプロキシ通信量</string>
-    <string name="traffic_row_sub">日別・月別</string>
+    <string name="traffic_row_sub">日別・週別・月別</string>
     <string name="traffic_today">今日</string>
     <string name="traffic_this_month">今月</string>
     <string name="traffic_by_day">日</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini、アプリ一覧、コアの設定</string>
     <string name="backup_scope_apps_desc">Boxy の設定: テーマ、ホーム、パネル、ミラー</string>
     <string name="backup_scope_both_desc">モジュールのファイルと Boxy の設定</string>
+    <string name="traffic_by_week">週</string>
 </resources>

@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Трафик тарихы, кесте, Tasker</string>
     <string name="traffic_title">Трафик статистикасы</string>
     <string name="traffic_subtitle">Ядро деректері бойынша прокси арқылы өткен трафик</string>
-    <string name="traffic_row_sub">Күндер және айлар бойынша</string>
+    <string name="traffic_row_sub">Күндер, апталар және айлар бойынша</string>
     <string name="traffic_today">Бүгін</string>
     <string name="traffic_this_month">Осы ай</string>
     <string name="traffic_by_day">Күндер</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, қолданбалар тізімдері, ядро конфигурациялары</string>
     <string name="backup_scope_apps_desc">Boxy баптаулары: тақырып, басты бет, панельдер, айна</string>
     <string name="backup_scope_both_desc">Модуль файлдары және Boxy баптаулары</string>
+    <string name="traffic_by_week">Апталар</string>
 </resources>

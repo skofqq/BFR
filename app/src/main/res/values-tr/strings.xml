@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Trafik geçmişi, zamanlama, Tasker</string>
     <string name="traffic_title">Trafik istatistikleri</string>
     <string name="traffic_subtitle">Çekirdeğe göre proxy trafiği</string>
-    <string name="traffic_row_sub">Günlere ve aylara göre</string>
+    <string name="traffic_row_sub">Günlere, haftalara ve aylara göre</string>
     <string name="traffic_today">Bugün</string>
     <string name="traffic_this_month">Bu ay</string>
     <string name="traffic_by_day">Günler</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, uygulama listeleri, çekirdek yapılandırmaları</string>
     <string name="backup_scope_apps_desc">Boxy ayarları: tema, ana sayfa, paneller, ayna</string>
     <string name="backup_scope_both_desc">Modül dosyaları ve Boxy ayarları</string>
+    <string name="traffic_by_week">Haftalar</string>
 </resources>

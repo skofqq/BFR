@@ -108,7 +108,7 @@ PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_s
         item {
             SectionCard(stringResource(R.string.tools_config), stringResource(R.string.tools_config_sub)) {
                 SettingsRow(BoxyIcons.Folder, stringResource(R.string.tools_row_manage), stringResource(R.string.tools_row_manage_sub)) { push(ROUTE_FILES) }
-                SettingsRow(BoxyIcons.Check, stringResource(R.string.tools_row_select), stringResource(R.string.tools_row_select_sub)) { push(ROUTE_CONFIGS) }
+                SettingsRow(BoxyIcons.Tune, stringResource(R.string.tools_row_select), stringResource(R.string.tools_row_select_sub)) { push(ROUTE_CONFIGS) }
                 SettingsRow(BoxyIcons.QrCode, stringResource(R.string.import_title), stringResource(R.string.import_row_sub), showDivider = false) { importChooser = true }
             }
         }
@@ -132,7 +132,12 @@ PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_s
         val hidden = listOf(NavExtra.APPS, NavExtra.LOGS).filter { it != navExtra }
         if (hidden.isNotEmpty()) {
             item {
-                SectionCard(stringResource(R.string.tools_more), stringResource(R.string.tools_more_sub)) {
+                val sectionTitle = when {
+                    hidden.size > 1 -> stringResource(R.string.tools_more)
+                    hidden.first() == NavExtra.APPS -> stringResource(R.string.tab_apps)
+                    else -> stringResource(R.string.tab_logs)
+                }
+                SectionCard(sectionTitle, stringResource(R.string.tools_more_sub)) {
                     hidden.forEachIndexed { i, page ->
                         val last = i == hidden.lastIndex
                         when (page) {

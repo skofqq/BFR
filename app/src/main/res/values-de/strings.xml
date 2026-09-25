@@ -584,7 +584,7 @@
     <string name="tools_extra_sub">Traffic-Verlauf, Zeitplan, Tasker</string>
     <string name="traffic_title">Traffic-Statistik</string>
     <string name="traffic_subtitle">Proxy-Traffic laut Kern</string>
-    <string name="traffic_row_sub">Nach Tagen und Monaten</string>
+    <string name="traffic_row_sub">Nach Tagen, Wochen und Monaten</string>
     <string name="traffic_today">Heute</string>
     <string name="traffic_this_month">Dieser Monat</string>
     <string name="traffic_by_day">Tage</string>
@@ -629,4 +629,5 @@
     <string name="backup_scope_modules_desc">settings.ini, App-Listen, Kern-Konfigurationen</string>
     <string name="backup_scope_apps_desc">Boxy-Einstellungen: Design, Startseite, Panels, Spiegel</string>
     <string name="backup_scope_both_desc">Moduldateien und Boxy-Einstellungen</string>
+    <string name="traffic_by_week">Wochen</string>
 </resources>

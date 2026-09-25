@@ -146,7 +146,7 @@ fun PanelScreen(contentPadding: PaddingValues, header: @Composable () -> Unit, k
             if (kind == PanelKind.CORE) {
                 HeaderAction(BoxyIcons.Palette, stringResource(R.string.dashboard_title)) { dashboardSheet = true }
             }
-            HeaderAction(BoxyIcons.Web, stringResource(R.string.panel_sheet_title)) { listSheet = true }
+            HeaderAction(BoxyIcons.Dashboard, stringResource(R.string.panel_sheet_title)) { listSheet = true }
             HeaderAction(BoxyIcons.Refresh, stringResource(R.string.action_refresh_page)) { webView?.reload() }
             Box {
                 HeaderAction(BoxyIcons.MoreVert, stringResource(R.string.action_more)) { menu = true }
