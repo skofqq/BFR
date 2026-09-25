@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.ui.components.BoxySheet
 import com.skofqq.boxy.ui.components.OptionRow
@@ -137,12 +138,13 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     }
 
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            item { SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.tools_network_sub), onBack) }
+        PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.tools_network_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             val s = state
             if (s == null) {
                 item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
-                return@LazyColumn
+                return@PinnedLazyPage
             }
             item {
                 SectionCard(stringResource(R.string.net_general), stringResource(R.string.net_general_sub)) {

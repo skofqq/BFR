@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.data.HomeSection
 import com.skofqq.boxy.data.MetricCard
 import com.skofqq.boxy.data.Prefs
@@ -77,12 +78,11 @@ fun HomeScreen(
         if (running || vm.busy != Busy.NONE) Toast.makeText(context, stopFirst, Toast.LENGTH_SHORT).show() else sheet = target
     }
 
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item {
-            PageHeader(stringResource(R.string.home_title), stringResource(R.string.home_subtitle)) {
+    PinnedLazyPage(contentPadding, header = {
+PageHeader(stringResource(R.string.home_title), stringResource(R.string.home_subtitle)) {
                 HeaderAction(BoxyIcons.Edit, stringResource(R.string.home_edit)) { sheet = HomeSheet.LAYOUT }
             }
-        }
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         when (val env = vm.env) {
             null -> item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
             Environment.READY -> {

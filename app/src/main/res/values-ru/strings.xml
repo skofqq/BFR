@@ -129,7 +129,7 @@
     <string name="badge_wan">WAN</string>
     <string name="ip_interface">Интерфейс: %1$s</string>
     <string name="ip_region">Регион: %1$s</string>
-    <string name="card_speed">Скорость сети</string>
+    <string name="card_speed">Скорость</string>
     <string name="badge_net">СЕТЬ</string>
     <string name="card_subscription">Подписка</string>
     <string name="badge_sub">ПОДП</string>
@@ -256,7 +256,7 @@
     <string name="config_create_folder">Создать папку</string>
     <string name="config_create_folder_helper">Создать новую папку в текущем каталоге</string>
     <string name="config_selected">Активный конфиг: %1$s</string>
-    <string name="config_badge_active">АКТИВНЫЙ</string>
+    <string name="config_badge_active">АКТИВНА</string>
     <string name="config_name_invalid">Введите корректное имя</string>
     <string name="config_placeholder_name">config.yaml</string>
     <string name="config_files_folders">Файлы и папки</string>
@@ -338,7 +338,7 @@
     <string name="update_webui_sub">Обновить файлы панели</string>
     <string name="update_core_sheet_title">Обновление ядра</string>
     <string name="update_tip_title">Важно</string>
-    <string name="update_tip_body">Перед обновлением лучше остановить сервис. Нажмите значок загрузки справа от пункта, затем перезапустите сервис, чтобы применить изменения.</string>
+    <string name="update_tip_body">Чтобы настройки применились корректно, вернитесь на эту страницу, нажмите значок загрузки/обновления справа от пункта и перезапустите сервис.</string>
     <string name="update_started">Обновление: %1$s…</string>
     <string name="update_completed">Обновлено: %1$s</string>
     <string name="update_failed">Не удалось обновить</string>
@@ -498,7 +498,7 @@
     <string name="service_status_restarting">Перезапуск сервиса</string>
     <string name="service_action_stop">Стоп</string>
     <string name="service_action_restart">Перезапуск</string>
-    <string name="qs_tile_label">Сервис Box</string>
+    <string name="qs_tile_label">Boxy</string>
     <string name="app_back_again">Нажмите «Назад» ещё раз для выхода</string>
 
     <string name="onboarding_title">Добро пожаловать</string>
@@ -551,4 +551,7 @@
     <string name="net_hotspot_proxy_on">Подключённые устройства идут через прокси</string>
     <string name="net_hotspot_proxy_off">Подключённые устройства идут напрямую</string>
     <string name="editor_wrap">Перенос строк</string>
+    <string name="config_folder">Папка</string>
+    <string name="config_tap_select">Нажмите для выбора</string>
+    <string name="config_hint">Нажмите на файл, чтобы сделать его активным. Нажатие на активный файл или долгое нажатие на любой открывает редактор.</string>
 </resources>

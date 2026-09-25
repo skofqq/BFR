@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.ui.components.BoxyTextField
 import com.skofqq.boxy.ui.components.SectionCard
@@ -97,12 +98,13 @@ fun SubscriptionScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     }
 
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            item { SubPageHeader(stringResource(R.string.tools_subscription), stringResource(R.string.tools_subscription_sub), onBack) }
+        PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.tools_subscription), stringResource(R.string.tools_subscription_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
             val s = state
             if (s == null) {
                 item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
-                return@LazyColumn
+                return@PinnedLazyPage
             }
             item {
                 SectionCard(stringResource(R.string.sub_general), stringResource(R.string.sub_general_sub)) {

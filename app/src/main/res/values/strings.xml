@@ -141,7 +141,7 @@
     <string name="badge_wan">WAN</string>
     <string name="ip_interface">Interface: %1$s</string>
     <string name="ip_region">Region: %1$s</string>
-    <string name="card_speed">Net speed</string>
+    <string name="card_speed">Speed</string>
     <string name="badge_net">NET</string>
     <string name="card_subscription">Subscription</string>
     <string name="badge_sub">SUB</string>
@@ -350,7 +350,7 @@
     <string name="update_webui_sub">Update dashboard assets</string>
     <string name="update_core_sheet_title">Core update</string>
     <string name="update_tip_title">Important</string>
-    <string name="update_tip_body">It is best to stop the service before updating. Tap the download icon on the right of an item, then restart the service to apply it.</string>
+    <string name="update_tip_body">To apply settings correctly, come back to this page, tap the download / update icon on the right of an item and restart the service.</string>
     <string name="update_started">Updating %1$s…</string>
     <string name="update_completed">Update completed: %1$s</string>
     <string name="update_failed">Update failed</string>
@@ -510,7 +510,7 @@
     <string name="service_status_restarting">Service restarting</string>
     <string name="service_action_stop">Stop</string>
     <string name="service_action_restart">Restart</string>
-    <string name="qs_tile_label">Box service</string>
+    <string name="qs_tile_label">Boxy</string>
     <string name="app_back_again">Press back again to exit</string>
 
     <string name="onboarding_title">Welcome</string>
@@ -563,4 +563,7 @@
     <string name="net_hotspot_proxy_on">Connected devices go through the proxy</string>
     <string name="net_hotspot_proxy_off">Connected devices use a direct connection</string>
     <string name="editor_wrap">Wrap lines</string>
+    <string name="config_folder">Folder</string>
+    <string name="config_tap_select">Tap to select</string>
+    <string name="config_hint">Tap a file to make it active, tap the active one or long-press any file to edit it.</string>
 </resources>

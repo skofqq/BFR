@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.data.NavExtra
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.ui.components.PageHeader
@@ -80,8 +81,9 @@ const val ROUTE_SUBSCRIPTION = "subscription"
 
 @Composable
 private fun ToolsHub(contentPadding: PaddingValues, navExtra: NavExtra, onOpenPage: (NavExtra) -> Unit, push: (String) -> Unit) {
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_subtitle)) }
+    PinnedLazyPage(contentPadding, header = {
+PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_subtitle))
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(stringResource(R.string.tools_config), stringResource(R.string.tools_config_sub)) {
                 SettingsRow(BoxyIcons.Folder, stringResource(R.string.tools_row_manage), stringResource(R.string.tools_row_manage_sub)) { push(ROUTE_FILES) }

@@ -32,6 +32,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -40,6 +44,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.RootFile
 import com.skofqq.boxy.root.RootFiles
@@ -97,10 +102,10 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
     }
 
     val status = if (current == "runs.log" || current == coreLog) stringResource(R.string.logs_status_current) else stringResource(R.string.logs_status_available)
-    LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = contentPadding) {
-        item { header() }
-        item {
-            SubPageHeader(
+    val palette = logPalette()
+    PinnedLazyPage(contentPadding, header = {
+header()
+SubPageHeader(
                 stringResource(R.string.logs_title),
                 current?.let { stringResource(R.string.logs_current, it, status) } ?: stringResource(R.string.logs_subtitle),
                 onBack,
@@ -114,9 +119,7 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
                 }
                 HeaderAction(BoxyIcons.Delete, stringResource(R.string.action_delete)) { if (current != null) deleteDialog = true }
             }
-        }
-        item {
-            Row(
+Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
@@ -125,7 +128,7 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
                     Chip("${f.name} · ${Format.bytes(context, f.size)}", f.name == current, Boxy.colors.accent) { current = f.name }
                 }
             }
-        }
+}, state = listState) {
         val l = lines
         when {
             files == null || l == null -> item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
@@ -134,12 +137,12 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
                 item { Box(Modifier.padding(top = 8.dp)) }
                 itemsIndexed(l, key = { i, _ -> i }) { _, line ->
                     Text(
-                        line,
+                        remember(line, palette) { highlight(line, palette) },
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp).background(Boxy.colors.card).padding(horizontal = 12.dp, vertical = 1.dp),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 11.sp,
                         lineHeight = 15.sp,
-                        color = lineColor(line),
+                        color = Boxy.colors.text,
                     )
                 }
             }
@@ -166,12 +169,79 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
     }
 }
 
+/** Colours of the log highlighter. */
+private data class LogPalette(
+    val time: Color,
+    val info: Color,
+    val warn: Color,
+    val error: Color,
+    val debug: Color,
+    val key: Color,
+    val tag: Color,
+    val address: Color,
+    val string: Color,
+)
+
 @Composable
-private fun lineColor(line: String): Color = when {
-    line.contains("Error", true) || line.contains("level=error") || line.contains("[E]") || line.contains("FATAL") -> Tints.red.fg
-    line.contains("Warn", true) || line.contains("level=warning") -> Tints.amber.fg
-    line.contains("Debug", true) -> Boxy.colors.text2
-    else -> Boxy.colors.text
+private fun logPalette() = LogPalette(
+    time = Boxy.colors.text2,
+    info = Tints.blue.fg,
+    warn = Tints.amber.fg,
+    error = Tints.red.fg,
+    debug = Tints.teal.fg,
+    key = if (Boxy.colors.isDark) Color(0xFFCE93D8) else Color(0xFF9C27B0),
+    tag = Tints.orange.fg,
+    address = Tints.green.fg,
+    string = if (Boxy.colors.isDark) Color(0xFF90CAF9) else Color(0xFF1A237E),
+)
+
+// Groups: 1 date/time, 2 level tag in brackets, 3 key=, 4 bare level word, 5 [tag], 6 ip[:port] / host:port, 7 "string".
+private val LOG_TOKENS = Regex(
+    "(\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:?\\d{2})?|\\b\\d{1,2}:\\d{2}(?::\\d{2}(?:\\.\\d+)?)?(?: ?[aApP][mM])?\\b|[+-]\\d{4}(?= \\d{4}-))" +
+        "|(\\[(?:Info|Warning|Warn|Error|Debug|Fatal|I|W|E|D)\\])" +
+        "|\\b(time|level|msg|err|error|proxy|rule|rulePayload)=" +
+        "|\\b(INFO|WARN|WARNING|ERROR|DEBUG|FATAL|TRACE|info|warning|error|debug|fatal)\\b" +
+        "|(\\[[A-Za-z][\\w./ -]{0,24}\\])" +
+        "|(\\b\\d{1,3}(?:\\.\\d{1,3}){3}(?::\\d+)?\\b|\\[[0-9a-fA-F:]+\\](?::\\d+)?|\\b[\\w.-]+\\.[a-z]{2,}:\\d+\\b)" +
+        "|(\"[^\"]*\")",
+)
+
+private fun levelColor(word: String, p: LogPalette): Color = when (word.trim('[', ']').lowercase()) {
+    "error", "e", "fatal" -> p.error
+    "warn", "warning", "w" -> p.warn
+    "debug", "d", "trace" -> p.debug
+    else -> p.info
+}
+
+/** Token-level colouring of box.log, mihomo / sing-box / xray logs. */
+private fun highlight(line: String, p: LogPalette): AnnotatedString = buildAnnotatedString {
+    val lower = line.lowercase()
+    val lineIsError = "[error]" in lower || "level=error" in lower || "level=fatal" in lower || " fatal " in lower || " error [" in lower
+    var pos = 0
+    for (m in LOG_TOKENS.findAll(line)) {
+        if (m.range.first > pos) {
+            val plain = line.substring(pos, m.range.first)
+            if (lineIsError) withStyle(SpanStyle(color = p.error)) { append(plain) } else append(plain)
+        }
+        val g = m.groups
+        val text = m.value
+        when {
+            g[1] != null -> withStyle(SpanStyle(color = p.time)) { append(text) }
+            g[2] != null -> withStyle(SpanStyle(color = levelColor(text, p), fontWeight = FontWeight.Bold)) { append(text) }
+            g[3] != null -> withStyle(SpanStyle(color = p.key)) { append(text) }
+            g[4] != null -> withStyle(SpanStyle(color = levelColor(text, p), fontWeight = FontWeight.Bold)) { append(text) }
+            g[5] != null -> withStyle(SpanStyle(color = p.tag)) { append(text) }
+            g[6] != null -> withStyle(SpanStyle(color = p.address)) { append(text) }
+            // mihomo quotes its timestamp: time="2026-...".
+            text.length > 5 && text[1].isDigit() && text[5] == '-' -> withStyle(SpanStyle(color = p.time)) { append(text) }
+            else -> withStyle(SpanStyle(color = if (lineIsError) p.error else p.string)) { append(text) }
+        }
+        pos = m.range.last + 1
+    }
+    if (pos < line.length) {
+        val rest = line.substring(pos)
+        if (lineIsError) withStyle(SpanStyle(color = p.error)) { append(rest) } else append(rest)
+    }
 }
 
 @Composable

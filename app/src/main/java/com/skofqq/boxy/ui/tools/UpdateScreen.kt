@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.RootTask
 import com.skofqq.boxy.ui.components.BoxySheet
@@ -101,23 +103,35 @@ fun UpdateScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     val subsTitle = stringResource(R.string.update_target_subscription)
     val webuiTitle = stringResource(R.string.update_target_webui)
 
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { SubPageHeader(stringResource(R.string.tools_update), stringResource(R.string.tools_update_sub), onBack) }
-        item {
-            Column(
-                Modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(RoundedCornerShape(22.dp)).background(Tints.amber.bg).padding(16.dp),
-            ) {
-                Text(stringResource(R.string.update_tip_title), style = MaterialTheme.typography.titleMedium, color = Tints.amber.fg)
-                Text(stringResource(R.string.update_tip_body), style = MaterialTheme.typography.bodyMedium, color = Boxy.colors.text)
-            }
-        }
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.tools_update), stringResource(R.string.tools_update_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(null) {
-                UpdateRow(BoxyIcons.Memory, stringResource(R.string.update_target_core), stringResource(R.string.update_core_sub)) { coreSheet = true }
-                UpdateRow(BoxyIcons.Subscriptions, subsTitle, stringResource(R.string.update_subscription_sub)) {
+                // "Important" note with an info tile, as in BFR.
+                Row(
+                    Modifier.fillMaxWidth().padding(horizontal = 14.dp).clip(RoundedCornerShape(20.dp))
+                        .background(Boxy.colors.accent.copy(alpha = 0.10f)).padding(horizontal = 14.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Boxy.colors.accent.copy(alpha = 0.14f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(BoxyIcons.Info, null, Modifier.size(22.dp), tint = Boxy.colors.accent)
+                    }
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.update_tip_title), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.accent)
+                        Text(stringResource(R.string.update_tip_body), style = MaterialTheme.typography.bodyMedium, color = Boxy.colors.text)
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+                UpdateRow(BoxyIcons.Storage, stringResource(R.string.update_target_core), stringResource(R.string.update_core_sub)) { coreSheet = true }
+                UpdateRow(BoxyIcons.Link, subsTitle, stringResource(R.string.update_subscription_sub)) {
                     launchTask(subsTitle, "${BoxModule.SCRIPTS}/box.tool subs")
                 }
-                UpdateRow(BoxyIcons.Web, webuiTitle, stringResource(R.string.update_webui_sub)) { dashboardSheet = true }
+                UpdateRow(BoxyIcons.Language, webuiTitle, stringResource(R.string.update_webui_sub)) { dashboardSheet = true }
             }
         }
     }
@@ -138,7 +152,7 @@ fun UpdateScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
                         Text(t.title, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
                         Text(stringResource(t.subtitle), style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2)
                     }
-                    Icon(BoxyIcons.Download, null, tint = Boxy.colors.accent)
+                    Icon(BoxyIcons.SystemUpdate, null, tint = Boxy.colors.text)
                 }
             }
         }
@@ -182,7 +196,7 @@ private fun UpdateRow(icon: androidx.compose.ui.graphics.vector.ImageVector, tit
             Text(title, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2, maxLines = 2)
         }
-        Icon(BoxyIcons.Download, null, Modifier.size(24.dp), tint = Boxy.colors.accent)
+        Icon(BoxyIcons.SystemUpdate, null, Modifier.size(24.dp), tint = Boxy.colors.text)
     }
 }
 

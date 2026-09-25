@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.skofqq.boxy.BoxyApp
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.data.Backup
 import com.skofqq.boxy.data.BackupScope
 import com.skofqq.boxy.data.DEFAULT_LATENCY_TARGETS
@@ -84,8 +85,9 @@ fun SystemBarsSheet(prefs: Prefs, onDismiss: () -> Unit) {
 @Composable
 fun AppearanceScreen(contentPadding: PaddingValues, prefs: Prefs, onBack: () -> Unit) {
     val blurSupported = Build.VERSION.SDK_INT >= 31
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { SubPageHeader(stringResource(R.string.settings_appearance_more), stringResource(R.string.settings_appearance_more_sub), onBack) }
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.settings_appearance_more), stringResource(R.string.settings_appearance_more_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(stringResource(R.string.settings_glass), stringResource(R.string.settings_glass_sub)) {
                 SwitchRow(
@@ -167,8 +169,9 @@ private fun SliderRow(title: String, subtitle: String, value: Float, enabled: Bo
 fun LatencyTargetsScreen(contentPadding: PaddingValues, prefs: Prefs, onBack: () -> Unit) {
     val context = LocalContext.current
     var targets by remember { mutableStateOf(prefs.latencyTargets) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { SubPageHeader(stringResource(R.string.settings_latency_targets), stringResource(R.string.settings_latency_targets_sub), onBack) }
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.settings_latency_targets), stringResource(R.string.settings_latency_targets_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         targets.forEachIndexed { i, t ->
             item {
                 SectionCard("#${i + 1}", null) {
@@ -235,8 +238,9 @@ fun BackupScreen(contentPadding: PaddingValues, prefs: Prefs, onBack: () -> Unit
         }
     }
 
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { SubPageHeader(stringResource(R.string.settings_backup), stringResource(R.string.settings_backup_sub), onBack) }
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.settings_backup), stringResource(R.string.settings_backup_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(RoundedCornerShape(50)).background(Boxy.colors.card).padding(4.dp)) {
                 listOf(false to R.string.backup_tab_backup, true to R.string.backup_tab_restore).forEach { (r, label) ->
@@ -369,8 +373,9 @@ private val LICENSES = listOf(
 @Composable
 fun LicensesScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     val context = LocalContext.current
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { SubPageHeader(stringResource(R.string.settings_licenses), stringResource(R.string.settings_licenses_sub), onBack) }
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(stringResource(R.string.settings_licenses), stringResource(R.string.settings_licenses_sub), onBack)
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(null) {
                 LICENSES.forEach { l ->

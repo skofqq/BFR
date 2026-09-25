@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.data.AppLanguage
 import com.skofqq.boxy.data.NavExtra
 import com.skofqq.boxy.data.Prefs
@@ -148,8 +149,9 @@ private fun SettingsMain(contentPadding: PaddingValues, prefs: Prefs, push: (Str
     )
     val barState = { opaque: Boolean -> context.getString(if (opaque) R.string.settings_bars_opaque else R.string.settings_bars_transparent) }
 
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { PageHeader(stringResource(R.string.settings_title), stringResource(R.string.settings_subtitle)) }
+    PinnedLazyPage(contentPadding, header = {
+PageHeader(stringResource(R.string.settings_title), stringResource(R.string.settings_subtitle))
+}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(stringResource(R.string.settings_appearance), stringResource(R.string.settings_appearance_sub)) {
                 SettingsRow(BoxyIcons.Palette, stringResource(R.string.settings_theme), themeChoices.firstOrNull { it.value == prefs.themeMode }?.title) { themeDialog = true }

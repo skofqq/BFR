@@ -135,12 +135,14 @@ fun PanelScreen(contentPadding: PaddingValues, header: @Composable () -> Unit, k
     }
 
     Column(Modifier.fillMaxSize().padding(contentPadding)) {
-        header()
-        SubPageHeader(
-            if (kind == PanelKind.CORE) stringResource(R.string.panel_title) else stringResource(R.string.substore_title),
-            current?.name,
-            null,
-        ) {
+        Row(Modifier.fillMaxWidth().padding(bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+            header()
+            Spacer(Modifier.weight(1f))
+            Row(
+                Modifier.padding(top = 8.dp, end = 12.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
             if (kind == PanelKind.CORE) {
                 HeaderAction(BoxyIcons.Palette, stringResource(R.string.dashboard_title)) { dashboardSheet = true }
             }
@@ -155,6 +157,7 @@ fun PanelScreen(contentPadding: PaddingValues, header: @Composable () -> Unit, k
                     })
                     DropdownMenuItem({ Text(stringResource(R.string.web_clear_cache)) }, { menu = false; clearDialog = true })
                 }
+            }
             }
         }
         Box(

@@ -3,6 +3,7 @@ package com.skofqq.boxy.ui.tools
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.RootFile
 import com.skofqq.boxy.root.RootFiles
@@ -77,6 +79,7 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
     var core by remember { mutableStateOf<String?>(null) }
     var active by remember { mutableStateOf<String?>(null) }
     var files by remember { mutableStateOf<List<RootFile>?>(null) }
+    var folders by remember { mutableStateOf<List<RootFile>>(emptyList()) }
     var reload by remember { mutableStateOf(0) }
     var createDialog by remember { mutableStateOf(false) }
     var downloadDialog by remember { mutableStateOf(false) }
@@ -86,13 +89,14 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
         core = c
         val (dir, key) = coreConfig(c)
         active = BoxModule.readSetting(key)
-        files = RootFiles.list("${BoxModule.BOX_DIR}/$dir").filter { !it.isDir && it.extension in CONFIG_EXTENSIONS }
+        val all = RootFiles.list("${BoxModule.BOX_DIR}/$dir")
+        folders = all.filter { it.isDir && !it.name.startsWith(".") }
+        files = all.filter { !it.isDir && it.extension in CONFIG_EXTENSIONS }
     }
     val dir = "${BoxModule.BOX_DIR}/${coreConfig(core ?: "clash").first}"
 
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            SubPageHeader(
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(
                 stringResource(R.string.tools_config),
                 files?.let { stringResource(R.string.config_files_active_summary, it.size, active ?: "—") },
                 onBack,
@@ -100,30 +104,14 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
                 HeaderAction(BoxyIcons.Download, stringResource(R.string.config_download)) { downloadDialog = true }
                 HeaderAction(BoxyIcons.Folder, stringResource(R.string.tools_row_manage)) { onManage(dir) }
             }
-        }
+}, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item {
-            SectionCard(stringResource(R.string.config_active), core) {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(BoxyIcons.File, null, Modifier.size(22.dp), tint = Boxy.colors.accent)
-                    Spacer(Modifier.width(12.dp))
-                    Text(active ?: stringResource(R.string.config_none), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text)
-                    if (active != null) {
-                        Text(
-                            stringResource(R.string.config_edit),
-                            Modifier.clip(RoundedCornerShape(50)).clickable { onEdit("$dir/$active") }.padding(horizontal = 12.dp, vertical = 6.dp),
-                            color = Boxy.colors.accent,
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    }
-                }
-            }
-        }
-        item {
-            SectionCard(stringResource(R.string.config_files), stringResource(R.string.config_supported)) {
+            // One list like BFR: the core's folders first, then its config files.
+            SectionCard(null) {
                 val list = files
                 when {
                     list == null -> Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-                    list.isEmpty() -> Column(Modifier.padding(horizontal = 18.dp, vertical = 8.dp)) {
+                    list.isEmpty() && folders.isEmpty() -> Column(Modifier.padding(horizontal = 18.dp, vertical = 8.dp)) {
                         Text(stringResource(R.string.config_no_files), color = Boxy.colors.text2)
                         Text(
                             stringResource(R.string.config_create_file),
@@ -131,31 +119,61 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
                             color = Boxy.colors.accent,
                         )
                     }
-                    else -> list.forEach { f ->
-                        val isActive = f.name == active
-                        Row(
-                            Modifier.fillMaxWidth().clickable {
-                                scope.launch {
-                                    val c = core ?: return@launch
-                                    if (BoxModule.writeSetting(coreConfig(c).second, f.name)) {
-                                        active = f.name
-                                        Toast.makeText(context, context.getString(R.string.config_selected, f.name), Toast.LENGTH_SHORT).show()
+                    else -> {
+                        val rows = folders.size + list.size
+                        var index = 0
+                        folders.forEach { f ->
+                            index++
+                            ConfigRow(
+                                icon = BoxyIcons.Folder,
+                                iconTint = Boxy.colors.text,
+                                iconBg = Boxy.colors.surface2,
+                                title = f.name,
+                                subtitle = stringResource(R.string.config_folder),
+                                badge = null,
+                                divider = index < rows,
+                                onClick = { onManage(f.path) },
+                                onLongClick = { onManage(f.path) },
+                            )
+                        }
+                        list.forEach { f ->
+                            index++
+                            val isActive = f.name == active
+                            ConfigRow(
+                                icon = BoxyIcons.File,
+                                iconTint = Tints.green.fg,
+                                iconBg = Tints.green.bg,
+                                title = f.name,
+                                subtitle = stringResource(if (isActive) R.string.config_active else R.string.config_tap_select),
+                                badge = if (isActive) stringResource(R.string.config_badge_active) else null,
+                                divider = index < rows,
+                                onClick = {
+                                    if (isActive) {
+                                        onEdit(f.path)
+                                    } else {
+                                        scope.launch {
+                                            val c = core ?: return@launch
+                                            if (BoxModule.writeSetting(coreConfig(c).second, f.name)) {
+                                                active = f.name
+                                                Toast.makeText(context, context.getString(R.string.config_selected, f.name), Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
                                     }
-                                }
-                            }.padding(horizontal = 18.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(f.name, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text("${Format.bytes(context, f.size)} · ${Format.dateTime(f.modified)}", style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2)
-                            }
-                            if (isActive) Badge(stringResource(R.string.config_badge_active), Tints.green)
-                            Spacer(Modifier.width(8.dp))
-                            Icon(BoxyIcons.Edit, stringResource(R.string.config_edit), Modifier.size(22.dp).clickable { onEdit(f.path) }, tint = Boxy.colors.text2)
+                                },
+                                onLongClick = { onEdit(f.path) },
+                            )
                         }
                     }
                 }
             }
+        }
+        item {
+            Text(
+                stringResource(R.string.config_hint),
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = Boxy.colors.text2,
+            )
         }
     }
 
@@ -177,6 +195,48 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
     }
     if (downloadDialog) {
         DownloadDialog(dir, onDone = { downloadDialog = false; reload++ }, onDismiss = { downloadDialog = false })
+    }
+}
+
+/** Row of the config list: coloured icon tile, title, subtitle, optional ACTIVE badge and a chevron. */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+private fun ConfigRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    iconTint: androidx.compose.ui.graphics.Color,
+    iconBg: androidx.compose.ui.graphics.Color,
+    title: String,
+    subtitle: String,
+    badge: String?,
+    divider: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
+    Column {
+        Row(
+            Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick).padding(horizontal = 18.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(iconBg), contentAlignment = Alignment.Center) {
+                Icon(icon, null, Modifier.size(22.dp), tint = iconTint)
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleMedium, color = Boxy.colors.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = Boxy.colors.text2, maxLines = 1)
+            }
+            if (badge != null) {
+                Text(
+                    badge,
+                    Modifier.clip(RoundedCornerShape(10.dp)).background(Boxy.colors.accent).padding(horizontal = 12.dp, vertical = 5.dp),
+                    color = androidx.compose.ui.graphics.Color.White,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Spacer(Modifier.width(6.dp))
+            }
+            Icon(BoxyIcons.ChevronRight, null, Modifier.size(20.dp), tint = Boxy.colors.text2.copy(alpha = 0.75f))
+        }
+        if (divider) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 76.dp, end = 18.dp), color = Boxy.colors.outline)
     }
 }
 
@@ -202,9 +262,8 @@ fun FileManagerScreen(contentPadding: PaddingValues, dir: String, onBack: () -> 
     }
 
     val shown = results ?: files?.filter { query.isBlank() || it.name.contains(query, true) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item {
-            SubPageHeader(
+    PinnedLazyPage(contentPadding, header = {
+SubPageHeader(
                 if (dir == BoxModule.BOX_DIR) stringResource(R.string.config_files_folders) else dir.substringAfterLast('/'),
                 dir,
                 onBack,
@@ -223,7 +282,7 @@ fun FileManagerScreen(contentPadding: PaddingValues, dir: String, onBack: () -> 
                     }
                 }
             }
-        }
+}, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (searching) {
             item {
                 BoxyTextField(

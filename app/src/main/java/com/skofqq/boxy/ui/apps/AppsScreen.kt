@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.skofqq.boxy.R
+import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.ui.components.BoxySheet
 import com.skofqq.boxy.ui.components.HeaderAction
 import com.skofqq.boxy.ui.components.SheetButtons
@@ -85,10 +86,9 @@ fun AppsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
     }
 
     Box(Modifier.fillMaxSize()) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = contentPadding) {
-            item { header() }
-            item {
-                Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        PinnedLazyPage(contentPadding, header = {
+header()
+Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
                         Text(stringResource(R.string.apps_title), style = MaterialTheme.typography.headlineLarge, color = Boxy.colors.text)
                         Spacer(Modifier.height(6.dp))
@@ -111,10 +111,8 @@ fun AppsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
                         }
                     }
                 }
-            }
-            item {
-                ModeSwitch(vm.mode, enabled = !vm.coreRouting, onChange = vm::changeMode)
-            }
+ModeSwitch(vm.mode, enabled = !vm.coreRouting, onChange = vm::changeMode)
+}) {
             if (searching) {
                 item { SearchField(vm.query) { vm.query = it } }
             }
