@@ -38,6 +38,37 @@ is_wifi_connected() {
   fi
 }
 
+# Operator names and MCC+MNC codes of the SIM used for mobile data, one per line.
+# On dual SIM phones the data SIM is picked when the slot can be found; otherwise all SIMs are listed.
+get_sim_operators() {
+  local alpha numeric sub slot
+  alpha=$(getprop gsm.sim.operator.alpha)
+  numeric=$(getprop gsm.sim.operator.numeric)
+  [ -z "$alpha" ] && alpha=$(getprop gsm.operator.alpha)
+  [ -z "$numeric" ] && numeric=$(getprop gsm.operator.numeric)
+  sub=$(settings get global multi_sim_data_call 2>/dev/null)
+  slot=$(dumpsys isub 2>/dev/null | grep -E "id=${sub}[ ,]" | grep -oE "simSlotIndex=[0-9]+" | head -n1 | cut -d= -f2)
+  if echo "$alpha$numeric" | grep -q ',' && [ -n "$slot" ]; then
+    echo "$alpha" | cut -d, -f$((slot + 1))
+    echo "$numeric" | cut -d, -f$((slot + 1))
+  else
+    echo "$alpha" | tr ',' '\n'
+    echo "$numeric" | tr ',' '\n'
+  fi
+}
+
+# 0 when the current SIM operator is in sim_operators_list (case-insensitive).
+is_listed_sim() {
+  local ops item
+  ops=$(get_sim_operators | busybox awk 'NF')
+  for item in "${sim_operators_list[@]}"; do
+    item=$(echo "$item" | xargs)
+    [ -z "$item" ] && continue
+    echo "$ops" | grep -qixF -- "$item" && return 0
+  done
+  return 1
+}
+
 is_allowed_wifi() {
   ssid_list="$(IFS=,; echo "${wifi_ssids_list[*]}")"
 

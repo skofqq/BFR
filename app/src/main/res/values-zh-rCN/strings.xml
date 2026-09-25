@@ -600,4 +600,14 @@
     <string name="backup_scope_apps_desc">Boxy 设置：主题、主页、面板、镜像</string>
     <string name="backup_scope_both_desc">模块文件和 Boxy 设置</string>
     <string name="traffic_by_week">按周</string>
+    <string name="net_sim_title">移动网络</string>
+    <string name="net_sim_sub">无 Wi‑Fi 时的规则（需开启“Wi-Fi 断开时使用”）</string>
+    <string name="net_sim_matching">按 SIM 运营商匹配</string>
+    <string name="net_sim_matching_sub">根据数据 SIM 的运营商决定</string>
+    <string name="net_sim_list_mode">运营商列表模式</string>
+    <string name="net_sim_whitelist_sub">仅对列表中的运营商使用代理</string>
+    <string name="net_sim_blacklist_sub">除列表中的运营商外都使用代理</string>
+    <string name="net_hint_sim">运营商或 MCC+MNC，例如 China Mobile 或 46000</string>
+    <string name="net_sim_picker_title">手机中的 SIM 卡</string>
+    <string name="net_sim_picker_empty">未找到 SIM 卡</string>
 </resources>

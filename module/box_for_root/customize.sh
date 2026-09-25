@@ -215,7 +215,7 @@ restore_ini() {
   target_ini="/data/adb/box/settings.ini"
 
   # List of keys to restore (separate with spaces)
-  keys="network_mode bin_name ipv6 xclash_option renew update_subscription run_crontab interva_update update_geo subscription_url_clash subscription_url_singbox name_clash_config clash_config name_provide_clash_config clash_provide_path custom_rules_subs name_provide_clash_rules name_sing_config name_xray_config name_v2fly_config name_hysteria_config tproxy_port redir_port box_user_group cgroup_memcg memcg_limit cgroup_cpuset allow_cpu cgroup_blkio weight enable_network_service_control use_module_on_wifi_disconnect use_module_on_wifi use_ssid_matching use_wifi_list_mode wifi_ssids_list wifi_bssids_list mac_filter mac_mode macs_list inotify_log_enabled"
+  keys="network_mode bin_name ipv6 xclash_option renew update_subscription run_crontab interva_update update_geo subscription_url_clash subscription_url_singbox name_clash_config clash_config name_provide_clash_config clash_provide_path custom_rules_subs name_provide_clash_rules name_sing_config name_xray_config name_v2fly_config name_hysteria_config tproxy_port redir_port box_user_group cgroup_memcg memcg_limit cgroup_cpuset allow_cpu cgroup_blkio weight enable_network_service_control use_module_on_wifi_disconnect use_module_on_wifi use_ssid_matching use_wifi_list_mode wifi_ssids_list wifi_bssids_list use_sim_matching use_sim_list_mode sim_operators_list mac_filter mac_mode macs_list inotify_log_enabled"
 
   for key in $keys; do
       value=$(grep "^$key=" "$backup_ini")
@@ -324,6 +324,34 @@ fi
 # }
 # create_resolv
 
+# Test the active config with the core that is already installed, so a broken file is reported now
+check_active_config() {
+  local ini="/data/adb/box/settings.ini" core name dir bin
+  core=$(grep -m1 '^bin_name=' "$ini" | cut -d= -f2 | tr -d '"')
+  case "$core" in
+    clash) name=$(grep -m1 '^name_clash_config=' "$ini" | cut -d= -f2 | tr -d '"'); bin="/data/adb/box/bin/xclash/$(grep -m1 '^xclash_option=' "$ini" | cut -d= -f2 | tr -d '"')" ;;
+    sing-box) name=$(grep -m1 '^name_sing_config=' "$ini" | cut -d= -f2 | tr -d '"'); bin="/data/adb/box/bin/sing-box" ;;
+    *) return 0 ;;
+  esac
+  [ "$core" = "clash" ] && [ ! -x "$bin" ] && bin="/data/adb/box/bin/xclash/mihomo"
+  dir="/data/adb/box/$core"
+  [ -x "$bin" ] && [ -f "$dir/$name" ] || return 0
+  ui_print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  ui_print "— $(t 'Checking the active config' 'Проверка активной конфигурации'): $core → $name"
+  if [ "$core" = "clash" ]; then
+    out=$(timeout 60 "$bin" -t -d "$dir" -f "$dir/$name" 2>&1)
+  else
+    out=$(timeout 60 "$bin" check -D "$dir" -c "$dir/$name" 2>&1)
+  fi
+  if [ $? -eq 0 ]; then
+    ui_print "— ✅ $(t 'Config is valid' 'Конфигурация в порядке')"
+  else
+    ui_print "! ❌ $(t 'The core rejected the config, the service will not start with it:' 'Ядро не приняло конфигурацию, с ней сервис не запустится:')"
+    echo "$out" | grep -iE 'error|fatal|failed|yaml:' | tail -n 3 | while read -r line; do ui_print "     ${line}"; done
+  fi
+}
+check_active_config
+
 # Module description in the manager's module list
 if [ "$BOX_LANG" = "ru" ]; then
   sed -i "s/^description=.*/description=Прокси-туннель на Android через sing-box, clash, v2ray, hysteria и xray/" $MODPATH/module.prop
@@ -354,4 +382,4 @@ ui_print "     ↳  $(t 'You can now run: su -c /dev/sbfr' 'Теперь мож�
 ui_print ""
 # Complete installation
 ui_print "— $(t 'Installation complete. Please reboot your device.' 'Установка завершена. Перезагрузите устройство.')"
-ui_print "— $(t 'Report issues to t.me.taamarin' 'О проблемах сообщайте: t.me/taamarin')"
+ui_print "— $(t 'Report issues: github.com/skofqq/BFR/issues' 'О проблемах сообщайте: github.com/skofqq/BFR/issues')"

@@ -642,4 +642,14 @@
     <string name="backup_scope_apps_desc">Настройки Boxy: тема, главная, панели, зеркало</string>
     <string name="backup_scope_both_desc">Файлы модуля и настройки Boxy</string>
     <string name="traffic_by_week">Недели</string>
+    <string name="net_sim_title">Мобильная сеть</string>
+    <string name="net_sim_sub">Правила, когда Wi‑Fi отключён (при «При отключении Wi-Fi»)</string>
+    <string name="net_sim_matching">Совпадение по оператору SIM</string>
+    <string name="net_sim_matching_sub">Решать по оператору SIM для мобильных данных</string>
+    <string name="net_sim_list_mode">Режим списка операторов</string>
+    <string name="net_sim_whitelist_sub">Прокси только у операторов из списка</string>
+    <string name="net_sim_blacklist_sub">Прокси у всех операторов, кроме указанных</string>
+    <string name="net_hint_sim">Оператор или MCC+MNC, напр. MTS или 25001</string>
+    <string name="net_sim_picker_title">SIM-карты в телефоне</string>
+    <string name="net_sim_picker_empty">SIM не найдена</string>
 </resources>

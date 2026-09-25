@@ -654,4 +654,14 @@
     <string name="backup_scope_apps_desc">Boxy preferences: theme, layout, panels, mirror</string>
     <string name="backup_scope_both_desc">Module files and Boxy preferences</string>
     <string name="traffic_by_week">Weeks</string>
+    <string name="net_sim_title">Mobile network</string>
+    <string name="net_sim_sub">Rules when Wi‑Fi is off (with “Use on Wi-Fi disconnect”)</string>
+    <string name="net_sim_matching">Match SIM operator</string>
+    <string name="net_sim_matching_sub">Decide by the operator of the data SIM</string>
+    <string name="net_sim_list_mode">Operator list mode</string>
+    <string name="net_sim_whitelist_sub">Proxy only on listed operators</string>
+    <string name="net_sim_blacklist_sub">Proxy on all operators except listed</string>
+    <string name="net_hint_sim">Operator or MCC+MNC, e.g. MTS or 25001</string>
+    <string name="net_sim_picker_title">SIM cards in the phone</string>
+    <string name="net_sim_picker_empty">No SIM found</string>
 </resources>

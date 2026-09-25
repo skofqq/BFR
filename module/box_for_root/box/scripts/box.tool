@@ -373,6 +373,33 @@ upgeox() {
   fi
 }
 
+# Tests a config with the current core like box.service does before start.
+# Returns 0 when the core accepts it or when there is no core binary to test with yet.
+check_config() {
+  local file="$1" bin="${bin_dir}/${bin_name}"
+  if [ "${bin_name}" = "clash" ] && [ ! -x "${bin}" ]; then
+    bin="${bin_dir}/xclash/${xclash_option:-mihomo}"
+  fi
+  [ -x "${bin}" ] || return 0
+  case "${bin_name}" in
+    clash) timeout 60 "${bin}" -t -d "${box_dir}/${bin_name}" -f "${file}" > "${box_run}/check.log" 2>&1 ;;
+    sing-box) timeout 60 "${bin}" check -D "${box_dir}/${bin_name}" -c "${file}" > "${box_run}/check.log" 2>&1 ;;
+    *) return 0 ;;
+  esac
+}
+
+# Puts back the previous file after a failed check.
+rollback_config() {
+  local file="$1"
+  log Error "$(tail -n 5 "${box_run}/check.log" 2>/dev/null)"
+  if [ -f "${file}.bak" ]; then
+    mv -f "${file}.bak" "${file}"
+    log Warning "New config failed the check, the previous ${file##*/} is kept"
+  else
+    log Warning "New config failed the check and there is no previous ${file##*/} to restore"
+  fi
+}
+
 # Check and update subscription
 upsubs() {
   yq="yq"
@@ -432,10 +459,16 @@ upsubs() {
 
                   if [ "${custom_rules_subs}" = "true" ]; then
                     if ${yq} '.rules' "${update_file_name}" >/dev/null; then
+                      cp -f "${clash_config}" "${clash_config}.bak"
                       ${yq} '.rules' "${update_file_name}" > "${clash_provide_rules}"
                       ${yq} -i '{"rules": .}' "${clash_provide_rules}"
                       ${yq} -i 'del(.rules)' "${clash_config}"
                       cat "${clash_provide_rules}" >> "${clash_config}"
+                      if ! check_config "${clash_config}"; then
+                        rollback_config "${clash_config}"
+                        return 1
+                      fi
+                      rm -f "${clash_config}.bak"
                     fi
                   fi
 
@@ -459,6 +492,10 @@ upsubs() {
                 fi
 
               else
+                if ! check_config "${update_file_name}"; then
+                  rollback_config "${update_file_name}"
+                  return 1
+                fi
                 if [ -f "${box_pid}" ]; then
                   kill -0 "$(<"${box_pid}" 2>/dev/null)" && \
                   $scripts_dir/box.service restart 2>/dev/null
@@ -491,6 +528,10 @@ upsubs() {
           log Debug "Downloading ${update_file_name}"
           if upfile "${update_file_name}" "${subscription_url_singbox}"; then
             log Info "${update_file_name} saved"
+            if ! check_config "${update_file_name}"; then
+              rollback_config "${update_file_name}"
+              return 1
+            fi
             if [ -f "${box_pid}" ]; then
               kill -0 "$(<"${box_pid}" 2>/dev/null)" && \
               $scripts_dir/box.service restart 2>/dev/null

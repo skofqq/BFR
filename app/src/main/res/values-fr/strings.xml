@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Réglages de Boxy : thème, accueil, panneaux, miroir</string>
     <string name="backup_scope_both_desc">Fichiers du module et réglages de Boxy</string>
     <string name="traffic_by_week">Semaines</string>
+    <string name="net_sim_title">Réseau mobile</string>
+    <string name="net_sim_sub">Règles sans Wi‑Fi (avec « À la déconnexion Wi-Fi »)</string>
+    <string name="net_sim_matching">Correspondance par opérateur SIM</string>
+    <string name="net_sim_matching_sub">Décider selon l’opérateur de la SIM de données</string>
+    <string name="net_sim_list_mode">Mode de la liste d’opérateurs</string>
+    <string name="net_sim_whitelist_sub">Proxy seulement chez les opérateurs listés</string>
+    <string name="net_sim_blacklist_sub">Proxy chez tous sauf les opérateurs listés</string>
+    <string name="net_hint_sim">Opérateur ou MCC+MNC, ex. Orange ou 20801</string>
+    <string name="net_sim_picker_title">Cartes SIM du téléphone</string>
+    <string name="net_sim_picker_empty">Aucune SIM trouvée</string>
 </resources>

@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Налады Boxy: тэма, галоўная, панэлі, люстэрка</string>
     <string name="backup_scope_both_desc">Файлы модуля і налады Boxy</string>
     <string name="traffic_by_week">Тыдні</string>
+    <string name="net_sim_title">Мабільная сетка</string>
+    <string name="net_sim_sub">Правілы, калі Wi‑Fi адключаны (з «Пры адключэнні Wi-Fi»)</string>
+    <string name="net_sim_matching">Супадзенне па аператары SIM</string>
+    <string name="net_sim_matching_sub">Вырашаць па аператары SIM для мабільных даных</string>
+    <string name="net_sim_list_mode">Рэжым спіса аператараў</string>
+    <string name="net_sim_whitelist_sub">Проксі толькі ў аператараў са спіса</string>
+    <string name="net_sim_blacklist_sub">Проксі ва ўсіх аператараў, акрамя пазначаных</string>
+    <string name="net_hint_sim">Аператар або MCC+MNC, напр. A1 або 25701</string>
+    <string name="net_sim_picker_title">SIM-карты ў тэлефоне</string>
+    <string name="net_sim_picker_empty">SIM не знойдзена</string>
 </resources>

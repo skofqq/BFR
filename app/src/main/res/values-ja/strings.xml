@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Boxy の設定: テーマ、ホーム、パネル、ミラー</string>
     <string name="backup_scope_both_desc">モジュールのファイルと Boxy の設定</string>
     <string name="traffic_by_week">週</string>
+    <string name="net_sim_title">モバイルネットワーク</string>
+    <string name="net_sim_sub">Wi‑Fi がないときのルール（「Wi-Fi 切断時に使用」と併用）</string>
+    <string name="net_sim_matching">SIM 事業者で照合</string>
+    <string name="net_sim_matching_sub">データ SIM の事業者で判断</string>
+    <string name="net_sim_list_mode">事業者リストのモード</string>
+    <string name="net_sim_whitelist_sub">リストの事業者でのみプロキシ</string>
+    <string name="net_sim_blacklist_sub">リスト以外の事業者でプロキシ</string>
+    <string name="net_hint_sim">事業者名または MCC+MNC（例 docomo、44010）</string>
+    <string name="net_sim_picker_title">端末の SIM カード</string>
+    <string name="net_sim_picker_empty">SIM が見つかりません</string>
 </resources>

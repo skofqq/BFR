@@ -61,6 +61,7 @@ import kotlinx.coroutines.withContext
 private val NET_KEYS = listOf(
     "enable_network_service_control", "use_module_on_wifi_disconnect", "use_module_on_wifi", "use_ssid_matching",
     "use_wifi_list_mode", "wifi_ssids_list", "wifi_bssids_list", "inotify_log_enabled", "mac_filter", "mac_mode", "macs_list",
+    "use_sim_matching", "use_sim_list_mode", "sim_operators_list",
 )
 
 private data class NetState(
@@ -75,6 +76,10 @@ private data class NetState(
     val macFilter: Boolean?,
     val macWhitelist: Boolean,
     val macs: List<String>?,
+    /** Null when the installed module has no SIM rules (older than ru.3). */
+    val simMatching: Boolean?,
+    val simWhitelist: Boolean,
+    val sims: List<String>?,
 )
 
 data class WifiNetwork(val ssid: String, val bssid: String, val rssi: Int)
@@ -90,6 +95,8 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     var macModeSheet by remember { mutableStateOf(false) }
     var wifiPickFor by remember { mutableStateOf<Pair<Boolean, Int>?>(null) } // (isBssid, index)
     var macPickFor by remember { mutableStateOf<Int?>(null) }
+    var simModeSheet by remember { mutableStateOf(false) }
+    var simPickFor by remember { mutableStateOf<Int?>(null) }
     var hotspotProxy by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(Unit) { hotspotProxy = BoxModule.hotspotProxyEnabled() }
@@ -108,6 +115,9 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
             macFilter = raw["mac_filter"]?.let { BoxModule.unquote(it) == "true" },
             macWhitelist = BoxModule.unquote(raw["mac_mode"]) == "whitelist",
             macs = raw["macs_list"]?.let { BoxModule.parseArray(it) },
+            simMatching = raw["use_sim_matching"]?.let { BoxModule.unquote(it) == "true" },
+            simWhitelist = BoxModule.unquote(raw["use_sim_list_mode"]) != "blacklist",
+            sims = raw["sim_operators_list"]?.let { BoxModule.parseArray(it) },
         )
         original = s
         state = s
@@ -123,6 +133,10 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
                 add("use_ssid_matching" to s.ssidMatching.toString())
                 add("use_wifi_list_mode" to if (s.whitelist) "whitelist" else "blacklist")
                 add("inotify_log_enabled" to s.log.toString())
+                if (s.simMatching != null) {
+                    add("use_sim_matching" to s.simMatching.toString())
+                    add("use_sim_list_mode" to if (s.simWhitelist) "whitelist" else "blacklist")
+                }
                 if (s.macFilter != null) {
                     add("mac_filter" to s.macFilter.toString())
                     add("mac_mode" to if (s.macWhitelist) "whitelist" else "blacklist")
@@ -132,6 +146,7 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
             ok = ok && BoxModule.writeSettingRaw("wifi_ssids_list", BoxModule.toArray(s.ssids.filter { it.isNotBlank() }))
             if (s.bssids != null) ok = ok && BoxModule.writeSettingRaw("wifi_bssids_list", BoxModule.toArray(s.bssids.filter { it.isNotBlank() }))
             if (s.macs != null) ok = ok && BoxModule.writeSettingRaw("macs_list", BoxModule.toArray(s.macs.filter { it.isNotBlank() }))
+            if (s.sims != null) ok = ok && BoxModule.writeSettingRaw("sim_operators_list", BoxModule.toArray(s.sims.filter { it.isNotBlank() }))
             if (ok) original = s
             Toast.makeText(context, if (ok) R.string.saved else R.string.net_save_failed, Toast.LENGTH_SHORT).show()
         }
@@ -180,6 +195,33 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                             stringResource(R.string.net_hint_bssid),
                             onPick = { wifiPickFor = true to it },
                             pickIcon = BoxyIcons.Wifi,
+                        )
+                    }
+                }
+            }
+            if (s.simMatching != null && s.sims != null) {
+                item {
+                    SectionCard(stringResource(R.string.net_sim_title), stringResource(R.string.net_sim_sub)) {
+                        SwitchRow(
+                            BoxyIcons.SimCard,
+                            stringResource(R.string.net_sim_matching),
+                            stringResource(R.string.net_sim_matching_sub),
+                            s.simMatching,
+                            enabled = s.enabled && s.onDisconnect,
+                        ) { state = s.copy(simMatching = it) }
+                        SettingsRow(
+                            if (s.simWhitelist) BoxyIcons.CheckCircle else BoxyIcons.Block,
+                            stringResource(R.string.net_sim_list_mode),
+                            stringResource(if (s.simWhitelist) R.string.net_sim_whitelist_sub else R.string.net_sim_blacklist_sub),
+                            showDivider = false,
+                        ) { simModeSheet = true }
+                        Spacer(Modifier.height(8.dp))
+                        StringListEditor(
+                            s.sims.ifEmpty { listOf("") },
+                            { state = s.copy(sims = it) },
+                            stringResource(R.string.net_hint_sim),
+                            onPick = { simPickFor = it },
+                            pickIcon = BoxyIcons.SimCard,
                         )
                     }
                 }
@@ -249,6 +291,19 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
         BoxySheet(stringResource(R.string.net_mac_title), null, { macModeSheet = false }) {
             OptionRow(stringResource(R.string.net_mac_whitelist), stringResource(R.string.net_mac_whitelist_sub), s.macWhitelist) { state = s.copy(macWhitelist = true); macModeSheet = false }
             OptionRow(stringResource(R.string.net_mac_blacklist), stringResource(R.string.net_mac_blacklist_sub), !s.macWhitelist) { state = s.copy(macWhitelist = false); macModeSheet = false }
+        }
+    }
+    if (simModeSheet && s != null) {
+        BoxySheet(stringResource(R.string.net_sim_list_mode), null, { simModeSheet = false }) {
+            OptionRow(stringResource(R.string.net_mode_whitelist), stringResource(R.string.net_sim_whitelist_sub), s.simWhitelist) { state = s.copy(simWhitelist = true); simModeSheet = false }
+            OptionRow(stringResource(R.string.net_mode_blacklist), stringResource(R.string.net_sim_blacklist_sub), !s.simWhitelist) { state = s.copy(simWhitelist = false); simModeSheet = false }
+        }
+    }
+    simPickFor?.let { index ->
+        SimPickerSheet(onDismiss = { simPickFor = null }) { value ->
+            val cur = state ?: return@SimPickerSheet
+            state = cur.copy(sims = (cur.sims ?: emptyList()).ifEmpty { listOf("") }.toMutableList().also { it[index.coerceAtMost(it.lastIndex)] = value })
+            simPickFor = null
         }
     }
     wifiPickFor?.let { (isBssid, index) ->
@@ -348,6 +403,32 @@ private fun HotspotPickerSheet(onDismiss: () -> Unit, onPick: (HotspotClient) ->
             l == null -> Text(stringResource(R.string.net_mac_picker_loading), color = Boxy.colors.text2)
             l.isEmpty() -> Text(stringResource(R.string.net_mac_picker_empty), color = Boxy.colors.text2)
             else -> l.forEach { c -> PickRow(c.name ?: c.ip, "${c.mac} · ${c.iface}") { onPick(c) } }
+        }
+    }
+}
+
+/** Operator names and MCC+MNC codes of the SIM cards in the phone. */
+@Composable
+private fun SimPickerSheet(onDismiss: () -> Unit, onPick: (String) -> Unit) {
+    var list by remember { mutableStateOf<List<Pair<String, String>>?>(null) }
+    LaunchedEffect(Unit) {
+        list = withContext(Dispatchers.IO) {
+            suspend fun prop(name: String) = BoxModule.exec("getprop $name").second.firstOrNull().orEmpty().split(',')
+            val names = prop("gsm.sim.operator.alpha")
+            val codes = prop("gsm.sim.operator.numeric")
+            names.indices.flatMap { i ->
+                val name = names[i].trim()
+                val code = codes.getOrNull(i)?.trim().orEmpty()
+                listOfNotNull(name.takeIf { it.isNotEmpty() }?.let { it to "SIM ${i + 1} · $code" }, code.takeIf { it.isNotEmpty() }?.let { it to "SIM ${i + 1} · $name" })
+            }.distinctBy { it.first }
+        }
+    }
+    BoxySheet(stringResource(R.string.net_sim_picker_title), null, onDismiss) {
+        val l = list
+        when {
+            l == null -> Text(stringResource(R.string.net_mac_picker_loading), color = Boxy.colors.text2)
+            l.isEmpty() -> Text(stringResource(R.string.net_sim_picker_empty), color = Boxy.colors.text2)
+            else -> l.forEach { (value, sub) -> PickRow(value, sub) { onPick(value) } }
         }
     }
 }

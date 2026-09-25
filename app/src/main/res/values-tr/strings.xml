@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Boxy ayarları: tema, ana sayfa, paneller, ayna</string>
     <string name="backup_scope_both_desc">Modül dosyaları ve Boxy ayarları</string>
     <string name="traffic_by_week">Haftalar</string>
+    <string name="net_sim_title">Mobil ağ</string>
+    <string name="net_sim_sub">Wi‑Fi kapalıyken kurallar («Wi-Fi kesildiğinde» ile)</string>
+    <string name="net_sim_matching">SIM operatörüne göre eşleştir</string>
+    <string name="net_sim_matching_sub">Veri SIM’inin operatörüne göre karar ver</string>
+    <string name="net_sim_list_mode">Operatör listesi modu</string>
+    <string name="net_sim_whitelist_sub">Proxy yalnızca listedeki operatörlerde</string>
+    <string name="net_sim_blacklist_sub">Listedekiler dışındaki tüm operatörlerde proxy</string>
+    <string name="net_hint_sim">Operatör veya MCC+MNC, ör. Turkcell veya 28601</string>
+    <string name="net_sim_picker_title">Telefondaki SIM kartlar</string>
+    <string name="net_sim_picker_empty">SIM bulunamadı</string>
 </resources>

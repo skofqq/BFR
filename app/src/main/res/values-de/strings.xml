@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Boxy-Einstellungen: Design, Startseite, Panels, Spiegel</string>
     <string name="backup_scope_both_desc">Moduldateien und Boxy-Einstellungen</string>
     <string name="traffic_by_week">Wochen</string>
+    <string name="net_sim_title">Mobilfunknetz</string>
+    <string name="net_sim_sub">Regeln ohne WLAN (mit „Bei WLAN-Trennung“)</string>
+    <string name="net_sim_matching">SIM-Betreiber abgleichen</string>
+    <string name="net_sim_matching_sub">Nach dem Betreiber der Daten-SIM entscheiden</string>
+    <string name="net_sim_list_mode">Modus der Betreiberliste</string>
+    <string name="net_sim_whitelist_sub">Proxy nur bei gelisteten Betreibern</string>
+    <string name="net_sim_blacklist_sub">Proxy bei allen außer gelisteten Betreibern</string>
+    <string name="net_hint_sim">Betreiber oder MCC+MNC, z. B. Telekom oder 26201</string>
+    <string name="net_sim_picker_title">SIM-Karten im Telefon</string>
+    <string name="net_sim_picker_empty">Keine SIM gefunden</string>
 </resources>

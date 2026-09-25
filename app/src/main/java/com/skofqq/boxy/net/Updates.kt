@@ -47,11 +47,12 @@ object Updates {
         val body = get("https://api.github.com/repos/$REPO/releases?per_page=10") ?: return@withContext null
         runCatching {
             val arr = JSONArray(body)
-            (0 until arr.length()).map { i ->
+            (0 until arr.length()).mapNotNull { i ->
                 val r = arr.getJSONObject(i)
                 val assets = r.optJSONArray("assets") ?: JSONArray()
                 val apk = (0 until assets.length()).map { assets.getJSONObject(it) }
                     .firstOrNull { it.optString("name").endsWith(".apk") }?.optString("browser_download_url")
+                if (apk == null) return@mapNotNull null
                 AppRelease(
                     version = r.optString("tag_name").removePrefix("v"),
                     prerelease = r.optBoolean("prerelease"),

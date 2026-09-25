@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Налаштування Boxy: тема, головна, панелі, дзеркало</string>
     <string name="backup_scope_both_desc">Файли модуля та налаштування Boxy</string>
     <string name="traffic_by_week">Тижні</string>
+    <string name="net_sim_title">Мобільна мережа</string>
+    <string name="net_sim_sub">Правила, коли Wi‑Fi вимкнено (з «При відключенні Wi-Fi»)</string>
+    <string name="net_sim_matching">Збіг за оператором SIM</string>
+    <string name="net_sim_matching_sub">Вирішувати за оператором SIM для мобільних даних</string>
+    <string name="net_sim_list_mode">Режим списку операторів</string>
+    <string name="net_sim_whitelist_sub">Проксі лише в операторів зі списку</string>
+    <string name="net_sim_blacklist_sub">Проксі в усіх операторів, крім зазначених</string>
+    <string name="net_hint_sim">Оператор або MCC+MNC, напр. Kyivstar або 25503</string>
+    <string name="net_sim_picker_title">SIM-картки в телефоні</string>
+    <string name="net_sim_picker_empty">SIM не знайдено</string>
 </resources>

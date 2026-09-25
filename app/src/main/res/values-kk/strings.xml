@@ -630,4 +630,14 @@
     <string name="backup_scope_apps_desc">Boxy баптаулары: тақырып, басты бет, панельдер, айна</string>
     <string name="backup_scope_both_desc">Модуль файлдары және Boxy баптаулары</string>
     <string name="traffic_by_week">Апталар</string>
+    <string name="net_sim_title">Мобильді желі</string>
+    <string name="net_sim_sub">Wi‑Fi өшірулі кездегі ережелер («Wi-Fi ажыратылғанда» қосулы болса)</string>
+    <string name="net_sim_matching">SIM операторы бойынша сәйкестендіру</string>
+    <string name="net_sim_matching_sub">Мобильді деректер SIM операторы бойынша шешу</string>
+    <string name="net_sim_list_mode">Операторлар тізімінің режимі</string>
+    <string name="net_sim_whitelist_sub">Прокси тек тізімдегі операторларда</string>
+    <string name="net_sim_blacklist_sub">Тізімдегілерден басқа барлық операторларда прокси</string>
+    <string name="net_hint_sim">Оператор немесе MCC+MNC, мысалы Beeline не 40101</string>
+    <string name="net_sim_picker_title">Телефондағы SIM карталар</string>
+    <string name="net_sim_picker_empty">SIM табылмады</string>
 </resources>

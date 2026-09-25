@@ -205,7 +205,16 @@ check_module_service() {
 
     elif [ "$wifi_status" = "not_wifi" ]; then
       log_msg "--- Network state change: WiFi disconnected ---"
-      if [ "$use_module_on_wifi_disconnect" = "true" ]; then
+      want_service=true
+      if [ "$use_module_on_wifi_disconnect" = "true" ] && [ "$use_sim_matching" = "true" ]; then
+        log_msg "Policy: SIM ${use_sim_list_mode} mode, list: ${sim_operators_list[*]}, SIM: $(get_sim_operators | busybox awk 'NF' | tr '\n' ' ')"
+        if is_listed_sim; then
+          [ "$use_sim_list_mode" = "blacklist" ] && want_service=false
+        else
+          [ "$use_sim_list_mode" = "whitelist" ] && want_service=false
+        fi
+      fi
+      if [ "$use_module_on_wifi_disconnect" = "true" ] && [ "$want_service" = "true" ]; then
         log_msg "Policy: Start service when WiFi disconnected"
         if [ "$current_state" != "enabled" ]; then
           "${scripts_dir}/box.service" start
