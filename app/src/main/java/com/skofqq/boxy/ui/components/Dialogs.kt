@@ -1,6 +1,15 @@
 package com.skofqq.boxy.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
@@ -49,6 +58,46 @@ fun InputDialog(
                 val e = validate(values)
                 if (e != null) error = e else onConfirm(values.map { it.trim() })
             }) { Text(confirm) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+        containerColor = Boxy.colors.card,
+    )
+}
+
+/** Result of a failed core config test: the error lines in monospace, with a way to go ahead anyway. */
+@Composable
+fun ConfigErrorDialog(
+    output: String,
+    proceed: String,
+    onProceed: () -> Unit,
+    onDismiss: () -> Unit,
+    onEdit: (() -> Unit)? = null,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.check_failed_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(stringResource(R.string.check_failed_body), style = MaterialTheme.typography.bodyMedium, color = Boxy.colors.text2)
+                Text(
+                    output,
+                    Modifier.fillMaxWidth().heightIn(max = 260.dp)
+                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                        .background(Boxy.colors.surface2)
+                        .verticalScroll(rememberScrollState())
+                        .padding(10.dp),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    color = Tints.red.fg,
+                )
+            }
+        },
+        confirmButton = {
+            Row {
+                if (onEdit != null) TextButton(onClick = onEdit) { Text(stringResource(R.string.config_edit)) }
+                TextButton(onClick = onProceed) { Text(proceed, color = Tints.red.fg) }
+            }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
         containerColor = Boxy.colors.card,

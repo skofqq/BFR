@@ -215,6 +215,19 @@ object Net {
         }.getOrDefault(emptyList())
     }
 
+    /** Download / upload bytes since the core started (/connections downloadTotal, uploadTotal). */
+    suspend fun clashTotals(api: ClashApi): Pair<Long, Long>? = withContext(Dispatchers.IO) {
+        runCatching {
+            val c = openApi(api, "/connections")
+            try {
+                val j = JSONObject(c.inputStream.bufferedReader().readText())
+                if (!j.has("downloadTotal")) null else j.optLong("downloadTotal") to j.optLong("uploadTotal")
+            } finally {
+                c.disconnect()
+            }
+        }.getOrNull()
+    }
+
     /** Download / upload totals of live connections, skipping those routed through [excluded] chains. */
     suspend fun clashConnectionTotals(api: ClashApi, excluded: Set<String>): Pair<Long, Long>? = withContext(Dispatchers.IO) {
         runCatching {

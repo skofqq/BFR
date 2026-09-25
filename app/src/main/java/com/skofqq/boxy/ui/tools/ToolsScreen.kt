@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.skofqq.boxy.ui.components.BoxySheet
+import com.skofqq.boxy.ui.components.SheetGroup
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -66,6 +69,8 @@ fun ToolsScreen(contentPadding: PaddingValues, navExtra: NavExtra, active: Boole
                 r == ROUTE_NETWORK -> NetworkControlScreen(contentPadding, onBack = pop)
                 r == ROUTE_UPDATE -> UpdateScreen(contentPadding, onBack = pop)
                 r == ROUTE_SUBSCRIPTION -> SubscriptionScreen(contentPadding, onBack = pop)
+                r == ROUTE_TRAFFIC -> TrafficScreen(contentPadding, onBack = pop)
+                r == ROUTE_AUTOMATION -> AutomationScreen(contentPadding, onBack = pop)
             }
         }
     }
@@ -78,16 +83,33 @@ const val ROUTE_EDIT = "edit:"
 const val ROUTE_NETWORK = "network"
 const val ROUTE_UPDATE = "update"
 const val ROUTE_SUBSCRIPTION = "subscription"
+const val ROUTE_TRAFFIC = "traffic"
+const val ROUTE_AUTOMATION = "automation"
 
 @Composable
 private fun ToolsHub(contentPadding: PaddingValues, navExtra: NavExtra, onOpenPage: (NavExtra) -> Unit, push: (String) -> Unit) {
+    var importChooser by remember { mutableStateOf(false) }
+    val qr = rememberQrLaunchers()
+    if (importChooser) {
+        BoxySheet(stringResource(R.string.import_title), stringResource(R.string.import_chooser_sub), { importChooser = false }) {
+            SheetGroup {
+                SettingsRow(BoxyIcons.QrCode, stringResource(R.string.import_scan), stringResource(R.string.import_scan_sub)) { importChooser = false; qr.camera() }
+                SettingsRow(BoxyIcons.Image, stringResource(R.string.import_picture), stringResource(R.string.import_picture_sub)) { importChooser = false; qr.picture() }
+                SettingsRow(BoxyIcons.Link, stringResource(R.string.import_link), stringResource(R.string.import_link_sub), showDivider = false) {
+                    importChooser = false
+                    ImportBus.request = ImportRequest("")
+                }
+            }
+        }
+    }
     PinnedLazyPage(contentPadding, header = {
 PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_subtitle))
 }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(stringResource(R.string.tools_config), stringResource(R.string.tools_config_sub)) {
                 SettingsRow(BoxyIcons.Folder, stringResource(R.string.tools_row_manage), stringResource(R.string.tools_row_manage_sub)) { push(ROUTE_FILES) }
-                SettingsRow(BoxyIcons.Check, stringResource(R.string.tools_row_select), stringResource(R.string.tools_row_select_sub), showDivider = false) { push(ROUTE_CONFIGS) }
+                SettingsRow(BoxyIcons.Check, stringResource(R.string.tools_row_select), stringResource(R.string.tools_row_select_sub)) { push(ROUTE_CONFIGS) }
+                SettingsRow(BoxyIcons.QrCode, stringResource(R.string.import_title), stringResource(R.string.import_row_sub), showDivider = false) { importChooser = true }
             }
         }
         item {
@@ -99,6 +121,12 @@ PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_s
             SectionCard(stringResource(R.string.tools_update), stringResource(R.string.tools_update_sub)) {
                 SettingsRow(BoxyIcons.Download, stringResource(R.string.tools_row_open), stringResource(R.string.tools_update_row_sub)) { push(ROUTE_UPDATE) }
                 SettingsRow(BoxyIcons.Subscriptions, stringResource(R.string.tools_subscription), stringResource(R.string.tools_subscription_sub), showDivider = false) { push(ROUTE_SUBSCRIPTION) }
+            }
+        }
+        item {
+            SectionCard(stringResource(R.string.tools_extra), stringResource(R.string.tools_extra_sub)) {
+                SettingsRow(BoxyIcons.BarChart, stringResource(R.string.traffic_title), stringResource(R.string.traffic_row_sub)) { push(ROUTE_TRAFFIC) }
+                SettingsRow(BoxyIcons.Schedule, stringResource(R.string.auto_title), stringResource(R.string.auto_row_sub), showDivider = false) { push(ROUTE_AUTOMATION) }
             }
         }
         val hidden = listOf(NavExtra.APPS, NavExtra.LOGS).filter { it != navExtra }

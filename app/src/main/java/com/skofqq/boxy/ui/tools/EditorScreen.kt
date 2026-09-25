@@ -37,7 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.skofqq.boxy.R
+import com.skofqq.boxy.root.CheckResult
+import com.skofqq.boxy.root.ConfigCheck
 import com.skofqq.boxy.root.RootFiles
+import com.skofqq.boxy.ui.components.ConfigErrorDialog
 import com.skofqq.boxy.ui.components.BackPill
 import com.skofqq.boxy.ui.components.BoxyTextField
 import com.skofqq.boxy.ui.components.ConfirmDialog
@@ -72,12 +75,32 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
     val tryBack = { if (modified) discardDialog = true else onBack() }
     BackHandler { tryBack() }
 
+    var checkError by remember { mutableStateOf<String?>(null) }
+    var checking by remember { mutableStateOf(false) }
+
+    fun write(content: String, checked: Boolean) {
+        scope.launch {
+            val ok = RootFiles.write(path, content)
+            if (ok) modified = false
+            val msg = when {
+                !ok -> R.string.op_failed
+                checked -> R.string.check_saved_ok
+                else -> R.string.editor_saved
+            }
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun save() {
         val e = editor ?: return
+        if (checking) return
+        val content = e.text.toString()
+        val core = ConfigCheck.coreFor(path) ?: return write(content, false)
+        checking = true
         scope.launch {
-            val ok = RootFiles.write(path, e.text.toString())
-            if (ok) modified = false
-            Toast.makeText(context, if (ok) R.string.editor_saved else R.string.op_failed, Toast.LENGTH_SHORT).show()
+            val r = ConfigCheck.checkText(core, path, content)
+            checking = false
+            if (r is CheckResult.Failed) checkError = r.output else write(content, r == CheckResult.Ok)
         }
     }
 
@@ -100,7 +123,7 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
             }
         }
         Text(
-            path.substringAfterLast('/') + if (modified) " •" else "",
+            path.substringAfterLast('/') + (if (modified) " •" else "") + (if (checking) " · " + stringResource(R.string.check_running) else ""),
             Modifier.padding(horizontal = 20.dp, vertical = 2.dp),
             style = MaterialTheme.typography.bodySmall,
             color = colors.text2,
@@ -180,6 +203,15 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
     }
 
     DisposableEffect(Unit) { onDispose { editor = null } }
+
+    checkError?.let { output ->
+        ConfigErrorDialog(
+            output,
+            stringResource(R.string.check_save_anyway),
+            onProceed = { checkError = null; editor?.let { write(it.text.toString(), false) } },
+            onDismiss = { checkError = null },
+        )
+    }
 
     if (discardDialog) {
         ConfirmDialog(

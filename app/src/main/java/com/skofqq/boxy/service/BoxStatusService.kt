@@ -15,6 +15,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.skofqq.boxy.MainActivity
 import com.skofqq.boxy.R
+import com.skofqq.boxy.data.TrafficStats
 import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.ServiceState
 import com.skofqq.boxy.util.Format
@@ -51,9 +52,17 @@ class BoxStatusService : Service() {
             if (Build.VERSION.SDK_INT >= 34) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0,
         )
         scope.launch {
+            var tick = 0
+            var last: Boolean? = null
             while (isActive) {
                 val state = runCatching { BoxModule.state() }.getOrNull()
                 if (busyText == null) notify(build(state))
+                // The widget and tile follow changes made elsewhere (module action button, boot, crash).
+                if (state != null && state.running != last) {
+                    if (last != null) BoxControl.changed(this@BoxStatusService)
+                    last = state.running
+                }
+                if (tick++ % 12 == 0) TrafficStats.sample(applicationContext)
                 delay(5000)
             }
         }
@@ -61,9 +70,9 @@ class BoxStatusService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_STOP -> act(R.string.service_status_stopping) { BoxModule.stop() }
-            ACTION_START -> act(R.string.service_status_starting) { BoxModule.start() }
-            ACTION_RESTART -> act(R.string.service_status_restarting) { BoxModule.restart() }
+            ACTION_STOP -> act(R.string.service_status_stopping) { BoxControl.stop(applicationContext) }
+            ACTION_START -> act(R.string.service_status_starting) { BoxControl.start(applicationContext) }
+            ACTION_RESTART -> act(R.string.service_status_restarting) { BoxControl.restart(applicationContext) }
         }
         return START_STICKY
     }

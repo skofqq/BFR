@@ -49,6 +49,7 @@ import com.skofqq.boxy.root.BoxModule
 import com.skofqq.boxy.root.RootFile
 import com.skofqq.boxy.root.RootFiles
 import com.skofqq.boxy.root.RootTask
+import com.skofqq.boxy.ui.components.BoxyTextField
 import com.skofqq.boxy.ui.components.ConfirmDialog
 import com.skofqq.boxy.ui.components.HeaderAction
 import com.skofqq.boxy.ui.components.SubPageHeader
@@ -74,7 +75,11 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
     var auto by rememberSaveable { mutableStateOf(true) }
     var reload by remember { mutableStateOf(0) }
     var deleteDialog by remember { mutableStateOf(false) }
+    var searching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var level by rememberSaveable { mutableStateOf(LogLevel.ALL) }
     val listState = rememberLazyListState()
+    val shown = remember(lines, query, level) { filterLines(lines.orEmpty(), query.trim(), level) }
 
     LaunchedEffect(reload) {
         val list = RootFiles.list(BoxModule.RUN_DIR).filter { !it.isDir && (it.name.endsWith(".log") || it.name.endsWith(".txt")) }
@@ -96,13 +101,14 @@ fun LogsScreen(contentPadding: PaddingValues, header: @Composable () -> Unit = {
             }
         }
     }
-    LaunchedEffect(lines?.size) {
-        val n = lines?.size ?: 0
+    LaunchedEffect(shown.size) {
+        val n = shown.size
         if (n > 0 && auto) listState.scrollToItem(n + 2)
     }
 
     val status = if (current == "runs.log" || current == coreLog) stringResource(R.string.logs_status_current) else stringResource(R.string.logs_status_available)
     val palette = logPalette()
+    val mark = Boxy.colors.accent.copy(alpha = 0.28f)
     PinnedLazyPage(contentPadding, header = {
 header()
 SubPageHeader(
@@ -117,6 +123,18 @@ SubPageHeader(
                         reload++
                     }
                 }
+                HeaderAction(BoxyIcons.Search, stringResource(R.string.action_search), tint = if (searching) Boxy.colors.accent else Boxy.colors.text) {
+                    searching = !searching
+                    if (!searching) query = ""
+                }
+                HeaderAction(BoxyIcons.Share, stringResource(R.string.logs_share)) {
+                    val name = current ?: return@HeaderAction
+                    scope.launch {
+                        if (!LogShare.share(context, "${BoxModule.RUN_DIR}/$name")) {
+                            Toast.makeText(context, R.string.op_failed, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
                 HeaderAction(BoxyIcons.Delete, stringResource(R.string.action_delete)) { if (current != null) deleteDialog = true }
             }
 Row(
@@ -128,16 +146,43 @@ Row(
                     Chip("${f.name} · ${Format.bytes(context, f.size)}", f.name == current, Boxy.colors.accent) { current = f.name }
                 }
             }
+Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                LogLevel.entries.forEach { lv ->
+                    val (label, color) = when (lv) {
+                        LogLevel.ALL -> R.string.logs_level_all to Boxy.colors.accent
+                        LogLevel.ERROR -> R.string.logs_level_error to Tints.red.fg
+                        LogLevel.WARNING -> R.string.logs_level_warning to Tints.amber.fg
+                        LogLevel.INFO -> R.string.logs_level_info to Tints.blue.fg
+                        LogLevel.DEBUG -> R.string.logs_level_debug to Tints.teal.fg
+                    }
+                    Chip(stringResource(label), level == lv, color) { level = lv }
+                }
+            }
+if (searching) {
+                BoxyTextField(
+                    query,
+                    { query = it },
+                    stringResource(R.string.logs_search_hint),
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                )
+            }
 }, state = listState) {
-        val l = lines
+        val l = lines?.let { shown }
         when {
             files == null || l == null -> item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
             files?.isEmpty() == true -> item { Text(stringResource(R.string.logs_no_files), Modifier.padding(24.dp), color = Boxy.colors.text2) }
             else -> {
                 item { Box(Modifier.padding(top = 8.dp)) }
+                if (l.isEmpty()) {
+                    item { Text(stringResource(R.string.logs_no_match), Modifier.padding(24.dp), color = Boxy.colors.text2) }
+                }
+                val q = query.trim()
                 itemsIndexed(l, key = { i, _ -> i }) { _, line ->
                     Text(
-                        remember(line, palette) { highlight(line, palette) },
+                        remember(line, palette, q) { markMatches(highlight(line, palette), q, mark) },
                         Modifier.fillMaxWidth().padding(horizontal = 16.dp).background(Boxy.colors.card).padding(horizontal = 12.dp, vertical = 1.dp),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 11.sp,
@@ -167,6 +212,43 @@ Row(
             onDismiss = { deleteDialog = false },
         )
     }
+}
+
+enum class LogLevel { ALL, ERROR, WARNING, INFO, DEBUG }
+
+/** Level named on the line itself; null for continuation lines of a multi-line entry. */
+private fun lineLevel(line: String): LogLevel? {
+    val l = line.lowercase()
+    return when {
+        "[error]" in l || "level=error" in l || "level=fatal" in l || " error [" in l || " fatal " in l || "[fatal]" in l -> LogLevel.ERROR
+        "[warning]" in l || "[warn]" in l || "level=warning" in l || "level=warn" in l || " warn [" in l -> LogLevel.WARNING
+        "[info]" in l || "level=info" in l || " info [" in l -> LogLevel.INFO
+        "[debug]" in l || "level=debug" in l || " debug [" in l || " trace [" in l -> LogLevel.DEBUG
+        else -> null
+    }
+}
+
+/** Lines of the chosen level (continuation lines follow the entry they belong to) that contain [query]. */
+private fun filterLines(lines: List<String>, query: String, level: LogLevel): List<String> {
+    if (query.isEmpty() && level == LogLevel.ALL) return lines
+    var last: LogLevel? = null
+    return lines.filter { line ->
+        val lv = lineLevel(line) ?: last
+        last = lv
+        (level == LogLevel.ALL || lv == level) && (query.isEmpty() || line.contains(query, ignoreCase = true))
+    }
+}
+
+/** Background on every occurrence of the search text. */
+private fun markMatches(text: AnnotatedString, query: String, color: Color): AnnotatedString {
+    if (query.isEmpty()) return text
+    val b = AnnotatedString.Builder(text)
+    var i = text.text.indexOf(query, ignoreCase = true)
+    while (i >= 0) {
+        b.addStyle(SpanStyle(background = color), i, i + query.length)
+        i = text.text.indexOf(query, i + query.length, ignoreCase = true)
+    }
+    return b.toAnnotatedString()
 }
 
 /** Colours of the log highlighter. */

@@ -28,10 +28,14 @@ Languages: English, Русский, Українська, Беларуская, 
 **Tools**
 - Config: choose the active config of the current core, file manager for `/data/adb/box`
   (search, create, rename, delete, download by URL) and a code editor with search
+- Config check: the core tests a file (`mihomo -t`, `sing-box check`, …) before it is selected or saved, and shows the error line
+- Subscription import: QR code (camera or picture), pasted link, `clash://install-config` and `sing-box://import-remote-profile` links
 - Network control: Wi‑Fi rules, SSID / BSSID lists with nearby Wi‑Fi scan, proxy on/off for hotspot clients, hotspot client MAC filter
 - Update: cores (Mihomo, Sing-box, Xray, V2Ray, Hysteria), subscription, web UI with live output
 - Subscription settings: URLs, provider files, interval, crontab
-- Logs: module log files with auto refresh and colour highlighting
+- Logs: module log files with auto refresh, colour highlighting, search, level filter and sharing
+- Traffic statistics: proxy traffic by day and by month (Clash API)
+- Automation: start / stop schedule, intents for Tasker, MacroDroid and adb
 
 **Panel**
 - Core web UI (Zashboard or MetaCubeXD, switchable), custom panels, SubStore, cache cleaning
@@ -41,7 +45,7 @@ Languages: English, Русский, Українська, Беларуская, 
 - Liquid glass navigation bar with backdrop blur and lens, sheet blur, UI scale, system bars
 - Navigation: Apps or Logs as a fourth tab
 - GitHub mirror for all downloads (module scripts included)
-- Status notification with actions, Quick Settings tile, open panel on launch
+- Status notification with actions, Quick Settings tile, home screen widget, open panel on launch
 - Backup and restore of module files and app preferences
 - App updates (GitHub releases) and module updates (`updateJson`)
 

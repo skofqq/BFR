@@ -35,7 +35,7 @@ class BoxTileService : TileService() {
         tile.subtitle = getString(if (running) R.string.status_stopping else R.string.status_starting)
         tile.updateTile()
         scope.launch {
-            if (running) BoxModule.stop() else BoxModule.start()
+            if (running) BoxControl.stop(applicationContext) else BoxControl.start(applicationContext)
             busy = false
             refresh()
         }

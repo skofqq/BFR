@@ -5,7 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.skofqq.boxy.BoxyApp
 import com.skofqq.boxy.data.Prefs
+import com.skofqq.boxy.data.TrafficStats
+import com.skofqq.boxy.service.BoxControl
 import com.skofqq.boxy.data.SubscriptionSource
 import com.skofqq.boxy.net.GeoIp
 import com.skofqq.boxy.net.LanAddress
@@ -117,6 +120,7 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
             }
         }
         launch { while (true) { refreshState(); delay(2000) } }
+        launch { while (true) { TrafficStats.sample(BoxyApp.instance); delay(60_000) } }
         launch { speedLoop() }
         launch { systemLoop() }
         launch { while (true) { testLatency(); delay(60_000) } }
@@ -268,11 +272,11 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
         viewModelScope.launch { systemEnv = BoxModule.systemEnvironment() }
     }
 
-    fun start() = act(Busy.STARTING) { BoxModule.start() }
+    fun start() = act(Busy.STARTING) { BoxControl.start(BoxyApp.instance) }
 
-    fun stop() = act(Busy.STOPPING) { BoxModule.stop() }
+    fun stop() = act(Busy.STOPPING) { BoxControl.stop(BoxyApp.instance) }
 
-    fun restart() = act(Busy.RESTARTING) { BoxModule.restart() }
+    fun restart() = act(Busy.RESTARTING) { BoxControl.restart(BoxyApp.instance) }
 
     fun reloadConfig() {
         viewModelScope.launch {

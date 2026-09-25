@@ -10,7 +10,10 @@ class BoxyApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         prefs = Prefs(this)
+        com.skofqq.boxy.data.TrafficStats.schedule(this)
+        com.skofqq.boxy.automation.Automation.reschedule(this)
         com.skofqq.boxy.net.Mirrors.current = prefs.githubMirror
         com.skofqq.boxy.service.BoxStatusService.createChannel(this)
     }
@@ -21,6 +24,9 @@ class BoxyApp : Application() {
     }
 
     companion object {
+        lateinit var instance: BoxyApp
+            private set
+
         init {
             Shell.enableVerboseLogging = BuildConfigCompat.DEBUG
             Shell.setDefaultBuilder(

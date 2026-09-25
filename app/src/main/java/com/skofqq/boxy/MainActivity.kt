@@ -70,6 +70,9 @@ import com.skofqq.boxy.ui.settings.SettingsScreen
 import com.skofqq.boxy.ui.theme.Boxy
 import com.skofqq.boxy.ui.theme.BoxyIcons
 import com.skofqq.boxy.ui.theme.BoxyTheme
+import com.skofqq.boxy.ui.tools.ImportBus
+import com.skofqq.boxy.ui.tools.ImportLinks
+import com.skofqq.boxy.ui.tools.ImportSheet
 import com.skofqq.boxy.ui.tools.ToolsScreen
 import com.skofqq.boxy.util.withAppLocale
 import kotlinx.coroutines.launch
@@ -81,6 +84,11 @@ private enum class Overlay { APPS, LOGS, PANEL, SUBSTORE }
 
 class MainActivity : ComponentActivity() {
 
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        ImportLinks.fromIntent(intent)?.let { ImportBus.request = it }
+    }
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(newBase.withAppLocale())
     }
@@ -90,6 +98,7 @@ class MainActivity : ComponentActivity() {
         val prefs = (application as BoxyApp).prefs
         if (prefs.notifications) BoxStatusService.sync(this, true)
         val firstLaunch = savedInstanceState == null
+        if (firstLaunch) ImportLinks.fromIntent(intent)?.let { ImportBus.request = it }
         setContent {
             BoxyTheme(prefs.themeMode, prefs.trueBlack) {
                 val dark = Boxy.colors.isDark
@@ -231,6 +240,8 @@ private fun MainScreen(prefs: Prefs, openPanel: Boolean) {
                 }
             }
         }
+
+        ImportBus.request?.let { r -> ImportSheet(r) { ImportBus.request = null } }
 
         // Opaque system bars: a solid strip instead of content showing through.
         if (prefs.opaqueStatusBar) {

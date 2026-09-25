@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.dp
 import com.skofqq.boxy.R
 import com.skofqq.boxy.ui.components.PinnedLazyPage
 import com.skofqq.boxy.root.BoxModule
+import com.skofqq.boxy.root.CheckResult
+import com.skofqq.boxy.root.ConfigCheck
+import com.skofqq.boxy.ui.components.ConfigErrorDialog
 import com.skofqq.boxy.root.RootFile
 import com.skofqq.boxy.root.RootFiles
 import com.skofqq.boxy.ui.components.Badge
@@ -83,6 +86,29 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
     var reload by remember { mutableStateOf(0) }
     var createDialog by remember { mutableStateOf(false) }
     var downloadDialog by remember { mutableStateOf(false) }
+    var checking by remember { mutableStateOf<String?>(null) }
+    var checkError by remember { mutableStateOf<Pair<RootFile, String>?>(null) }
+
+    fun select(f: RootFile) {
+        scope.launch {
+            val c = core ?: return@launch
+            if (BoxModule.writeSetting(coreConfig(c).second, f.name)) {
+                active = f.name
+                Toast.makeText(context, context.getString(R.string.config_selected, f.name), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // Same test box.service runs before start, so a broken file is caught before it is made active.
+    fun checkAndSelect(f: RootFile) {
+        val c = core ?: return
+        checking = f.name
+        scope.launch {
+            val r = ConfigCheck.check(coreConfig(c).first, f.path)
+            checking = null
+            if (r is CheckResult.Failed) checkError = f to r.output else select(f)
+        }
+    }
 
     LaunchedEffect(reload) {
         val c = BoxModule.readSetting("bin_name") ?: "clash"
@@ -91,7 +117,7 @@ fun ConfigListScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: 
         active = BoxModule.readSetting(key)
         val all = RootFiles.list("${BoxModule.BOX_DIR}/$dir")
         folders = all.filter { it.isDir && !it.name.startsWith(".") }
-        files = all.filter { !it.isDir && it.extension in CONFIG_EXTENSIONS }
+        files = all.filter { !it.isDir && !it.name.startsWith(".") && it.extension in CONFIG_EXTENSIONS }
     }
     val dir = "${BoxModule.BOX_DIR}/${coreConfig(core ?: "clash").first}"
 
@@ -144,20 +170,18 @@ SubPageHeader(
                                 iconTint = Tints.green.fg,
                                 iconBg = Tints.green.bg,
                                 title = f.name,
-                                subtitle = stringResource(if (isActive) R.string.config_active else R.string.config_tap_select),
+                                subtitle = when {
+                                    checking == f.name -> stringResource(R.string.check_running)
+                                    isActive -> stringResource(R.string.config_active)
+                                    else -> stringResource(R.string.config_tap_select)
+                                },
                                 badge = if (isActive) stringResource(R.string.config_badge_active) else null,
                                 divider = index < rows,
                                 onClick = {
                                     if (isActive) {
                                         onEdit(f.path)
-                                    } else {
-                                        scope.launch {
-                                            val c = core ?: return@launch
-                                            if (BoxModule.writeSetting(coreConfig(c).second, f.name)) {
-                                                active = f.name
-                                                Toast.makeText(context, context.getString(R.string.config_selected, f.name), Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
+                                    } else if (checking == null) {
+                                        checkAndSelect(f)
                                     }
                                 },
                                 onLongClick = { onEdit(f.path) },
@@ -195,6 +219,15 @@ SubPageHeader(
     }
     if (downloadDialog) {
         DownloadDialog(dir, onDone = { downloadDialog = false; reload++ }, onDismiss = { downloadDialog = false })
+    }
+    checkError?.let { (f, output) ->
+        ConfigErrorDialog(
+            output,
+            stringResource(R.string.check_select_anyway),
+            onProceed = { checkError = null; select(f) },
+            onDismiss = { checkError = null },
+            onEdit = { checkError = null; onEdit(f.path) },
+        )
     }
 }
 
