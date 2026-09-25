@@ -544,4 +544,5 @@
     <string name="config_hint">Натисніть на файл, щоб зробити його активним. Натискання на активний файл або довге натискання на будь-який відкриває редактор.</string>
     <string name="about_app_repo">Застосунок</string>
     <string name="about_based_on">На основі</string>
+    <string name="about_check_updates">Перевірити оновлення</string>
 </resources>

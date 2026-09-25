@@ -568,4 +568,5 @@
     <string name="config_hint">Tap a file to make it active, tap the active one or long-press any file to edit it.</string>
     <string name="about_app_repo">App</string>
     <string name="about_based_on">Based on</string>
+    <string name="about_check_updates">Check for updates</string>
 </resources>

@@ -38,7 +38,13 @@ private const val BFR_URL = "https://github.com/boxproxy"
 
 /** App card like BFR's: icon, name, version and links to the module, the app and the author. */
 @Composable
-fun AppInfoSheet(versionName: String, moduleVersion: String?, onDismiss: () -> Unit) {
+fun AppInfoSheet(
+    versionName: String,
+    moduleVersion: String?,
+    appUpdate: String?,
+    onCheckUpdates: () -> Unit,
+    onDismiss: () -> Unit,
+) {
     val context = LocalContext.current
     val open = { url: String -> context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
     val link = Tints.green.fg
@@ -58,6 +64,13 @@ fun AppInfoSheet(versionName: String, moduleVersion: String?, onDismiss: () -> U
         }
         Spacer(Modifier.height(18.dp))
         Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Boxy.colors.card).padding(vertical = 8.dp)) {
+            IconInfoRow(
+                BoxyIcons.SystemUpdate,
+                stringResource(R.string.about_check_updates),
+                appUpdate?.let { "→ $it" } ?: "",
+                link,
+                onCheckUpdates,
+            )
             IconInfoRow(BoxyIcons.Info, stringResource(R.string.about_module), "GitHub", link) { open(MODULE_URL) }
             IconInfoRow(BoxyIcons.Code, stringResource(R.string.about_app_repo), "GitHub", link) { open(GITHUB_URL) }
             IconInfoRow(

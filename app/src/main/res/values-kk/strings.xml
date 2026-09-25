@@ -544,4 +544,5 @@
     <string name="config_hint">Файлды белсенді ету үшін оны басыңыз. Белсенді файлды басу немесе кез келген файлды ұзақ басу редакторды ашады.</string>
     <string name="about_app_repo">Қолданба</string>
     <string name="about_based_on">Негізі</string>
+    <string name="about_check_updates">Жаңартуларды тексеру</string>
 </resources>

@@ -544,4 +544,5 @@
     <string name="config_hint">ファイルをタップすると有効になります。有効なファイルをタップするか、任意のファイルを長押しするとエディタが開きます。</string>
     <string name="about_app_repo">アプリ</string>
     <string name="about_based_on">ベース</string>
+    <string name="about_check_updates">更新を確認</string>
 </resources>

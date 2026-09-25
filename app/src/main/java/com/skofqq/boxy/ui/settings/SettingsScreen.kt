@@ -233,7 +233,7 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
                     BoxyIcons.Info,
                     stringResource(R.string.settings_version),
                     if (appUpdate != null) stringResource(R.string.settings_update_available_value, versionName, appUpdate!!) else versionName,
-                ) { aboutSheet = true }
+                ) { infoSheet = true }
                 SettingsRow(
                     BoxyIcons.Tune,
                     stringResource(R.string.settings_module_version),
@@ -243,23 +243,10 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
                         else -> moduleVersion ?: stringResource(R.string.common_dash)
                     },
                 ) { moduleSheet = true }
-                SettingsRow(BoxyIcons.Person, stringResource(R.string.settings_author), "skofqq") { infoSheet = true }
-                SettingsRow(BoxyIcons.Link, "GitHub", GITHUB_URL.removePrefix("https://")) {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_URL)))
-                }
                 SettingsRow(BoxyIcons.Code, stringResource(R.string.settings_licenses), stringResource(R.string.settings_licenses_sub), showDivider = false) {
                     push(ROUTE_LICENSES)
                 }
             }
-        }
-        item {
-            Text(
-                stringResource(R.string.settings_credits),
-                Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = Boxy.colors.text2,
-                textAlign = TextAlign.Center,
-            )
         }
     }
 
@@ -295,7 +282,7 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
         )
     }
     if (aboutSheet) AppUpdateSheet(versionName) { aboutSheet = false }
-    if (infoSheet) AppInfoSheet(versionName, moduleVersion) { infoSheet = false }
+    if (infoSheet) AppInfoSheet(versionName, moduleVersion, appUpdate, onCheckUpdates = { infoSheet = false; aboutSheet = true }) { infoSheet = false }
     if (mirrorSheet) MirrorSheet(prefs) { mirrorSheet = false }
     if (moduleSheet) ModuleUpdateSheet(moduleVersion, moduleInstalled) { moduleSheet = false }
 }

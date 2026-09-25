@@ -514,4 +514,5 @@
     <string name="config_hint">点击文件将其设为当前配置；点击当前配置或长按任意文件可编辑。</string>
     <string name="about_app_repo">应用</string>
     <string name="about_based_on">基于</string>
+    <string name="about_check_updates">检查更新</string>
 </resources>
