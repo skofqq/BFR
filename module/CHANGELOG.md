@@ -1,5 +1,15 @@
 # Box for Root (Boxy edition)
 
+## v1.10.2-ru.5
+
+- Optional DNSCrypt: `dnscrypt="true"` starts dnscrypt-proxy (bin/dnscrypt-proxy, `dnscrypt/dnscrypt-proxy.toml`) on 127.0.0.1:5354 before the core;
+  with clash the active config's `dns.nameserver` is pointed at it and restored when DNSCrypt is off; `box.tool updnscrypt` downloads it
+- yq download fixed: the upstream link has no x86 builds (404), x86 devices now get the official static build; short "Not Found" files are rejected
+
+- DNSCrypt по желанию: `dnscrypt="true"` запускает dnscrypt-proxy на 127.0.0.1:5354 перед ядром; для clash `dns.nameserver`
+  активной конфигурации переключается на него и возвращается при выключении; `box.tool updnscrypt` скачивает его
+- Исправлена загрузка yq: у исходной ссылки нет сборок для x86 (404), теперь берётся официальная статическая сборка
+
 ## v1.10.2-ru.4
 
 - `box.tool subs` exits with 0 after a successful update, apps no longer report a failure (upstream #219)

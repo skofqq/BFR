@@ -206,6 +206,11 @@ object BoxyIcons {
         "M19.99,4c0,-1.1 -0.89,-2 -1.99,-2h-8L4,8v12c0,1.1 0.9,2 2,2h12.01c1.1,0 1.99,-0.9 1.99,-2l-0.01,-16zM9,19H7v-2h2v2zM17,19h-2v-2h2v2zM9,15H7v-4h2v4zM13,19h-2v-4h2v4zM13,13h-2v-2h2v2zM17,15h-2v-4h2v4z",
     )
 
+    val Shield = icon(
+        "Shield",
+        "M12,1L3,5v6c0,5.55 3.84,10.74 9,12 5.16,-1.26 9,-6.45 9,-12V5l-9,-4zM10,17l-4,-4 1.41,-1.41L10,14.17l6.59,-6.59L18,9l-8,8z",
+    )
+
     // Eva icons (as requested for back / chevrons).
     val ArrowBack = icon(
         "ArrowBack",

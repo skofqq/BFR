@@ -303,7 +303,75 @@ prepare_singbox() {
   fi
 }
 
+# ---- DNSCrypt (optional upstream DNS for the core) ----
+dnscrypt_dir="${box_dir}/dnscrypt"
+dnscrypt_bin="${bin_dir}/dnscrypt-proxy"
+dnscrypt_pid="${box_run}/dnscrypt.pid"
+
+box_dnscrypt() {
+  case "$1" in
+    start)
+      box_dnscrypt stop
+      [ "${dnscrypt}" = "true" ] || return 0
+      # The installer resets bin/ to 0644.
+      [ -f "${dnscrypt_bin}" ] && chmod 0755 "${dnscrypt_bin}"
+      if [ ! -x "${dnscrypt_bin}" ]; then
+        log Warning "DNSCrypt is on, but ${dnscrypt_bin} is missing. Download it: box.tool updnscrypt"
+        return 0
+      fi
+      if [ ! -f "${dnscrypt_dir}/dnscrypt-proxy.toml" ]; then
+        log Warning "DNSCrypt is on, but ${dnscrypt_dir}/dnscrypt-proxy.toml is missing"
+        return 0
+      fi
+      sed -i "s|^listen_addresses = .*|listen_addresses = ['127.0.0.1:${dnscrypt_port:-5354}']|" "${dnscrypt_dir}/dnscrypt-proxy.toml"
+      # Same user and group as the core, so its own traffic is not caught by the proxy rules.
+      (
+        cd "${dnscrypt_dir}" || exit 1
+        nohup busybox setuidgid "${box_user_group}" "${dnscrypt_bin}" -config dnscrypt-proxy.toml > "${box_run}/dnscrypt.log" 2>&1 &
+        echo -n $! > "${dnscrypt_pid}"
+      )
+      sleep 0.5
+      if kill -0 "$(cat "${dnscrypt_pid}" 2>/dev/null)" 2>/dev/null; then
+        log Info "DNSCrypt started on 127.0.0.1:${dnscrypt_port:-5354}"
+      else
+        log Error "DNSCrypt failed to start, see ${box_run}/dnscrypt.log"
+        rm -f "${dnscrypt_pid}"
+      fi
+      ;;
+    stop)
+      [ -f "${dnscrypt_pid}" ] && kill -15 "$(cat "${dnscrypt_pid}")" >/dev/null 2>&1
+      busybox pkill -15 -x dnscrypt-proxy >/dev/null 2>&1
+      rm -f "${dnscrypt_pid}"
+      ;;
+  esac
+}
+
+# Points dns.nameserver of the active clash config at DNSCrypt, and puts the old servers back when it is off.
+dnscrypt_clash() {
+  local addr="127.0.0.1:${dnscrypt_port:-5354}" bak="${clash_config}.dnscrypt.bak" yq="yq" first
+  command -v yq >/dev/null 2>&1 || yq="${box_dir}/bin/yq"
+  # Only when dnscrypt-proxy really runs, otherwise the core would be left without DNS.
+  if [ "${dnscrypt}" = "true" ] && kill -0 "$(cat "${dnscrypt_pid}" 2>/dev/null)" 2>/dev/null; then
+    if [ ! -x "${yq}" ] && ! command -v yq >/dev/null 2>&1; then
+      log Warning "DNSCrypt: yq is missing, add ${addr} to dns.nameserver of ${clash_config} yourself"
+      return 0
+    fi
+    first=$(${yq} '.dns.nameserver[0] // ""' "${clash_config}" 2>/dev/null)
+    [ "${first}" = "${addr}" ] && return 0
+    [ -f "${bak}" ] || ${yq} -o=json '{"nameserver": .dns.nameserver, "fallback": .dns.fallback}' "${clash_config}" > "${bak}"
+    ${yq} -i ".dns.enable = true | .dns.nameserver = [\"${addr}\"] | del(.dns.fallback)" "${clash_config}" \
+      && log Info "DNSCrypt: clash dns.nameserver → ${addr}"
+  elif [ -f "${bak}" ]; then
+    if ${yq} -i ".dns.nameserver = load(\"${bak}\").nameserver | .dns.fallback = load(\"${bak}\").fallback | (.dns.nameserver, .dns.nameserver[], .dns.fallback, .dns.fallback[]) style=\"\" | del(.dns.fallback | select(length == 0))" "${clash_config}"; then
+      rm -f "${bak}"
+      log Info "DNSCrypt is off: previous clash DNS servers restored"
+    fi
+  fi
+}
+
 prepare_clash() {
+  dnscrypt_clash
+
   # check configuration file
   if ! [ -f "${clash_config}" ]; then
     log Error "configuration file ${clash_config} not found"
@@ -756,6 +824,7 @@ start_box() {
   fi
 
   # Execute the box_cgroup, box_run_bin, box_detected_port, box_bin_alive,box_bin_status functions
+  box_dnscrypt start
   box_run_bin
   box_cgroup
 
@@ -789,6 +858,7 @@ start_box() {
 
 stop_box() {
   stop_cron
+  box_dnscrypt stop
   # Kill each binary using a loop
   for bin in "${bin_list[@]}"; do
     # Check if the binary is running using pgrep

@@ -66,7 +66,8 @@ fun ToolsScreen(contentPadding: PaddingValues, navExtra: NavExtra, active: Boole
                     onEdit = { push("$ROUTE_EDIT$it") },
                 )
                 r.startsWith(ROUTE_EDIT) -> EditorScreen(contentPadding, path = r.removePrefix(ROUTE_EDIT), onBack = pop)
-                r == ROUTE_NETWORK -> NetworkControlScreen(contentPadding, onBack = pop)
+                r == ROUTE_NETWORK -> NetworkControlScreen(contentPadding, onBack = pop, onEdit = { push("$ROUTE_EDIT$it") }, onDnsServers = { push(ROUTE_DNSCRYPT) })
+                r == ROUTE_DNSCRYPT -> DnsCryptServersScreen(contentPadding, onBack = pop)
                 r == ROUTE_UPDATE -> UpdateScreen(contentPadding, onBack = pop)
                 r == ROUTE_SUBSCRIPTION -> SubscriptionScreen(contentPadding, onBack = pop)
                 r == ROUTE_TRAFFIC -> TrafficScreen(contentPadding, onBack = pop)
@@ -85,6 +86,7 @@ const val ROUTE_UPDATE = "update"
 const val ROUTE_SUBSCRIPTION = "subscription"
 const val ROUTE_TRAFFIC = "traffic"
 const val ROUTE_AUTOMATION = "automation"
+const val ROUTE_DNSCRYPT = "dnscrypt"
 
 @Composable
 private fun ToolsHub(contentPadding: PaddingValues, navExtra: NavExtra, onOpenPage: (NavExtra) -> Unit, push: (String) -> Unit) {

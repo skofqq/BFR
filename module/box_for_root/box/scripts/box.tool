@@ -290,9 +290,14 @@ upyq() {
   fi
 
   # Download link
+  # taamarin/yq only has Android builds for arm / arm64; x86 devices use the official static Linux build.
   local download_link="https://github.com/taamarin/yq/releases/download/prerelease/yq_${platform}_${arch}"
+  case "${arch}" in
+    386|amd64) download_link="https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${arch}" ;;
+  esac
   log Info "Downloading yq from: ${download_link}"
-  if ! upfile "${box_dir}/bin/yq" "${download_link}"; then
+  # A missing release asset downloads as a short "Not Found" page: treat anything under 1 MB as a failure.
+  if ! upfile "${box_dir}/bin/yq" "${download_link}" || [ "$(wc -c < "${box_dir}/bin/yq" 2>/dev/null || echo 0)" -lt 1000000 ]; then
     log Error "Failed to download yq binary."
     if cp "${bin_dir}/backup/yq.bak" "${box_dir}/bin/yq" >/dev/null 2>&1; then
       log Info "Restored yq from backup."
@@ -560,6 +565,40 @@ upsubs() {
       return 1
       ;;
   esac
+}
+
+# Downloads dnscrypt-proxy from the official GitHub releases into bin/dnscrypt-proxy
+updnscrypt() {
+  local a ver url zip tmp
+  case $(uname -m) in
+    aarch64) a="arm64" ;;
+    armv7l|armv8l) a="arm" ;;
+    i686) a="i386" ;;
+    x86_64) a="x86_64" ;;
+    *) log Error "Unsupported architecture: $(uname -m)"; return 1 ;;
+  esac
+  ver=$($rev1 "https://api.github.com/repos/DNSCrypt/dnscrypt-proxy/releases/latest" | grep '"tag_name"' | busybox grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
+  if [ -z "${ver}" ]; then
+    log Error "Failed to get the latest dnscrypt-proxy version"
+    return 1
+  fi
+  url="https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/${ver}/dnscrypt-proxy-android_${a}-${ver}.zip"
+  zip="${bin_dir}/dnscrypt-proxy.zip"
+  tmp="${bin_dir}/dnscrypt.tmp"
+  log Info "Downloading dnscrypt-proxy ${ver} (android_${a})"
+  upfile "${zip}" "${url}" || return 1
+  rm -rf "${tmp}" && mkdir -p "${tmp}"
+  if ! busybox unzip -o "${zip}" -d "${tmp}" >/dev/null 2>&1; then
+    log Error "Failed to unpack ${zip}"
+    rm -rf "${tmp}" "${zip}" "${zip}.bak"
+    return 1
+  fi
+  mv -f "${tmp}"/android-*/dnscrypt-proxy "${bin_dir}/dnscrypt-proxy" && chmod 0755 "${bin_dir}/dnscrypt-proxy"
+  rm -rf "${tmp}" "${zip}" "${zip}.bak"
+  if [ ! -d "${box_dir}/dnscrypt" ]; then
+    mkdir -p "${box_dir}/dnscrypt"
+  fi
+  log Info "dnscrypt-proxy ${ver} installed"
 }
 
 upkernel() {
@@ -1224,6 +1263,10 @@ case "$1" in
     ;;
   bond0|bond1)
     $1
+    ;;
+  updnscrypt)
+    updnscrypt
+    exit $?
     ;;
   geosub)
     upgeox

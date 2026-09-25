@@ -86,7 +86,7 @@ data class WifiNetwork(val ssid: String, val bssid: String, val rssi: Int)
 data class HotspotClient(val ip: String, val mac: String, val iface: String, val name: String?)
 
 @Composable
-fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
+fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: (String) -> Unit = {}, onDnsServers: () -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var original by remember { mutableStateOf<NetState?>(null) }
@@ -102,6 +102,14 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit) {
     var dnsHijack by remember { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(Unit) { hotspotProxy = BoxModule.hotspotProxyEnabled() }
     LaunchedEffect(Unit) { dnsHijack = BoxModule.dnsHijack() }
+    var dnscrypt by remember { mutableStateOf<com.skofqq.boxy.root.DnsCryptState?>(null) }
+    var dnscryptTask by remember { mutableStateOf<String?>(null) } // last output line while downloading
+    var dnscryptReload by remember { mutableStateOf(0) }
+    var core by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(dnscryptReload) {
+        dnscrypt = BoxModule.dnscrypt()
+        core = BoxModule.readSetting("bin_name")
+    }
     LaunchedEffect(Unit) {
         val raw = BoxModule.readSettingsRaw(NET_KEYS)
         fun bool(k: String, d: Boolean) = BoxModule.unquote(raw[k])?.let { it == "true" } ?: d
@@ -247,6 +255,72 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                                 }
                             }
                         }
+                    }
+                }
+            }
+            val dc = dnscrypt
+            if (dc?.enabled != null) {
+                item {
+                    SectionCard(stringResource(R.string.dnscrypt_title), stringResource(R.string.dnscrypt_sub)) {
+                        val installed = dc.version != null
+                        SwitchRow(
+                            BoxyIcons.Shield,
+                            stringResource(R.string.dnscrypt_enable),
+                            when {
+                                !installed -> stringResource(R.string.dnscrypt_state_missing)
+                                dc.running -> stringResource(R.string.dnscrypt_state_on, "127.0.0.1:${dc.port}")
+                                dc.enabled -> stringResource(R.string.dnscrypt_state_pending)
+                                else -> stringResource(R.string.dnscrypt_state_off)
+                            },
+                            dc.enabled,
+                            enabled = installed || dc.enabled,
+                        ) { on ->
+                            scope.launch {
+                                if (BoxModule.setDnscrypt(on)) {
+                                    // The service reads the setting on start: restart it when it runs.
+                                    if (BoxModule.state().running) {
+                                        Toast.makeText(context, R.string.dnscrypt_restarting, Toast.LENGTH_SHORT).show()
+                                        com.skofqq.boxy.service.BoxControl.restart(context.applicationContext)
+                                    }
+                                    dnscryptReload++
+                                } else {
+                                    Toast.makeText(context, R.string.net_save_failed, Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                        SettingsRow(
+                            BoxyIcons.Download,
+                            stringResource(if (installed) R.string.dnscrypt_update else R.string.dnscrypt_download),
+                            dnscryptTask ?: dc.version?.let { stringResource(R.string.dnscrypt_installed, it) } ?: "github.com/DNSCrypt/dnscrypt-proxy",
+                        ) {
+                            if (dnscryptTask != null) return@SettingsRow
+                            dnscryptTask = context.getString(R.string.import_downloading)
+                            scope.launch {
+                                val ok = com.skofqq.boxy.root.RootTask.run("${BoxModule.SCRIPTS}/box.tool updnscrypt") { line ->
+                                    if (line.isNotBlank()) dnscryptTask = line.trim().take(80)
+                                }
+                                dnscryptTask = null
+                                if (!ok) Toast.makeText(context, R.string.dnscrypt_download_failed, Toast.LENGTH_SHORT).show()
+                                dnscryptReload++
+                            }
+                        }
+                        SettingsRow(
+                            BoxyIcons.Router,
+                            stringResource(R.string.dnscrypt_servers),
+                            stringResource(R.string.dnscrypt_servers_row_sub),
+                        ) { onDnsServers() }
+                        SettingsRow(
+                            BoxyIcons.Edit,
+                            stringResource(R.string.dnscrypt_config),
+                            stringResource(R.string.dnscrypt_config_sub),
+                            showDivider = false,
+                        ) { onEdit("${BoxModule.BOX_DIR}/dnscrypt/dnscrypt-proxy.toml") }
+                        Text(
+                            stringResource(if (core == "clash") R.string.dnscrypt_hint_clash else R.string.dnscrypt_hint_other, "127.0.0.1:${dc.port}"),
+                            Modifier.padding(horizontal = 18.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Boxy.colors.text2,
+                        )
                     }
                 }
             }

@@ -215,7 +215,7 @@ restore_ini() {
   target_ini="/data/adb/box/settings.ini"
 
   # List of keys to restore (separate with spaces)
-  keys="network_mode bin_name ipv6 xclash_option renew update_subscription run_crontab interva_update update_geo subscription_url_clash subscription_url_singbox name_clash_config clash_config name_provide_clash_config clash_provide_path custom_rules_subs name_provide_clash_rules name_sing_config name_xray_config name_v2fly_config name_hysteria_config tproxy_port redir_port box_user_group cgroup_memcg memcg_limit cgroup_cpuset allow_cpu cgroup_blkio weight enable_network_service_control use_module_on_wifi_disconnect use_module_on_wifi use_ssid_matching use_wifi_list_mode wifi_ssids_list wifi_bssids_list use_sim_matching use_sim_list_mode sim_operators_list dns_hijack user_agent mac_filter mac_mode macs_list inotify_log_enabled"
+  keys="network_mode bin_name ipv6 xclash_option renew update_subscription run_crontab interva_update update_geo subscription_url_clash subscription_url_singbox name_clash_config clash_config name_provide_clash_config clash_provide_path custom_rules_subs name_provide_clash_rules name_sing_config name_xray_config name_v2fly_config name_hysteria_config tproxy_port redir_port box_user_group cgroup_memcg memcg_limit cgroup_cpuset allow_cpu cgroup_blkio weight enable_network_service_control use_module_on_wifi_disconnect use_module_on_wifi use_ssid_matching use_wifi_list_mode wifi_ssids_list wifi_bssids_list use_sim_matching use_sim_list_mode sim_operators_list dns_hijack user_agent dnscrypt dnscrypt_port mac_filter mac_mode macs_list inotify_log_enabled"
 
   for key in $keys; do
       value=$(grep "^$key=" "$backup_ini")
@@ -275,7 +275,7 @@ if [ "${backup_box}" = "true" ]; then
     config_dir="$1"
     [ -d "${temp_dir}/${config_dir}" ] && cp -rf "${temp_dir}/${config_dir}/"* "/data/adb/box/${config_dir}/"
   }
-  for dir in clash xray v2fly sing-box hysteria; do
+  for dir in clash xray v2fly sing-box hysteria dnscrypt; do
     restore_config "$dir"
   done
 
@@ -287,7 +287,7 @@ if [ "${backup_box}" = "true" ]; then
     fi
   }
 
-  for kernel in curl yq xray sing-box v2fly hysteria xclash/mihomo xclash/premium; do
+  for kernel in curl yq xray sing-box v2fly hysteria xclash/mihomo xclash/premium dnscrypt-proxy; do
     restore_kernel "$kernel"
   done
 
@@ -296,6 +296,9 @@ if [ "${backup_box}" = "true" ]; then
   ui_print "     ↳  box.pid"
   ui_print "     ↳  uid.list"
   cp -rf "${temp_dir}/run/"* "/data/adb/box/run/"
+
+  # Restored cores and tools stay executable (set_perm above made bin/ 0644)
+  chmod 0755 /data/adb/box/bin/* /data/adb/box/bin/xclash/* 2>/dev/null
 
   ui_print "— $(t 'Restoring...' 'Восстановление...')"
   ui_print "     ↳  ap.list.cfg"

@@ -28,6 +28,14 @@ data class ServiceDetails(
     val cpuAffinity: String?,
 )
 
+/** Optional DNSCrypt of the module (ru.5+). [enabled] is null when the module has no dnscrypt setting. */
+data class DnsCryptState(
+    val enabled: Boolean?,
+    val version: String?,
+    val running: Boolean,
+    val port: String,
+)
+
 data class SystemEnvironment(
     val android: String,
     val kernel: String?,
@@ -255,6 +263,23 @@ object BoxModule {
         if (ok) Shell.cmd("[ -f $PID_FILE ] && $SCRIPTS/box.iptables renew >/dev/null 2>&1").exec()
         ok
     }
+
+    suspend fun dnscrypt(): DnsCryptState = withContext(Dispatchers.IO) {
+        val out = sh(
+            "grep -E '^(dnscrypt|dnscrypt_port)=' $SETTINGS 2>/dev/null; " +
+                "[ -x $BOX_DIR/bin/dnscrypt-proxy ] && echo \"ver=$($BOX_DIR/bin/dnscrypt-proxy -version 2>/dev/null | head -n1)\"; " +
+                "p=$(cat $RUN_DIR/dnscrypt.pid 2>/dev/null); [ -n \"${'$'}p\" ] && [ -e /proc/${'$'}p ] && echo run=1",
+        )
+        val kv = parseKv(out)
+        DnsCryptState(
+            enabled = kv["dnscrypt"]?.let { unquote(it) == "true" },
+            version = kv["ver"]?.takeIf { it.isNotBlank() },
+            running = kv["run"] == "1",
+            port = unquote(kv["dnscrypt_port"])?.takeIf { it.isNotBlank() } ?: "5354",
+        )
+    }
+
+    suspend fun setDnscrypt(enabled: Boolean): Boolean = writeSetting("dnscrypt", enabled.toString())
 
     suspend fun subStoreInstalled(): Boolean = withContext(Dispatchers.IO) { exists("/data/adb/modules/sub_store") }
 

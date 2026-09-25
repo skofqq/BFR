@@ -16,6 +16,8 @@ Changes on top of v1.10.2:
 - Mobile data rules by SIM operator: `use_sim_matching`, `use_sim_list_mode`, `sim_operators_list`
 - Installer tests the active config with an installed core
 - `config_docs.yaml` comments in English
+- Optional DNSCrypt: `dnscrypt=true`, `box.tool updnscrypt`, config in `dnscrypt/dnscrypt-proxy.toml`;
+  with clash the active config's `dns.nameserver` is pointed at it and restored when it is off
 - Fixes for upstream issues: `box.tool subs` exits with 0 on success (#219), sing-box formats only the active config (#203),
   `dns_hijack=false` leaves DNS to AdGuard Home and similar (#213), `user_agent` in settings.ini (#138)
 
@@ -27,12 +29,13 @@ Module working directory: `/data/adb/box/`
 
 ```
 /data/adb/box/
-├── bin/                  # cores and tools: xclash/ (mihomo), sing-box, xray, v2fly, hysteria, yq, curl
+├── bin/                  # cores and tools: xclash/ (mihomo), sing-box, xray, v2fly, hysteria, yq, curl, dnscrypt-proxy
 ├── clash/                # mihomo (clash) configs, dashboard/, proxy providers, rule sets
 ├── sing-box/             # sing-box configs
 ├── xray/                 # xray configs
 ├── v2fly/                # v2fly configs
 ├── hysteria/             # hysteria configs
+├── dnscrypt/             # dnscrypt-proxy config (optional DNSCrypt)
 ├── scripts/              # module scripts
 │   ├── box.service       # start / stop / restart of the core
 │   ├── box.iptables      # transparent proxy rules (tproxy, redirect, tun)

@@ -30,6 +30,7 @@ Languages: English, Русский, Українська, Беларуская, 
   (search, create, rename, delete, download by URL) and a code editor with search
 - Config check: the core tests a file (`mihomo -t`, `sing-box check`, …) before it is selected or saved, and shows the error line
 - Subscription import: QR code (camera or picture), pasted link, `clash://install-config` and `sing-box://import-remote-profile` links
+- DNSCrypt (optional): dnscrypt-proxy as the core's upstream DNS, download, on / off, config editor
 - Network control: Wi‑Fi rules, SSID / BSSID lists with nearby Wi‑Fi scan, proxy on/off for hotspot clients, hotspot client MAC filter, SIM operator rules, DNS redirect switch
 - Update: cores (Mihomo, Sing-box, Xray, V2Ray, Hysteria), subscription, web UI with live output
 - Subscription settings: URLs, provider files, interval, crontab
@@ -60,12 +61,13 @@ Module working directory: `/data/adb/box/`
 
 ```
 /data/adb/box/
-├── bin/                  # cores and tools: xclash/ (mihomo), sing-box, xray, v2fly, hysteria, yq, curl
+├── bin/                  # cores and tools: xclash/ (mihomo), sing-box, xray, v2fly, hysteria, yq, curl, dnscrypt-proxy
 ├── clash/                # mihomo (clash) configs, dashboard/, proxy providers, rule sets
 ├── sing-box/             # sing-box configs
 ├── xray/                 # xray configs
 ├── v2fly/                # v2fly configs
 ├── hysteria/             # hysteria configs
+├── dnscrypt/             # dnscrypt-proxy config (optional DNSCrypt)
 ├── scripts/              # module scripts
 │   ├── box.service       # start / stop / restart of the core
 │   ├── box.iptables      # transparent proxy rules (tproxy, redirect, tun)
