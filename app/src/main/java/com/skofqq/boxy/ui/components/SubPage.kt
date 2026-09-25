@@ -1,6 +1,7 @@
 package com.skofqq.boxy.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -108,9 +109,10 @@ fun BoxyTextField(
     keyboardType: KeyboardType = KeyboardType.Text,
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
+    container: androidx.compose.ui.graphics.Color = Boxy.colors.surface2,
 ) {
     Row(
-        modifier.clip(RoundedCornerShape(16.dp)).background(Boxy.colors.surface2).padding(horizontal = 14.dp, vertical = 12.dp),
+        modifier.clip(RoundedCornerShape(16.dp)).background(container).padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (leading != null) {
@@ -137,8 +139,9 @@ fun BoxyTextField(
 }
 
 /**
- * Editable list of strings (SSIDs, URLs, file names). Each row has a delete button;
- * an optional pick button on the row start (scan Wi‑Fi / hotspot clients).
+ * Editable list of strings (SSIDs, URLs, file names) in the BFR style: an icon tile, an outlined field and a
+ * delete button per row, dividers between rows and an "Add" row at the end. With [onPick] the tile opens a picker
+ * (scan Wi‑Fi / hotspot clients / SIM operators).
  */
 @Composable
 fun StringListEditor(
@@ -147,36 +150,59 @@ fun StringListEditor(
     hint: String,
     onPick: ((Int) -> Unit)? = null,
     pickIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector = pickIcon ?: BoxyIcons.Router,
 ) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    val colors = Boxy.colors
+    Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp)) {
         items.forEachIndexed { i, value ->
-            BoxyTextField(
-                value = value,
-                onChange = { v -> onChange(items.toMutableList().also { it[i] = v }) },
-                hint = hint,
-                modifier = Modifier.fillMaxWidth(),
-                leading = if (onPick != null && pickIcon != null) {
-                    { Icon(pickIcon, null, Modifier.size(22.dp).clickable { onPick(i) }, tint = Boxy.colors.accent) }
-                } else {
-                    null
-                },
-                trailing = {
-                    Icon(
-                        BoxyIcons.Close,
-                        stringResource(R.string.action_delete),
-                        Modifier.size(20.dp).clickable { onChange(items.toMutableList().also { it.removeAt(i) }) },
-                        tint = Boxy.colors.text2,
+            if (i > 0) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 56.dp), color = colors.outline.copy(alpha = 0.35f))
+            Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                val pick = onPick?.takeIf { pickIcon != null }
+                Box(
+                    Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(colors.surface2)
+                        .then(if (pick != null) Modifier.clickable { pick(i) } else Modifier),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(icon, null, Modifier.size(22.dp), tint = if (pick != null) colors.accent else colors.text2)
+                }
+                Spacer(Modifier.width(12.dp))
+                Box(
+                    Modifier.weight(1f)
+                        .clip(RoundedCornerShape(18.dp))
+                        .border(1.dp, colors.outline, RoundedCornerShape(18.dp))
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                ) {
+                    if (value.isEmpty()) Text(hint, color = colors.text2, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    BasicTextField(
+                        value,
+                        { v -> onChange(items.toMutableList().also { it[i] = v }) },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.text),
+                        cursorBrush = SolidColor(colors.accent),
+                        modifier = Modifier.fillMaxWidth(),
                     )
-                },
-            )
+                }
+                Spacer(Modifier.width(4.dp))
+                Box(
+                    Modifier.size(44.dp).clip(RoundedCornerShape(50)).clickable { onChange(items.toMutableList().also { it.removeAt(i) }) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(BoxyIcons.Delete, stringResource(R.string.action_delete), Modifier.size(22.dp), tint = colors.text2)
+                }
+            }
         }
         Row(
-            Modifier.clip(RoundedCornerShape(50)).clickable { onChange(items + "") }.padding(horizontal = 10.dp, vertical = 8.dp),
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).clickable { onChange(items + "") }.padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(BoxyIcons.Add, null, Modifier.size(20.dp), tint = Boxy.colors.accent)
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.list_append_item), color = Boxy.colors.accent, style = MaterialTheme.typography.labelLarge)
+            Box(Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(colors.surface2), contentAlignment = Alignment.Center) {
+                Icon(BoxyIcons.Add, null, Modifier.size(22.dp), tint = colors.text)
+            }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(stringResource(R.string.action_add), style = MaterialTheme.typography.titleMedium, color = colors.text)
+                Text(stringResource(R.string.list_append_item), style = MaterialTheme.typography.bodyMedium, color = colors.text2)
+            }
         }
     }
 }

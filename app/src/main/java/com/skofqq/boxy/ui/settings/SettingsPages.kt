@@ -7,6 +7,11 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -166,42 +171,104 @@ private fun SliderRow(title: String, subtitle: String, value: Float, enabled: Bo
     }
 }
 
-/** Name and URL of each latency target shown on the home page. */
+/**
+ * Name and URL of each latency target shown on the home page. BFR-style card: each target is a compact
+ * "#n / name · host" row that expands into its name and URL fields when tapped.
+ */
 @Composable
 fun LatencyTargetsScreen(contentPadding: PaddingValues, prefs: Prefs, onBack: () -> Unit) {
     val context = LocalContext.current
+    val colors = Boxy.colors
     var targets by remember { mutableStateOf(prefs.latencyTargets) }
+    var open by remember { mutableStateOf(-1) }
     PinnedLazyPage(contentPadding, header = {
-SubPageHeader(stringResource(R.string.settings_latency_targets), stringResource(R.string.settings_latency_targets_sub), onBack)
-}, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        targets.forEachIndexed { i, t ->
-            item {
-                SectionCard("#${i + 1}", null) {
-                    Column(Modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        BoxyTextField(t.name, { v -> targets = targets.toMutableList().also { it[i] = t.copy(name = v) } }, stringResource(R.string.settings_latency_name), Modifier.fillMaxWidth())
-                        BoxyTextField(t.url, { v -> targets = targets.toMutableList().also { it[i] = t.copy(url = v) } }, stringResource(R.string.settings_latency_url), Modifier.fillMaxWidth())
+        SubPageHeader(stringResource(R.string.settings_latency_targets), stringResource(R.string.settings_latency_targets_sub), onBack)
+    }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        item {
+            SectionCard(null) {
+                Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    targets.forEachIndexed { i, t ->
+                        val expanded = open == i
+                        Column(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(colors.surface2)
+                                .animateContentSize(),
+                        ) {
+                            Column(
+                                Modifier.fillMaxWidth().clickable { open = if (expanded) -1 else i }
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                            ) {
+                                Text("#${i + 1}", style = MaterialTheme.typography.labelMedium, color = colors.text2)
+                                val host = t.url.trim().substringAfter("://").trimEnd('/')
+                                Text(
+                                    listOf(t.name.trim(), host).filter { it.isNotEmpty() }.joinToString("  ·  ").ifEmpty { "—" },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.text,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
+                            if (expanded) {
+                                Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    LatencyFieldLabel(BoxyIcons.Tune, stringResource(R.string.settings_latency_name))
+                                    BoxyTextField(
+                                        t.name,
+                                        { v -> targets = targets.toMutableList().also { it[i] = t.copy(name = v) } },
+                                        stringResource(R.string.settings_latency_name),
+                                        Modifier.fillMaxWidth(),
+                                        container = colors.card,
+                                    )
+                                    LatencyFieldLabel(BoxyIcons.Link, stringResource(R.string.settings_latency_url))
+                                    BoxyTextField(
+                                        t.url,
+                                        { v -> targets = targets.toMutableList().also { it[i] = t.copy(url = v) } },
+                                        "https://",
+                                        Modifier.fillMaxWidth(),
+                                        keyboardType = androidx.compose.ui.text.input.KeyboardType.Uri,
+                                        container = colors.card,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Row(Modifier.padding(top = 6.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(
+                            Modifier.weight(1f).height(50.dp).clip(RoundedCornerShape(18.dp))
+                                .border(1.dp, colors.outline, RoundedCornerShape(18.dp))
+                                .clickable {
+                                    targets = DEFAULT_LATENCY_TARGETS
+                                    open = -1
+                                    prefs.updateLatencyTargets(null)
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(stringResource(R.string.action_reset), color = colors.text, fontWeight = FontWeight.SemiBold)
+                        }
+                        Box(
+                            Modifier.weight(1f).height(50.dp).clip(RoundedCornerShape(18.dp)).background(colors.accent)
+                                .clickable {
+                                    val clean = targets.map { LatencyTarget(it.name.trim().ifBlank { it.url }, it.url.trim()) }.filter { it.url.isNotBlank() }
+                                    prefs.updateLatencyTargets(clean.ifEmpty { null })
+                                    Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
+                                    onBack()
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(stringResource(R.string.action_save), color = androidx.compose.ui.graphics.Color.White, fontWeight = FontWeight.SemiBold)
+                        }
                     }
                 }
             }
         }
-        item {
-            Box(Modifier.padding(horizontal = 16.dp)) {
-                SheetButtons(
-                    stringResource(R.string.action_save),
-                    {
-                        val clean = targets.map { LatencyTarget(it.name.trim().ifBlank { it.url }, it.url.trim()) }.filter { it.url.isNotBlank() }
-                        prefs.updateLatencyTargets(clean.ifEmpty { null })
-                        Toast.makeText(context, R.string.saved, Toast.LENGTH_SHORT).show()
-                        onBack()
-                    },
-                    stringResource(R.string.action_reset),
-                    {
-                        targets = DEFAULT_LATENCY_TARGETS
-                        prefs.updateLatencyTargets(null)
-                    },
-                )
-            }
-        }
+    }
+}
+
+@Composable
+private fun LatencyFieldLabel(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, Modifier.size(20.dp), tint = Boxy.colors.text2)
+        Spacer(Modifier.width(10.dp))
+        Text(text, style = MaterialTheme.typography.titleSmall, color = Boxy.colors.text)
     }
 }
 

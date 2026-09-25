@@ -8,8 +8,13 @@ import io.github.rosemoe.sora.lang.styling.Styles
 import io.github.rosemoe.sora.lang.styling.TextStyle
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 
-/** Light-weight highlighting for the module's config files: YAML (Clash, Hysteria) and JSON (sing-box, Xray, V2Ray). */
-class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
+/**
+ * Light-weight highlighting for the module's config files: YAML (Clash, Hysteria), JSON (sing-box, Xray, V2Ray)
+ * and TOML / INI style "key = value" files (dnscrypt-proxy.toml, settings.ini, *.cfg).
+ */
+class ConfigLanguage(private val kind: Kind) : EmptyLanguage() {
+    enum class Kind { YAML, JSON, TOML }
+
     private val manager = object : SimpleAnalyzeManager<Unit>() {
         override fun analyze(text: StringBuilder, delegate: Delegate<Unit>): Styles {
             val spans = MappedSpans.Builder()
@@ -19,7 +24,11 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
                 if (delegate.isCancelled) break
                 val end = text.indexOf('\n', start).let { if (it < 0) text.length else it }
                 val s = text.substring(start, end)
-                if (json) jsonLine(spans, line, s) else yamlLine(spans, line, s)
+                when (kind) {
+                    Kind.JSON -> jsonLine(spans, line, s)
+                    Kind.YAML -> yamlLine(spans, line, s)
+                    Kind.TOML -> tomlLine(spans, line, s)
+                }
                 line++
                 start = end + 1
             }
@@ -31,6 +40,17 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
     override fun getAnalyzeManager(): AnalyzeManager = manager
 
     companion object {
+        /** Highlighting for a file name, or null for plain text. */
+        fun forPath(path: String): ConfigLanguage? {
+            val name = path.substringAfterLast('/').lowercase()
+            return when (name.substringAfterLast('.', "")) {
+                "json" -> ConfigLanguage(Kind.JSON)
+                "yaml", "yml" -> ConfigLanguage(Kind.YAML)
+                "toml", "ini", "cfg", "conf", "prop" -> ConfigLanguage(Kind.TOML)
+                else -> null
+            }
+        }
+
         private val NORMAL = TextStyle.makeStyle(EditorColorScheme.TEXT_NORMAL)
         private val KEY = TextStyle.makeStyle(EditorColorScheme.KEYWORD)
         private val STRING = TextStyle.makeStyle(EditorColorScheme.LITERAL)
@@ -162,6 +182,98 @@ class ConfigLanguage(private val json: Boolean) : EmptyLanguage() {
                         continue
                     }
                     c in "{}[],:" -> {
+                        b.addIfNeeded(line, i, PUNCT)
+                        b.addIfNeeded(line, i + 1, NORMAL)
+                    }
+                }
+                i++
+            }
+        }
+        /** TOML / INI: [section] headers, key = value, strings, numbers, arrays and # comments. */
+        private fun tomlLine(b: MappedSpans.Builder, line: Int, s: String) {
+            b.addIfNeeded(line, 0, NORMAL)
+            var i = 0
+            while (i < s.length && (s[i] == ' ' || s[i] == '\t')) i++
+            if (i >= s.length) return
+            if (s[i] == '#' || s[i] == ';') {
+                b.addIfNeeded(line, i, COMMENT)
+                return
+            }
+            if (s[i] == '[' && s.indexOf('=') < 0) {
+                var j = i
+                while (j < s.length && s[j] == '[') j++
+                b.addIfNeeded(line, i, PUNCT)
+                val close = s.indexOf(']', j).let { if (it < 0) s.length else it }
+                b.addIfNeeded(line, j, KEY)
+                b.addIfNeeded(line, close, PUNCT)
+                val hash = s.indexOf('#', close)
+                if (hash >= 0) b.addIfNeeded(line, hash, COMMENT)
+                return
+            }
+            val eq = tomlEquals(s, i)
+            if (eq > i) {
+                b.addIfNeeded(line, i, KEY)
+                b.addIfNeeded(line, eq, PUNCT)
+                b.addIfNeeded(line, eq + 1, NORMAL)
+                i = eq + 1
+            }
+            tomlValue(b, line, s, i)
+        }
+
+        /** Index of the '=' after a bare or quoted key starting at [from], or -1. */
+        private fun tomlEquals(s: String, from: Int): Int {
+            var i = from
+            var quote: Char? = null
+            while (i < s.length) {
+                val c = s[i]
+                if (quote != null) {
+                    if (c == quote) quote = null
+                } else when (c) {
+                    '"', '\'' -> quote = c
+                    '=' -> return i
+                    '#', '[', '{', '(', ',' -> return -1
+                }
+                i++
+            }
+            return -1
+        }
+
+        private fun tomlValue(b: MappedSpans.Builder, line: Int, s: String, from: Int) {
+            var i = from
+            while (i < s.length) {
+                val c = s[i]
+                when {
+                    c == '#' -> {
+                        b.addIfNeeded(line, i, COMMENT)
+                        return
+                    }
+                    c == '"' || c == '\'' -> {
+                        var j = i + 1
+                        while (j < s.length && s[j] != c) {
+                            if (c == '"' && s[j] == '\\') j++
+                            j++
+                        }
+                        val end = minOf(j + 1, s.length)
+                        b.addIfNeeded(line, i, STRING)
+                        b.addIfNeeded(line, end, NORMAL)
+                        i = end
+                        continue
+                    }
+                    c.isDigit() || c == '-' || c == '+' || c.isLetter() -> {
+                        var j = i
+                        while (j < s.length && (s[j].isLetterOrDigit() || s[j] in ".-+_:")) j++
+                        val word = s.substring(i, j)
+                        if (word.replace("_", "").toDoubleOrNull() != null) {
+                            b.addIfNeeded(line, i, NUMBER)
+                            b.addIfNeeded(line, j, NORMAL)
+                        } else if (word != "true" && word != "false" && from > 0) {
+                            b.addIfNeeded(line, i, STRING)
+                            b.addIfNeeded(line, j, NORMAL)
+                        }
+                        i = maxOf(j, i + 1)
+                        continue
+                    }
+                    c in "[]{}(),=" -> {
                         b.addIfNeeded(line, i, PUNCT)
                         b.addIfNeeded(line, i + 1, NORMAL)
                     }

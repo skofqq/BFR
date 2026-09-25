@@ -190,8 +190,7 @@ fun EditorScreen(contentPadding: PaddingValues, path: String, onBack: () -> Unit
                                 setColor(EditorColorScheme.COMMENT, if (dark) 0xFF8B949E.toInt() else 0xFF8A8F98.toInt())
                                 setColor(EditorColorScheme.LINE_DIVIDER, colors.outline.copy(alpha = 0.4f).toArgb())
                             }
-                            val ext = path.substringAfterLast('.', "").lowercase()
-                            if (ext == "json" || ext == "yaml" || ext == "yml") setEditorLanguage(ConfigLanguage(json = ext == "json"))
+                            ConfigLanguage.forPath(path)?.let { setEditorLanguage(it) }
                             setText(content)
                             subscribeEvent(ContentChangeEvent::class.java) { _, _ -> modified = true }
                             editor = this

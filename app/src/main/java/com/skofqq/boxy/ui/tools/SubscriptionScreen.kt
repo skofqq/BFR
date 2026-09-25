@@ -120,12 +120,12 @@ SubPageHeader(stringResource(R.string.tools_subscription), stringResource(R.stri
             }
             item {
                 SectionCard(stringResource(R.string.sub_clash_urls_title), stringResource(R.string.sub_clash_urls_sub)) {
-                    StringListEditor(s.clashUrls.ifEmpty { listOf("") }, { state = s.copy(clashUrls = it) }, stringResource(R.string.sub_url_placeholder))
+                    StringListEditor(s.clashUrls.ifEmpty { listOf("") }, { state = s.copy(clashUrls = it) }, stringResource(R.string.sub_url_placeholder), icon = BoxyIcons.Link)
                 }
             }
             item {
                 SectionCard(stringResource(R.string.sub_clash_configs_title), stringResource(R.string.sub_clash_configs_sub)) {
-                    StringListEditor(s.clashNames.ifEmpty { listOf("") }, { state = s.copy(clashNames = it) }, stringResource(R.string.sub_filename_placeholder))
+                    StringListEditor(s.clashNames.ifEmpty { listOf("") }, { state = s.copy(clashNames = it) }, stringResource(R.string.sub_filename_placeholder), icon = BoxyIcons.Description)
                 }
             }
             item {

@@ -204,7 +204,7 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                             { state = s.copy(bssids = it) },
                             stringResource(R.string.net_hint_bssid),
                             onPick = { wifiPickFor = true to it },
-                            pickIcon = BoxyIcons.Wifi,
+                            pickIcon = BoxyIcons.Router,
                         )
                     }
                 }
@@ -305,7 +305,7 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                             }
                         }
                         SettingsRow(
-                            BoxyIcons.Router,
+                            BoxyIcons.ServerGlobe,
                             stringResource(R.string.dnscrypt_servers),
                             stringResource(R.string.dnscrypt_servers_row_sub),
                         ) { onDnsServers() }
