@@ -1,9 +1,11 @@
 # Boxy
 
+**English** · [Русский](README.ru.md)
+
 Open-source Android app for managing the [Box for Root](https://github.com/taamarin/box_for_magisk) module
 (Magisk / KernelSU / APatch). The design follows BFR by boxproxy; the code is written from scratch in Kotlin and Jetpack Compose.
 
-Languages: English, Русский, 中文.
+Languages: English, Русский, Українська, Беларуская, Қазақша, Deutsch, Español, Français, Italiano, Türkçe, 中文, 日本語.
 
 ## Features
 
@@ -26,16 +28,16 @@ Languages: English, Русский, 中文.
 **Tools**
 - Config: choose the active config of the current core, file manager for `/data/adb/box`
   (search, create, rename, delete, download by URL) and a code editor with search
-- Network control: Wi‑Fi rules, SSID / BSSID lists with nearby Wi‑Fi scan, hotspot client MAC filter
+- Network control: Wi‑Fi rules, SSID / BSSID lists with nearby Wi‑Fi scan, proxy on/off for hotspot clients, hotspot client MAC filter
 - Update: cores (Mihomo, Sing-box, Xray, V2Ray, Hysteria), subscription, web UI with live output
 - Subscription settings: URLs, provider files, interval, crontab
-- Logs: module log files with auto refresh
+- Logs: module log files with auto refresh and colour highlighting
 
 **Panel**
 - Core web UI (Zashboard or MetaCubeXD, switchable), custom panels, SubStore, cache cleaning
 
 **Settings**
-- Theme (light, dark, system, Material You), true black, language
+- Theme (light, dark, system, Material You), true black, language picker with flags
 - Liquid glass navigation bar with backdrop blur and lens, sheet blur, UI scale, system bars
 - Navigation: Apps or Logs as a fourth tab
 - GitHub mirror for all downloads (module scripts included)
