@@ -542,4 +542,6 @@
     <string name="config_folder">Carpeta</string>
     <string name="config_tap_select">Toca para elegir</string>
     <string name="config_hint">Toca un archivo para activarlo. Tocar el activo o mantener pulsado cualquiera abre el editor.</string>
+    <string name="about_app_repo">App</string>
+    <string name="about_based_on">Basado en</string>
 </resources>

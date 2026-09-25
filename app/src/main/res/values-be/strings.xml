@@ -542,4 +542,6 @@
     <string name="config_folder">Папка</string>
     <string name="config_tap_select">Націсніце, каб выбраць</string>
     <string name="config_hint">Націсніце на файл, каб зрабіць яго актыўным. Націсканне на актыўны файл або доўгае націсканне на любы адкрывае рэдактар.</string>
+    <string name="about_app_repo">Праграма</string>
+    <string name="about_based_on">На аснове</string>
 </resources>

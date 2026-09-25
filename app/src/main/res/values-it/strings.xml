@@ -542,4 +542,6 @@
     <string name="config_folder">Cartella</string>
     <string name="config_tap_select">Tocca per scegliere</string>
     <string name="config_hint">Tocca un file per attivarlo. Toccando il file attivo o tenendo premuto un file qualsiasi si apre l’editor.</string>
+    <string name="about_app_repo">App</string>
+    <string name="about_based_on">Basato su</string>
 </resources>

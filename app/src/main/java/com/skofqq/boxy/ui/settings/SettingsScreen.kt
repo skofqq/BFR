@@ -104,6 +104,7 @@ private fun SettingsMain(contentPadding: PaddingValues, prefs: Prefs, push: (Str
     var sourceDialog by remember { mutableStateOf(false) }
     var chainsDialog by remember { mutableStateOf(false) }
     var aboutSheet by remember { mutableStateOf(false) }
+    var infoSheet by remember { mutableStateOf(false) }
     var moduleSheet by remember { mutableStateOf(false) }
     var mirrorSheet by remember { mutableStateOf(false) }
     var moduleVersion by remember { mutableStateOf<String?>(null) }
@@ -242,9 +243,7 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
                         else -> moduleVersion ?: stringResource(R.string.common_dash)
                     },
                 ) { moduleSheet = true }
-                SettingsRow(BoxyIcons.Build, stringResource(R.string.settings_author), "skofqq") {
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_URL)))
-                }
+                SettingsRow(BoxyIcons.Person, stringResource(R.string.settings_author), "skofqq") { infoSheet = true }
                 SettingsRow(BoxyIcons.Link, "GitHub", GITHUB_URL.removePrefix("https://")) {
                     context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(GITHUB_URL)))
                 }
@@ -296,6 +295,7 @@ PageHeader(stringResource(R.string.settings_title), stringResource(R.string.sett
         )
     }
     if (aboutSheet) AppUpdateSheet(versionName) { aboutSheet = false }
+    if (infoSheet) AppInfoSheet(versionName, moduleVersion) { infoSheet = false }
     if (mirrorSheet) MirrorSheet(prefs) { mirrorSheet = false }
     if (moduleSheet) ModuleUpdateSheet(moduleVersion, moduleInstalled) { moduleSheet = false }
 }

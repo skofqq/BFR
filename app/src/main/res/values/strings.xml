@@ -566,4 +566,6 @@
     <string name="config_folder">Folder</string>
     <string name="config_tap_select">Tap to select</string>
     <string name="config_hint">Tap a file to make it active, tap the active one or long-press any file to edit it.</string>
+    <string name="about_app_repo">App</string>
+    <string name="about_based_on">Based on</string>
 </resources>

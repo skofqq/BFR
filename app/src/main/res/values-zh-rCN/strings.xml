@@ -512,4 +512,6 @@
     <string name="config_folder">文件夹</string>
     <string name="config_tap_select">点击选择</string>
     <string name="config_hint">点击文件将其设为当前配置；点击当前配置或长按任意文件可编辑。</string>
+    <string name="about_app_repo">应用</string>
+    <string name="about_based_on">基于</string>
 </resources>

@@ -542,4 +542,6 @@
     <string name="config_folder">Dossier</string>
     <string name="config_tap_select">Appuyez pour choisir</string>
     <string name="config_hint">Appuyez sur un fichier pour l’activer. Appuyer sur le fichier actif ou maintenir n’importe quel fichier ouvre l’éditeur.</string>
+    <string name="about_app_repo">Appli</string>
+    <string name="about_based_on">Basé sur</string>
 </resources>

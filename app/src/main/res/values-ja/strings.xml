@@ -542,4 +542,6 @@
     <string name="config_folder">フォルダ</string>
     <string name="config_tap_select">タップして選択</string>
     <string name="config_hint">ファイルをタップすると有効になります。有効なファイルをタップするか、任意のファイルを長押しするとエディタが開きます。</string>
+    <string name="about_app_repo">アプリ</string>
+    <string name="about_based_on">ベース</string>
 </resources>

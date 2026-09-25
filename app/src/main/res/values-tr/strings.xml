@@ -542,4 +542,6 @@
     <string name="config_folder">Klasör</string>
     <string name="config_tap_select">Seçmek için dokunun</string>
     <string name="config_hint">Etkinleştirmek için bir dosyaya dokunun. Etkin dosyaya dokunmak veya herhangi bir dosyaya uzun basmak düzenleyiciyi açar.</string>
+    <string name="about_app_repo">Uygulama</string>
+    <string name="about_based_on">Temel alınan</string>
 </resources>

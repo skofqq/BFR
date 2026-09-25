@@ -112,8 +112,14 @@ fun IconInfoRow(
     label: String,
     value: String,
     valueColor: androidx.compose.ui.graphics.Color = Boxy.colors.text,
+    onClick: (() -> Unit)? = null,
 ) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 11.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        Modifier.fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 20.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         androidx.compose.material3.Icon(icon, null, Modifier.size(22.dp), tint = Boxy.colors.text)
         Spacer(Modifier.width(16.dp))
         Text(label, style = MaterialTheme.typography.bodyLarge, color = Boxy.colors.text2, maxLines = 1)
