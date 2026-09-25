@@ -29,9 +29,9 @@ data class BoxyColors(
 )
 
 private val LightPalette = BoxyColors(
-    page = Color(0xFFF6F8FA),
-    card = Color(0xFFFFFFFF),
-    surface2 = Color(0xFFF1F3F5),
+    page = Color(0xFFF1F0F7),
+    card = Color(0xFFFEFBFF),
+    surface2 = Color(0xFFF0F0FA),
     outline = Color.Black.copy(alpha = 0.07f),
     text = Color(0xFF0D1117),
     text2 = Color(0xFF57606A),
