@@ -243,3 +243,26 @@ fun <T> ChoiceDialog(
         containerColor = Boxy.colors.card,
     )
 }
+
+/** "Important" note inside a card: info tile, accent title and body on a soft accent background (as in BFR). */
+@Composable
+fun NoticeCard(title: String, body: String, modifier: Modifier = Modifier) {
+    val colors = Boxy.colors
+    Row(
+        modifier.fillMaxWidth().padding(horizontal = 14.dp).clip(RoundedCornerShape(20.dp))
+            .background(colors.accent.copy(alpha = 0.10f)).padding(horizontal = 14.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(colors.accent.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(BoxyIcons.Info, null, Modifier.size(22.dp), tint = colors.accent)
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = colors.accent)
+            Text(body, style = MaterialTheme.typography.bodyMedium, color = colors.text)
+        }
+    }
+}

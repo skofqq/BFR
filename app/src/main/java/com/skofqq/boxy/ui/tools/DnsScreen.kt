@@ -4,7 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -148,11 +150,10 @@ fun DnsScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: (String
                             stringResource(R.string.dnscrypt_config_sub),
                             showDivider = false,
                         ) { onEdit("${BoxModule.BOX_DIR}/dnscrypt/dnscrypt-proxy.toml") }
-                        Text(
+                        Spacer(Modifier.height(6.dp))
+                        com.skofqq.boxy.ui.components.NoticeCard(
+                            stringResource(R.string.update_tip_title),
                             stringResource(if (core == "clash" || core == "sing-box") R.string.dnscrypt_hint_clash else R.string.dnscrypt_hint_other, "127.0.0.1:${dc.port}"),
-                            Modifier.padding(horizontal = 18.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Boxy.colors.text2,
                         )
                     }
                 }

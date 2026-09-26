@@ -108,24 +108,7 @@ SubPageHeader(stringResource(R.string.tools_update), stringResource(R.string.too
 }, verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             SectionCard(null) {
-                // "Important" note with an info tile, as in BFR.
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 14.dp).clip(RoundedCornerShape(20.dp))
-                        .background(Boxy.colors.accent.copy(alpha = 0.10f)).padding(horizontal = 14.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(
-                        Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(Boxy.colors.accent.copy(alpha = 0.14f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(BoxyIcons.Info, null, Modifier.size(22.dp), tint = Boxy.colors.accent)
-                    }
-                    Spacer(Modifier.width(14.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(stringResource(R.string.update_tip_title), style = MaterialTheme.typography.titleMedium, color = Boxy.colors.accent)
-                        Text(stringResource(R.string.update_tip_body), style = MaterialTheme.typography.bodyMedium, color = Boxy.colors.text)
-                    }
-                }
+                com.skofqq.boxy.ui.components.NoticeCard(stringResource(R.string.update_tip_title), stringResource(R.string.update_tip_body))
                 Spacer(Modifier.height(6.dp))
                 UpdateRow(BoxyIcons.Storage, stringResource(R.string.update_target_core), stringResource(R.string.update_core_sub)) { coreSheet = true }
                 UpdateRow(BoxyIcons.Link, subsTitle, stringResource(R.string.update_subscription_sub)) {
