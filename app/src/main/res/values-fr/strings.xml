@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">Le cœur répond avec des adresses fake-ip, son DNS amont ne peut pas être vérifié ainsi.</string>
     <string name="dnscheck_again">Vérifier à nouveau</string>
     <string name="dnscheck_not_running">DNSCrypt n’est pas lancé</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">Interception DNS et DNS chiffré</string>
+    <string name="tools_dns_row_sub">Interception DNS, DNSCrypt, vérification</string>
 </resources>

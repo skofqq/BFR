@@ -30,8 +30,8 @@ Languages: English, Русский, Українська, Беларуская, 
   (search, create, rename, delete, download by URL) and a code editor with search
 - Config check: the core tests a file (`mihomo -t`, `sing-box check`, …) before it is selected or saved, and shows the error line
 - Subscription import: QR code (camera or picture), pasted link, `clash://install-config` and `sing-box://import-remote-profile` links
-- DNSCrypt (optional): dnscrypt-proxy as the core's upstream DNS, download, on / off, server list with filters and latency sorting, config editor and a check of which resolver websites see
-- Network control: Wi‑Fi rules, SSID / BSSID lists with nearby Wi‑Fi scan, proxy on/off for hotspot clients, hotspot client MAC filter, SIM operator rules, DNS redirect switch
+- DNS: DNS hijack switch; optional DNSCrypt with dnscrypt-proxy as the core's upstream DNS, download, on / off, server list with filters and latency sorting, config editor and a check of which resolver websites see
+- Network control: Wi‑Fi rules, SSID / BSSID lists with nearby Wi‑Fi scan, proxy on/off for hotspot clients, hotspot client MAC filter, SIM operator rules
 - Update: cores (Mihomo, Sing-box, Xray, V2Ray, Hysteria), subscription, web UI with live output
 - Subscription settings: URLs, provider files, interval, crontab
 - Logs: module log files with auto refresh, colour highlighting, search, level filter and sharing

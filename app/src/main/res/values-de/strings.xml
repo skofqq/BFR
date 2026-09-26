@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">Der Kern antwortet mit fake-ip-Adressen, sein Upstream lässt sich so nicht prüfen.</string>
     <string name="dnscheck_again">Erneut prüfen</string>
     <string name="dnscheck_not_running">DNSCrypt läuft nicht</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">DNS-Übernahme und verschlüsseltes DNS</string>
+    <string name="tools_dns_row_sub">DNS-Übernahme, DNSCrypt, Prüfung</string>
 </resources>

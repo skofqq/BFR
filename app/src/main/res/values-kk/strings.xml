@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">Ядро fake-ip мекенжайларымен жауап береді, сондықтан оның жоғарғы DNS-ін бұлай тексеру мүмкін емес.</string>
     <string name="dnscheck_again">Қайта тексеру</string>
     <string name="dnscheck_not_running">DNSCrypt іске қосылмаған</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">DNS ұстау және шифрланған DNS</string>
+    <string name="tools_dns_row_sub">DNS ұстау, DNSCrypt, тексеру</string>
 </resources>

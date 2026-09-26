@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">El núcleo responde con direcciones fake-ip, así que su DNS superior no se puede comprobar así.</string>
     <string name="dnscheck_again">Comprobar de nuevo</string>
     <string name="dnscheck_not_running">DNSCrypt no está en marcha</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">Captura de DNS y DNS cifrado</string>
+    <string name="tools_dns_row_sub">Captura de DNS, DNSCrypt, comprobación</string>
 </resources>

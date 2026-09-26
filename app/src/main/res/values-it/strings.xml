@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">Il core risponde con indirizzi fake-ip, quindi il suo DNS a monte non si può verificare così.</string>
     <string name="dnscheck_again">Verifica di nuovo</string>
     <string name="dnscheck_not_running">DNSCrypt non è in esecuzione</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">Intercettazione DNS e DNS cifrato</string>
+    <string name="tools_dns_row_sub">Intercettazione DNS, DNSCrypt, verifica</string>
 </resources>

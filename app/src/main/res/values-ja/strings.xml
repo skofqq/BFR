@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">コアが fake-ip で応答するため、この方法では上流 DNS を確認できません。</string>
     <string name="dnscheck_again">もう一度確認</string>
     <string name="dnscheck_not_running">DNSCrypt は実行されていません</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">DNS ハイジャックと暗号化 DNS</string>
+    <string name="tools_dns_row_sub">DNS ハイジャック、DNSCrypt、確認</string>
 </resources>

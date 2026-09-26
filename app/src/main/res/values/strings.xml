@@ -717,4 +717,7 @@
     <string name="dnscheck_fakeip">The core answers with fake-ip addresses, so its upstream cannot be checked this way.</string>
     <string name="dnscheck_again">Check again</string>
     <string name="dnscheck_not_running">DNSCrypt is not running</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">DNS hijack and encrypted DNS</string>
+    <string name="tools_dns_row_sub">DNS hijack, DNSCrypt, check</string>
 </resources>

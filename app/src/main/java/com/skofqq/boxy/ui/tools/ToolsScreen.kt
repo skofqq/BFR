@@ -66,7 +66,8 @@ fun ToolsScreen(contentPadding: PaddingValues, navExtra: NavExtra, active: Boole
                     onEdit = { push("$ROUTE_EDIT$it") },
                 )
                 r.startsWith(ROUTE_EDIT) -> EditorScreen(contentPadding, path = r.removePrefix(ROUTE_EDIT), onBack = pop)
-                r == ROUTE_NETWORK -> NetworkControlScreen(contentPadding, onBack = pop, onEdit = { push("$ROUTE_EDIT$it") }, onDnsServers = { push(ROUTE_DNSCRYPT) })
+                r == ROUTE_NETWORK -> NetworkControlScreen(contentPadding, onBack = pop)
+                r == ROUTE_DNS -> DnsScreen(contentPadding, onBack = pop, onEdit = { push("$ROUTE_EDIT$it") }, onDnsServers = { push(ROUTE_DNSCRYPT) })
                 r == ROUTE_DNSCRYPT -> DnsCryptServersScreen(contentPadding, onBack = pop)
                 r == ROUTE_UPDATE -> UpdateScreen(contentPadding, onBack = pop)
                 r == ROUTE_SUBSCRIPTION -> SubscriptionScreen(contentPadding, onBack = pop)
@@ -87,6 +88,7 @@ const val ROUTE_SUBSCRIPTION = "subscription"
 const val ROUTE_TRAFFIC = "traffic"
 const val ROUTE_AUTOMATION = "automation"
 const val ROUTE_DNSCRYPT = "dnscrypt"
+const val ROUTE_DNS = "dns"
 
 @Composable
 private fun ToolsHub(contentPadding: PaddingValues, navExtra: NavExtra, onOpenPage: (NavExtra) -> Unit, push: (String) -> Unit) {
@@ -117,6 +119,12 @@ PageHeader(stringResource(R.string.tools_title), stringResource(R.string.tools_s
         item {
             SectionCard(stringResource(R.string.tools_network), stringResource(R.string.tools_network_sub)) {
                 SettingsRow(BoxyIcons.Wifi, stringResource(R.string.tools_row_open), stringResource(R.string.tools_row_open_sub), showDivider = false) { push(ROUTE_NETWORK) }
+            }
+        }
+        item {
+            SectionCard(stringResource(R.string.tools_dns), stringResource(R.string.tools_dns_sub)) {
+                SettingsRow(BoxyIcons.Shield, stringResource(R.string.tools_row_open), stringResource(R.string.tools_dns_row_sub)) { push(ROUTE_DNS) }
+                SettingsRow(BoxyIcons.Dns, stringResource(R.string.dnscrypt_servers), stringResource(R.string.dnscrypt_servers_row_sub), showDivider = false) { push(ROUTE_DNSCRYPT) }
             }
         }
         item {

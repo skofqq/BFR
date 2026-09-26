@@ -663,4 +663,7 @@
     <string name="dnscheck_fakeip">内核返回 fake-ip 地址，因此无法用此方法检查其上游 DNS。</string>
     <string name="dnscheck_again">再次检查</string>
     <string name="dnscheck_not_running">DNSCrypt 未运行</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">DNS 劫持与加密 DNS</string>
+    <string name="tools_dns_row_sub">DNS 劫持、DNSCrypt、检查</string>
 </resources>

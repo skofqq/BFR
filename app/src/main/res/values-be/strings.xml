@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">Ядро адказвае адрасамі fake-ip, таму яго вышэйшы DNS так не праверыць.</string>
     <string name="dnscheck_again">Праверыць яшчэ раз</string>
     <string name="dnscheck_not_running">DNSCrypt не запушчаны</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">Перахоп DNS і шыфраваны DNS</string>
+    <string name="tools_dns_row_sub">Перахоп DNS, DNSCrypt, праверка</string>
 </resources>

@@ -693,4 +693,7 @@
     <string name="dnscheck_fakeip">Çekirdek fake-ip adresleriyle yanıt veriyor, bu yüzden üst DNS’i bu şekilde denetlenemez.</string>
     <string name="dnscheck_again">Yeniden denetle</string>
     <string name="dnscheck_not_running">DNSCrypt çalışmıyor</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">DNS yakalama ve şifreli DNS</string>
+    <string name="tools_dns_row_sub">DNS yakalama, DNSCrypt, denetim</string>
 </resources>

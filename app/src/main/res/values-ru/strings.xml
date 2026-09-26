@@ -705,4 +705,7 @@
     <string name="dnscheck_fakeip">Ядро отвечает адресами fake-ip, поэтому его вышестоящий DNS так не проверить.</string>
     <string name="dnscheck_again">Проверить ещё раз</string>
     <string name="dnscheck_not_running">DNSCrypt не запущен</string>
+    <string name="tools_dns">DNS</string>
+    <string name="tools_dns_sub">Перехват DNS и шифрованный DNS</string>
+    <string name="tools_dns_row_sub">Перехват DNS, DNSCrypt, проверка</string>
 </resources>
