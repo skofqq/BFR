@@ -680,4 +680,17 @@
     <string name="dnscrypt_tag_filter">Filtra</string>
     <string name="dnscrypt_auto">Automático</string>
     <string name="dnscrypt_apply">Aplicar (%1$d)</string>
+    <string name="dnscheck_title">Comprobar DNSCrypt</string>
+    <string name="dnscheck_row_sub">Qué servidor DNS ven los sitios</string>
+    <string name="dnscheck_sub">Dirección desde la que llega la consulta DNS a whoami.akamai.net</string>
+    <string name="dnscheck_running">Comprobando…</string>
+    <string name="dnscheck_core">A través del núcleo (como las apps)</string>
+    <string name="dnscheck_direct">Directo, sin pasar por Boxy</string>
+    <string name="dnscheck_no_answer">Sin respuesta</string>
+    <string name="dnscheck_ok">El DNS de las apps pasa por DNSCrypt</string>
+    <string name="dnscheck_bad">El DNS de las apps no pasa por DNSCrypt. Revisa la captura de DNS y los servidores DNS de la configuración del núcleo.</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy no respondió. Reinicia el servicio o revisa su registro.</string>
+    <string name="dnscheck_fakeip">El núcleo responde con direcciones fake-ip, así que su DNS superior no se puede comprobar así.</string>
+    <string name="dnscheck_again">Comprobar de nuevo</string>
+    <string name="dnscheck_not_running">DNSCrypt no está en marcha</string>
 </resources>

@@ -650,4 +650,17 @@
     <string name="dnscrypt_tag_filter">有过滤</string>
     <string name="dnscrypt_auto">自动选择</string>
     <string name="dnscrypt_apply">应用 (%1$d)</string>
+    <string name="dnscheck_title">检查 DNSCrypt</string>
+    <string name="dnscheck_row_sub">网站看到的是哪个 DNS 服务器</string>
+    <string name="dnscheck_sub">whoami.akamai.net 看到的 DNS 查询来源地址</string>
+    <string name="dnscheck_running">正在检查…</string>
+    <string name="dnscheck_core">经由内核（应用的方式）</string>
+    <string name="dnscheck_direct">直接，绕过 Boxy</string>
+    <string name="dnscheck_no_answer">无响应</string>
+    <string name="dnscheck_ok">应用的 DNS 经由 DNSCrypt</string>
+    <string name="dnscheck_bad">应用的 DNS 未经由 DNSCrypt。请检查 DNS 劫持开关和内核配置中的 DNS 服务器。</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy 无响应。请重启服务或查看其日志。</string>
+    <string name="dnscheck_fakeip">内核返回 fake-ip 地址，因此无法用此方法检查其上游 DNS。</string>
+    <string name="dnscheck_again">再次检查</string>
+    <string name="dnscheck_not_running">DNSCrypt 未运行</string>
 </resources>

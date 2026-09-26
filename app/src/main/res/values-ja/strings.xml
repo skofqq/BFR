@@ -680,4 +680,17 @@
     <string name="dnscrypt_tag_filter">フィルターあり</string>
     <string name="dnscrypt_auto">自動選択</string>
     <string name="dnscrypt_apply">適用 (%1$d)</string>
+    <string name="dnscheck_title">DNSCrypt を確認</string>
+    <string name="dnscheck_row_sub">サイトから見える DNS サーバー</string>
+    <string name="dnscheck_sub">whoami.akamai.net から見た DNS クエリの送信元</string>
+    <string name="dnscheck_running">確認中…</string>
+    <string name="dnscheck_core">コア経由（アプリと同じ）</string>
+    <string name="dnscheck_direct">直接（Boxy を経由しない）</string>
+    <string name="dnscheck_no_answer">応答なし</string>
+    <string name="dnscheck_ok">アプリの DNS は DNSCrypt 経由です</string>
+    <string name="dnscheck_bad">アプリの DNS は DNSCrypt を経由していません。DNS ハイジャックとコア設定の DNS サーバーを確認してください。</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy が応答しません。サービスを再起動するかログを確認してください。</string>
+    <string name="dnscheck_fakeip">コアが fake-ip で応答するため、この方法では上流 DNS を確認できません。</string>
+    <string name="dnscheck_again">もう一度確認</string>
+    <string name="dnscheck_not_running">DNSCrypt は実行されていません</string>
 </resources>

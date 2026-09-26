@@ -704,4 +704,17 @@
     <string name="dnscrypt_tag_filter">Filters</string>
     <string name="dnscrypt_auto">Automatic</string>
     <string name="dnscrypt_apply">Apply (%1$d)</string>
+    <string name="dnscheck_title">Check DNSCrypt</string>
+    <string name="dnscheck_row_sub">Which DNS server websites see</string>
+    <string name="dnscheck_sub">The address a DNS query comes from, as whoami.akamai.net sees it</string>
+    <string name="dnscheck_running">Checking…</string>
+    <string name="dnscheck_core">Through the core (as apps resolve)</string>
+    <string name="dnscheck_direct">Directly, past Boxy</string>
+    <string name="dnscheck_no_answer">No answer</string>
+    <string name="dnscheck_ok">Apps resolve through DNSCrypt</string>
+    <string name="dnscheck_bad">Apps do not resolve through DNSCrypt. Check the DNS hijack switch and the DNS servers in the core config.</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy did not answer. Restart the service or check the dnscrypt-proxy log.</string>
+    <string name="dnscheck_fakeip">The core answers with fake-ip addresses, so its upstream cannot be checked this way.</string>
+    <string name="dnscheck_again">Check again</string>
+    <string name="dnscheck_not_running">DNSCrypt is not running</string>
 </resources>

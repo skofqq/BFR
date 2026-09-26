@@ -680,4 +680,17 @@
     <string name="dnscrypt_tag_filter">Filtre</string>
     <string name="dnscrypt_auto">Automatique</string>
     <string name="dnscrypt_apply">Appliquer (%1$d)</string>
+    <string name="dnscheck_title">Vérifier DNSCrypt</string>
+    <string name="dnscheck_row_sub">Quel serveur DNS voient les sites</string>
+    <string name="dnscheck_sub">Adresse d’où la requête DNS arrive chez whoami.akamai.net</string>
+    <string name="dnscheck_running">Vérification…</string>
+    <string name="dnscheck_core">Via le cœur (comme les applis)</string>
+    <string name="dnscheck_direct">En direct, sans Boxy</string>
+    <string name="dnscheck_no_answer">Pas de réponse</string>
+    <string name="dnscheck_ok">Le DNS des applis passe par DNSCrypt</string>
+    <string name="dnscheck_bad">Le DNS des applis ne passe pas par DNSCrypt. Vérifiez l’interception DNS et les serveurs DNS de la configuration du cœur.</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy n’a pas répondu. Redémarrez le service ou consultez son journal.</string>
+    <string name="dnscheck_fakeip">Le cœur répond avec des adresses fake-ip, son DNS amont ne peut pas être vérifié ainsi.</string>
+    <string name="dnscheck_again">Vérifier à nouveau</string>
+    <string name="dnscheck_not_running">DNSCrypt n’est pas lancé</string>
 </resources>

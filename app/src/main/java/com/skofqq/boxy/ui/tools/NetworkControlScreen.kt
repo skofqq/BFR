@@ -105,6 +105,7 @@ fun NetworkControlScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEd
     var dnscrypt by remember { mutableStateOf<com.skofqq.boxy.root.DnsCryptState?>(null) }
     var dnscryptTask by remember { mutableStateOf<String?>(null) } // last output line while downloading
     var dnscryptReload by remember { mutableStateOf(0) }
+    var dnsCheck by remember { mutableStateOf(false) }
     var core by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(dnscryptReload) {
         dnscrypt = BoxModule.dnscrypt()
@@ -310,6 +311,17 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                             stringResource(R.string.dnscrypt_servers_row_sub),
                         ) { onDnsServers() }
                         SettingsRow(
+                            BoxyIcons.CheckCircle,
+                            stringResource(R.string.dnscheck_title),
+                            stringResource(if (dc.running) R.string.dnscheck_row_sub else R.string.dnscheck_not_running),
+                        ) {
+                            if (dc.running) {
+                                dnsCheck = true
+                            } else {
+                                Toast.makeText(context, R.string.dnscheck_not_running, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                        SettingsRow(
                             BoxyIcons.Edit,
                             stringResource(R.string.dnscrypt_config),
                             stringResource(R.string.dnscrypt_config_sub),
@@ -379,6 +391,9 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
     }
 
     val s = state
+    if (dnsCheck) {
+        dnscrypt?.let { DnsCheckSheet(it.port) { dnsCheck = false } }
+    }
     if (modeSheet && s != null) {
         BoxySheet(stringResource(R.string.net_list_mode), stringResource(R.string.net_list_mode_sub), { modeSheet = false }) {
             OptionRow(stringResource(R.string.net_mode_whitelist), stringResource(R.string.net_mode_whitelist_sub), s.whitelist) { state = s.copy(whitelist = true); modeSheet = false }

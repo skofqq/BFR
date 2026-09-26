@@ -680,4 +680,17 @@
     <string name="dnscrypt_tag_filter">Сүзеді</string>
     <string name="dnscrypt_auto">Автотаңдау</string>
     <string name="dnscrypt_apply">Қолдану (%1$d)</string>
+    <string name="dnscheck_title">DNSCrypt тексеру</string>
+    <string name="dnscheck_row_sub">Сайттар қай DNS серверді көреді</string>
+    <string name="dnscheck_sub">whoami.akamai.net көретін DNS сұрауының мекенжайы</string>
+    <string name="dnscheck_running">Тексерілуде…</string>
+    <string name="dnscheck_core">Ядро арқылы (қолданбалар осылай)</string>
+    <string name="dnscheck_direct">Тікелей, Boxy-ді айналып</string>
+    <string name="dnscheck_no_answer">Жауап жоқ</string>
+    <string name="dnscheck_ok">Қолданбалар DNS-і DNSCrypt арқылы өтеді</string>
+    <string name="dnscheck_bad">Қолданбалар DNS-і DNSCrypt арқылы өтпейді. DNS ұстауды және ядро конфигурациясындағы DNS серверлерді тексеріңіз.</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy жауап бермеді. Қызметті қайта іске қосыңыз немесе dnscrypt-proxy журналын қараңыз.</string>
+    <string name="dnscheck_fakeip">Ядро fake-ip мекенжайларымен жауап береді, сондықтан оның жоғарғы DNS-ін бұлай тексеру мүмкін емес.</string>
+    <string name="dnscheck_again">Қайта тексеру</string>
+    <string name="dnscheck_not_running">DNSCrypt іске қосылмаған</string>
 </resources>

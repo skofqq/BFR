@@ -28,6 +28,12 @@ data class ServiceDetails(
     val cpuAffinity: String?,
 )
 
+/** Resolver addresses seen by whoami.akamai.net (see [BoxModule.dnsWhoami]); null when there was no answer. */
+data class DnsWhoami(val viaCore: String?, val viaDnscrypt: String?, val direct: String?) {
+    /** The core answered with a fake-ip address, so its upstream cannot be seen. */
+    val coreFakeIp: Boolean get() = viaCore?.let { it.startsWith("198.18.") || it.startsWith("198.19.") } == true
+}
+
 /** Optional DNSCrypt of the module (ru.5+). [enabled] is null when the module has no dnscrypt setting. */
 data class DnsCryptState(
     val enabled: Boolean?,
@@ -280,6 +286,25 @@ object BoxModule {
     }
 
     suspend fun setDnscrypt(enabled: Boolean): Boolean = writeSetting("dnscrypt", enabled.toString())
+
+    /**
+     * Which resolver the outside world sees: whoami.akamai.net answers with the address the query came from.
+     * [viaCore] is asked like an app does (1.1.1.1:53, taken over by the DNS hijack), [viaDnscrypt] straight at
+     * dnscrypt-proxy, [direct] from the core's user and group, which the module's rules let past the proxy.
+     */
+    suspend fun dnsWhoami(dnscryptPort: String): DnsWhoami = withContext(Dispatchers.IO) {
+        val out = sh(
+            "BB=; for b in /data/adb/magisk/busybox /data/adb/ksu/bin/busybox /data/adb/ap/bin/busybox; do [ -x \$b ] && BB=\$b && break; done; " +
+                "[ -z \"\$BB\" ] && exit 0; " +
+                "ug=\$(grep -m1 '^box_user_group=' $SETTINGS | cut -d= -f2 | tr -d '\"'); " +
+                "q() { \$BB timeout 8 \"\$@\" 2>/dev/null | \$BB awk '/^Name:/{n=1} n&&/^Address/{print \$3; exit}'; }; " +
+                "echo core=\$(q \$BB nslookup whoami.akamai.net 1.1.1.1); " +
+                "echo crypt=\$(q \$BB nslookup whoami.akamai.net 127.0.0.1:$dnscryptPort); " +
+                "echo direct=\$(q \$BB setuidgid \${ug:-root:net_admin} \$BB nslookup whoami.akamai.net 1.1.1.1)",
+        )
+        val kv = parseKv(out)
+        DnsWhoami(kv["core"]?.ifBlank { null }, kv["crypt"]?.ifBlank { null }, kv["direct"]?.ifBlank { null })
+    }
 
     suspend fun subStoreInstalled(): Boolean = withContext(Dispatchers.IO) { exists("/data/adb/modules/sub_store") }
 

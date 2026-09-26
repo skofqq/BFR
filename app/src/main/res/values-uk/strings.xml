@@ -680,4 +680,17 @@
     <string name="dnscrypt_tag_filter">Фільтрує</string>
     <string name="dnscrypt_auto">Автовибір</string>
     <string name="dnscrypt_apply">Застосувати (%1$d)</string>
+    <string name="dnscheck_title">Перевірити DNSCrypt</string>
+    <string name="dnscheck_row_sub">Який DNS-сервер бачать сайти</string>
+    <string name="dnscheck_sub">Адреса, з якої DNS-запит приходить до whoami.akamai.net</string>
+    <string name="dnscheck_running">Перевіряю…</string>
+    <string name="dnscheck_core">Через ядро (так роблять застосунки)</string>
+    <string name="dnscheck_direct">Напряму, повз Boxy</string>
+    <string name="dnscheck_no_answer">Немає відповіді</string>
+    <string name="dnscheck_ok">DNS застосунків іде через DNSCrypt</string>
+    <string name="dnscheck_bad">DNS застосунків іде не через DNSCrypt. Перевірте перехоплення DNS і DNS-сервери в конфігурації ядра.</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy не відповів. Перезапустіть сервіс або перегляньте журнал dnscrypt-proxy.</string>
+    <string name="dnscheck_fakeip">Ядро відповідає адресами fake-ip, тому його вищий DNS так не перевірити.</string>
+    <string name="dnscheck_again">Перевірити ще раз</string>
+    <string name="dnscheck_not_running">DNSCrypt не запущено</string>
 </resources>

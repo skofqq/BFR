@@ -83,9 +83,14 @@ object Net {
     }.getOrNull()
 
     /** Public address details from ip.sb (goes through the proxy when the service runs). */
-    suspend fun geoIp(v6: Boolean): GeoIp? = withContext(Dispatchers.IO) {
+    suspend fun geoIp(v6: Boolean): GeoIp? = geoIpFrom(if (v6) "https://api-ipv6.ip.sb/geoip" else "https://api-ipv4.ip.sb/geoip")
+
+    /** Details (country, provider) of any address, e.g. the resolver seen by the DNSCrypt check. */
+    suspend fun geoIpOf(ip: String): GeoIp? = geoIpFrom("https://api.ip.sb/geoip/$ip")
+
+    private suspend fun geoIpFrom(url: String): GeoIp? = withContext(Dispatchers.IO) {
         runCatching {
-            val c = open(if (v6) "https://api-ipv6.ip.sb/geoip" else "https://api-ipv4.ip.sb/geoip")
+            val c = open(url)
             try {
                 if (c.responseCode !in 200..299) return@runCatching null
                 val j = JSONObject(c.inputStream.bufferedReader().readText())

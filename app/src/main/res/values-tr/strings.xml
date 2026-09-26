@@ -680,4 +680,17 @@
     <string name="dnscrypt_tag_filter">Filtreler</string>
     <string name="dnscrypt_auto">Otomatik</string>
     <string name="dnscrypt_apply">Uygula (%1$d)</string>
+    <string name="dnscheck_title">DNSCrypt’i denetle</string>
+    <string name="dnscheck_row_sub">Sitelerin gördüğü DNS sunucusu</string>
+    <string name="dnscheck_sub">DNS sorgusunun whoami.akamai.net’e geldiği adres</string>
+    <string name="dnscheck_running">Denetleniyor…</string>
+    <string name="dnscheck_core">Çekirdek üzerinden (uygulamalar gibi)</string>
+    <string name="dnscheck_direct">Doğrudan, Boxy’yi atlayarak</string>
+    <string name="dnscheck_no_answer">Yanıt yok</string>
+    <string name="dnscheck_ok">Uygulamaların DNS’i DNSCrypt üzerinden gidiyor</string>
+    <string name="dnscheck_bad">Uygulamaların DNS’i DNSCrypt üzerinden gitmiyor. DNS yakalamayı ve çekirdek yapılandırmasındaki DNS sunucularını denetleyin.</string>
+    <string name="dnscheck_no_dnscrypt">dnscrypt-proxy yanıt vermedi. Hizmeti yeniden başlatın veya günlüğüne bakın.</string>
+    <string name="dnscheck_fakeip">Çekirdek fake-ip adresleriyle yanıt veriyor, bu yüzden üst DNS’i bu şekilde denetlenemez.</string>
+    <string name="dnscheck_again">Yeniden denetle</string>
+    <string name="dnscheck_not_running">DNSCrypt çalışmıyor</string>
 </resources>
