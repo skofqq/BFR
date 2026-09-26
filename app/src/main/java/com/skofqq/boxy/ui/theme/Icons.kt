@@ -223,22 +223,33 @@ object BoxyIcons {
         autoMirror = true,
     )
 
-    /** Globe with four nodes (server-06): the DNSCrypt servers list. */
-    val ServerGlobe = strokeIcon(
-        "ServerGlobe",
-        "M20 12a8 8 0 0 1-8 8m8-8a8 8 0 0 0-8-8m8 8H4m8 8a8 8 0 0 1-8-8m8 8a12.24 12.24 0 0 0 3.2-8A12.24 12.24 0 0 0 12 4m0 16a12.24 12.24 0 0 1-3.2-8A12.24 12.24 0 0 1 12 4m-8 8a8 8 0 0 1 8-8M6 20a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm16 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM6 4a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm16 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
-    )
-
-    /** Outline icon: the path is stroked (2px, round caps and joins) instead of filled. */
-    private fun strokeIcon(name: String, path: String): ImageVector =
-        ImageVector.Builder(name = name, defaultWidth = 24.dp, defaultHeight = 24.dp, viewportWidth = 24f, viewportHeight = 24f)
-            .addPath(
-                pathData = PathParser().parsePathString(path).toNodes(),
-                stroke = SolidColor(Color.Black),
-                strokeLineWidth = 2f,
-                strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
-                strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
-            ).build()
+    /**
+     * Globe with four nodes (server-06) for the DNSCrypt servers list, redrawn to sit with the filled Material
+     * icons: a heavier stroke and solid nodes in the corners.
+     */
+    val ServerGlobe: ImageVector = ImageVector.Builder(
+        name = "ServerGlobe",
+        defaultWidth = 24.dp,
+        defaultHeight = 24.dp,
+        viewportWidth = 24f,
+        viewportHeight = 24f,
+    ).addPath(
+        pathData = PathParser().parsePathString(
+            "M19,12a7,7 0 1,1 -14,0a7,7 0 1,1 14,0zM5,12h14M14.9,12a2.9,7 0 1,1 -5.8,0a2.9,7 0 1,1 5.8,0z",
+        ).toNodes(),
+        stroke = SolidColor(Color.Black),
+        strokeLineWidth = 2.2f,
+        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
+        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
+    ).addPath(
+        pathData = PathParser().parsePathString(
+            "M6,4a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z" +
+                "M22,4a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z" +
+                "M6,20a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z" +
+                "M22,20a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z",
+        ).toNodes(),
+        fill = SolidColor(Color.Black),
+    ).build()
 
     private fun icon(name: String, path: String, autoMirror: Boolean = false): ImageVector =
         ImageVector.Builder(
