@@ -305,7 +305,7 @@ SubPageHeader(stringResource(R.string.tools_network), stringResource(R.string.to
                             }
                         }
                         SettingsRow(
-                            BoxyIcons.ServerGlobe,
+                            BoxyIcons.Dns,
                             stringResource(R.string.dnscrypt_servers),
                             stringResource(R.string.dnscrypt_servers_row_sub),
                         ) { onDnsServers() }

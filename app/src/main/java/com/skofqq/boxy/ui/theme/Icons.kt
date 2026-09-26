@@ -223,33 +223,10 @@ object BoxyIcons {
         autoMirror = true,
     )
 
-    /**
-     * Globe with four nodes (server-06) for the DNSCrypt servers list, redrawn to sit with the filled Material
-     * icons: a heavier stroke and solid nodes in the corners.
-     */
-    val ServerGlobe: ImageVector = ImageVector.Builder(
-        name = "ServerGlobe",
-        defaultWidth = 24.dp,
-        defaultHeight = 24.dp,
-        viewportWidth = 24f,
-        viewportHeight = 24f,
-    ).addPath(
-        pathData = PathParser().parsePathString(
-            "M19,12a7,7 0 1,1 -14,0a7,7 0 1,1 14,0zM5,12h14M14.9,12a2.9,7 0 1,1 -5.8,0a2.9,7 0 1,1 5.8,0z",
-        ).toNodes(),
-        stroke = SolidColor(Color.Black),
-        strokeLineWidth = 2.2f,
-        strokeLineCap = androidx.compose.ui.graphics.StrokeCap.Round,
-        strokeLineJoin = androidx.compose.ui.graphics.StrokeJoin.Round,
-    ).addPath(
-        pathData = PathParser().parsePathString(
-            "M6,4a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z" +
-                "M22,4a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z" +
-                "M6,20a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z" +
-                "M22,20a2,2 0 1,1 -4,0a2,2 0 1,1 4,0z",
-        ).toNodes(),
-        fill = SolidColor(Color.Black),
-    ).build()
+    val Dns = icon(
+        "Dns",
+        "M20,13H4c-0.55,0 -1,0.45 -1,1v6c0,0.55 0.45,1 1,1h16c0.55,0 1,-0.45 1,-1v-6c0,-0.55 -0.45,-1 -1,-1zM7,19c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2 2,0.9 2,2 -0.9,2 -2,2zM20,3H4c-0.55,0 -1,0.45 -1,1v6c0,0.55 0.45,1 1,1h16c0.55,0 1,-0.45 1,-1V4c0,-0.55 -0.45,-1 -1,-1zM7,9c-1.1,0 -2,-0.9 -2,-2s0.9,-2 2,-2 2,0.9 2,2 -0.9,2 -2,2z",
+    )
 
     private fun icon(name: String, path: String, autoMirror: Boolean = false): ImageVector =
         ImageVector.Builder(

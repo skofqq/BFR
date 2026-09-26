@@ -155,8 +155,8 @@ fun StringListEditor(
     val colors = Boxy.colors
     Column(Modifier.fillMaxWidth().padding(horizontal = 18.dp)) {
         items.forEachIndexed { i, value ->
-            if (i > 0) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 56.dp), color = colors.outline.copy(alpha = 0.35f))
-            Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (i > 0) androidx.compose.material3.HorizontalDivider(Modifier.padding(start = 56.dp, end = 48.dp), color = colors.outline)
+            Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 val pick = onPick?.takeIf { pickIcon != null }
                 Box(
                     Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(colors.surface2)
