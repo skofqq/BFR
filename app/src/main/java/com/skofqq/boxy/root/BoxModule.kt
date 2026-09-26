@@ -287,6 +287,17 @@ object BoxModule {
 
     suspend fun setDnscrypt(enabled: Boolean): Boolean = writeSetting("dnscrypt", enabled.toString())
 
+    /** Cheap DNSCrypt status for polling: (enabled or null without the setting, dnscrypt-proxy running). */
+    suspend fun dnscryptStatus(): Pair<Boolean?, Boolean> = withContext(Dispatchers.IO) {
+        val kv = parseKv(
+            sh(
+                "grep -m1 '^dnscrypt=' $SETTINGS 2>/dev/null; " +
+                    "p=$(cat $RUN_DIR/dnscrypt.pid 2>/dev/null); [ -n \"${'$'}p\" ] && [ -e /proc/${'$'}p ] && echo run=1",
+            ),
+        )
+        kv["dnscrypt"]?.let { unquote(it) == "true" } to (kv["run"] == "1")
+    }
+
     /**
      * Which resolver the outside world sees: whoami.akamai.net answers with the address the query came from.
      * [viaCore] is asked like an app does (1.1.1.1:53, taken over by the DNS hijack), [viaDnscrypt] straight at

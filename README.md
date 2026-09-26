@@ -10,7 +10,7 @@ Languages: English, Русский, Українська, Беларуская, 
 ## Features
 
 **Home**
-- Service status with Start / Stop / Restart, uptime, service details (PID, core version, memory, CPU, affinity) and config reload
+- Service status with Start / Stop / Restart, uptime, service details (PID, core version, memory, CPU, affinity) and config reload; DNSCrypt status
 - Switch core, network mode and IPv6 while the service is stopped
 - Panel and Logs shortcuts, SubStore shortcut when the `sub_store` module is installed
 - Latency to three configurable targets

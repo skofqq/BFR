@@ -149,7 +149,7 @@ fun DnsScreen(contentPadding: PaddingValues, onBack: () -> Unit, onEdit: (String
                             showDivider = false,
                         ) { onEdit("${BoxModule.BOX_DIR}/dnscrypt/dnscrypt-proxy.toml") }
                         Text(
-                            stringResource(if (core == "clash") R.string.dnscrypt_hint_clash else R.string.dnscrypt_hint_other, "127.0.0.1:${dc.port}"),
+                            stringResource(if (core == "clash" || core == "sing-box") R.string.dnscrypt_hint_clash else R.string.dnscrypt_hint_other, "127.0.0.1:${dc.port}"),
                             Modifier.padding(horizontal = 18.dp, vertical = 6.dp),
                             style = MaterialTheme.typography.bodySmall,
                             color = Boxy.colors.text2,

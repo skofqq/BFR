@@ -196,6 +196,11 @@ private fun MainScreen(prefs: Prefs, openPanel: Boolean) {
                             if (i >= 0) scope.launch { pager.animateScrollToPage(i) } else subPage = Overlay.LOGS
                         },
                         onOpenSubStore = { subPage = Overlay.SUBSTORE },
+                        onOpenDns = {
+                            com.skofqq.boxy.ui.tools.ToolsNav.request = com.skofqq.boxy.ui.tools.ROUTE_DNS
+                            val i = tabs.indexOf(Tab.TOOLS)
+                            if (i >= 0) scope.launch { pager.animateScrollToPage(i) }
+                        },
                     )
                     Tab.APPS -> AppsScreen(padding)
                     Tab.LOGS -> LogsScreen(padding)

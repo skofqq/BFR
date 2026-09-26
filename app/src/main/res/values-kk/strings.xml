@@ -660,8 +660,8 @@
     <string name="dnscrypt_download_failed">dnscrypt-proxy жүктеу сәтсіз</string>
     <string name="dnscrypt_config">dnscrypt-proxy конфигурациясы</string>
     <string name="dnscrypt_config_sub">Серверлер, анонимді релелер, бұғаттау тізімдері</string>
-    <string name="dnscrypt_hint_clash">clash ядросында белсенді конфигурацияның dns.nameserver мәні автоматты түрде %1$s болады және DNSCrypt өшірілгенде қайтарылады.</string>
-    <string name="dnscrypt_hint_other">sing-box, xray және v2fly үшін %1$s мекенжайын конфигурацияның DNS серверлеріне қолмен қосыңыз.</string>
+    <string name="dnscrypt_hint_clash">clash және sing-box ядроларында белсенді конфигурацияның DNS-і %1$s мекенжайына автоматты түрде ауысады және DNSCrypt өшірілгенде қайтарылады.</string>
+    <string name="dnscrypt_hint_other">xray және v2fly үшін %1$s мекенжайын конфигурацияның DNS серверлеріне қолмен қосыңыз.</string>
     <string name="dnscrypt_servers">DNSCrypt серверлері</string>
     <string name="dnscrypt_servers_row_sub">Серверлерді таңдау: сүзгілер, кідіріс бойынша сұрыптау</string>
     <string name="dnscrypt_servers_summary">%2$d ішінен %1$d</string>
@@ -696,4 +696,5 @@
     <string name="tools_dns">DNS</string>
     <string name="tools_dns_sub">DNS ұстау және шифрланған DNS</string>
     <string name="tools_dns_row_sub">DNS ұстау, DNSCrypt, тексеру</string>
+    <string name="dnscrypt_home_failed">Ақау</string>
 </resources>

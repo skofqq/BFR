@@ -684,8 +684,8 @@
     <string name="dnscrypt_download_failed">Could not download dnscrypt-proxy</string>
     <string name="dnscrypt_config">dnscrypt-proxy config</string>
     <string name="dnscrypt_config_sub">Servers, anonymized relays, block lists</string>
-    <string name="dnscrypt_hint_clash">With the clash core, dns.nameserver of the active config is set to %1$s automatically and restored when DNSCrypt is turned off.</string>
-    <string name="dnscrypt_hint_other">For sing-box, xray and v2fly, add %1$s to the DNS servers of the config yourself.</string>
+    <string name="dnscrypt_hint_clash">With the clash and sing-box cores, the DNS of the active config is switched to %1$s automatically and restored when DNSCrypt is turned off.</string>
+    <string name="dnscrypt_hint_other">For xray and v2fly, add %1$s to the DNS servers of the config yourself.</string>
     <string name="dnscrypt_servers">DNSCrypt servers</string>
     <string name="dnscrypt_servers_row_sub">Choose servers: filters, sorting by latency</string>
     <string name="dnscrypt_servers_summary">%1$d of %2$d</string>
@@ -720,4 +720,5 @@
     <string name="tools_dns">DNS</string>
     <string name="tools_dns_sub">DNS hijack and encrypted DNS</string>
     <string name="tools_dns_row_sub">DNS hijack, DNSCrypt, check</string>
+    <string name="dnscrypt_home_failed">Down</string>
 </resources>

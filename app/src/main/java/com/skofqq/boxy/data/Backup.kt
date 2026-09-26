@@ -20,8 +20,9 @@ enum class BackupScope { MODULES, APPS, BOTH }
  */
 object Backup {
     private val ROOT_FILES = listOf("settings.ini", "package.list.cfg", "ap.list.cfg", "gid.list.cfg", "crontab.cfg")
-    private val CORE_DIRS = listOf("clash", "sing-box", "xray", "v2fly", "hysteria")
-    private val CONFIG_EXT = setOf("yaml", "yml", "json", "txt", "list", "conf")
+    // Core configs and the dnscrypt-proxy config (dnscrypt-proxy.toml with the picked servers, block lists).
+    private val CORE_DIRS = listOf("clash", "sing-box", "xray", "v2fly", "hysteria", "dnscrypt")
+    private val CONFIG_EXT = setOf("yaml", "yml", "json", "txt", "list", "conf", "toml")
 
     suspend fun export(context: Context, uri: Uri, prefs: Prefs, scope: BackupScope = BackupScope.BOTH): Boolean = withContext(Dispatchers.IO) {
         runCatching {

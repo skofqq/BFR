@@ -54,6 +54,7 @@ fun HomeScreen(
     onOpenPanel: () -> Unit,
     onOpenLogs: () -> Unit,
     onOpenSubStore: () -> Unit,
+    onOpenDns: () -> Unit = {},
 ) {
     val vm: HomeViewModel = viewModel { HomeViewModel(prefs) }
     val context = LocalContext.current
@@ -96,6 +97,8 @@ PageHeader(stringResource(R.string.home_title), stringResource(R.string.home_sub
                                 onCore = { editable(HomeSheet.CORE) },
                                 onMode = { editable(HomeSheet.MODE) },
                                 onIpv6 = { editable(HomeSheet.IPV6) },
+                                dnscrypt = vm.dnscrypt,
+                                onDnscrypt = onOpenDns,
                                 onStart = vm::start,
                                 onStop = vm::stop,
                                 onRestart = vm::restart,

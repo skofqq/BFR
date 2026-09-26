@@ -93,6 +93,8 @@ fun HeroCard(
     onCore: () -> Unit,
     onMode: () -> Unit,
     onIpv6: () -> Unit,
+    dnscrypt: Pair<Boolean?, Boolean>? = null,
+    onDnscrypt: () -> Unit = {},
     onStart: () -> Unit,
     onStop: () -> Unit,
     onRestart: () -> Unit,
@@ -140,6 +142,27 @@ fun HeroCard(
                     state?.ipv6?.let { stringResource(if (it) R.string.common_on else R.string.common_off) },
                     onIpv6,
                 )
+                val (dcEnabled, dcRunning) = dnscrypt ?: (null to false)
+                if (dcEnabled != null) {
+                    // On and working: green. On, service running, dnscrypt-proxy down: red. Otherwise plain.
+                    val failed = dcEnabled && running && !dcRunning
+                    MiniRow(
+                        "DNSCrypt",
+                        stringResource(
+                            when {
+                                !dcEnabled -> R.string.common_off
+                                failed -> R.string.dnscrypt_home_failed
+                                else -> R.string.common_on
+                            },
+                        ),
+                        onDnscrypt,
+                        color = when {
+                            failed -> Tints.red.fg
+                            dcEnabled && dcRunning -> green.fg
+                            else -> colors.text
+                        },
+                    )
+                }
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -158,7 +181,7 @@ fun HeroCard(
 private val IntrinsicMiniWidth = 150.dp
 
 @Composable
-private fun MiniRow(label: String, value: String?, onClick: () -> Unit) {
+private fun MiniRow(label: String, value: String?, onClick: () -> Unit, color: androidx.compose.ui.graphics.Color = Boxy.colors.text) {
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 14.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -167,7 +190,7 @@ private fun MiniRow(label: String, value: String?, onClick: () -> Unit) {
         Text(
             value ?: stringResource(R.string.common_dash),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-            color = Boxy.colors.text,
+            color = color,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

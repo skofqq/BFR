@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import com.skofqq.boxy.ui.components.BoxySheet
@@ -43,6 +44,12 @@ fun ToolsScreen(contentPadding: PaddingValues, navExtra: NavExtra, active: Boole
     val push: (String) -> Unit = { stack = stack + it }
     val pop: () -> Unit = { stack = stack.dropLast(1) }
     BackHandler(enabled = active && stack.isNotEmpty()) { pop() }
+
+    // A page requested from another tab (the DNSCrypt row on the home page).
+    LaunchedEffect(ToolsNav.request) {
+        ToolsNav.request?.let { stack = listOf(it) }
+        ToolsNav.request = null
+    }
 
     val route = stack.lastOrNull() ?: ROUTE_HUB
     AnimatedContent(
@@ -89,6 +96,11 @@ const val ROUTE_TRAFFIC = "traffic"
 const val ROUTE_AUTOMATION = "automation"
 const val ROUTE_DNSCRYPT = "dnscrypt"
 const val ROUTE_DNS = "dns"
+
+/** Opens a Tools page from elsewhere: set [request] to a route and switch to the Tools tab. */
+object ToolsNav {
+    var request by androidx.compose.runtime.mutableStateOf<String?>(null)
+}
 
 @Composable
 private fun ToolsHub(contentPadding: PaddingValues, navExtra: NavExtra, onOpenPage: (NavExtra) -> Unit, push: (String) -> Unit) {

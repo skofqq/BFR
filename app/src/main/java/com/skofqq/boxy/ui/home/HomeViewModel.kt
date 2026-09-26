@@ -48,6 +48,9 @@ data class SystemState(val cpuPercent: Float, val rssBytes: Long)
 class HomeViewModel(private val prefs: Prefs) : ViewModel() {
     var env by mutableStateOf<Environment?>(null)
         private set
+    /** DNSCrypt (enabled, running); enabled is null when the module has no DNSCrypt. */
+    var dnscrypt by mutableStateOf<Pair<Boolean?, Boolean>?>(null)
+        private set
     var state by mutableStateOf<ServiceState?>(null)
         private set
     var busy by mutableStateOf(Busy.NONE)
@@ -131,6 +134,7 @@ class HomeViewModel(private val prefs: Prefs) : ViewModel() {
         if (busy != Busy.NONE) return
         val s = BoxModule.state()
         state = s
+        dnscrypt = BoxModule.dnscryptStatus()
         if (s.running != lastRunning) {
             lastRunning = s.running
             refreshIp()

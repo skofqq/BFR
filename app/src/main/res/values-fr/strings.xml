@@ -660,8 +660,8 @@
     <string name="dnscrypt_download_failed">Impossible de télécharger dnscrypt-proxy</string>
     <string name="dnscrypt_config">Configuration de dnscrypt-proxy</string>
     <string name="dnscrypt_config_sub">Serveurs, relais anonymes, listes de blocage</string>
-    <string name="dnscrypt_hint_clash">Avec le cœur clash, dns.nameserver de la configuration active passe à %1$s automatiquement et est restauré à la désactivation de DNSCrypt.</string>
-    <string name="dnscrypt_hint_other">Pour sing-box, xray et v2fly, ajoutez %1$s aux serveurs DNS de la configuration.</string>
+    <string name="dnscrypt_hint_clash">Avec les cœurs clash et sing-box, le DNS de la configuration active passe à %1$s automatiquement et revient quand DNSCrypt est désactivé.</string>
+    <string name="dnscrypt_hint_other">Pour xray et v2fly, ajoutez %1$s aux serveurs DNS de la configuration vous-même.</string>
     <string name="dnscrypt_servers">Serveurs DNSCrypt</string>
     <string name="dnscrypt_servers_row_sub">Choisir les serveurs : filtres, tri par latence</string>
     <string name="dnscrypt_servers_summary">%1$d sur %2$d</string>
@@ -696,4 +696,5 @@
     <string name="tools_dns">DNS</string>
     <string name="tools_dns_sub">Interception DNS et DNS chiffré</string>
     <string name="tools_dns_row_sub">Interception DNS, DNSCrypt, vérification</string>
+    <string name="dnscrypt_home_failed">Échec</string>
 </resources>

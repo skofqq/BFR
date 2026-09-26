@@ -30,8 +30,8 @@ source /data/adb/box/settings.ini
 fwmark="16777216/16777216"
 table="2024"
 pref="100"
-# disable or enable QUIC using iptables rules. Note that this may cause some websites to become inaccessible.
-quic="enable"
+# settings.ini: quic="disable" blocks QUIC (UDP 443 / 80) for apps; the core itself is not affected.
+quic="${quic:-enable}"
 clash_dns_forward="enable"
 # settings.ini: dns_hijack=false leaves port 53 to the system or another module (AdGuard Home)
 dns_hijack="${dns_hijack:-true}"
@@ -559,10 +559,11 @@ start_tproxy() {
   ${iptables} -t mangle -A DIVERT -j ACCEPT
   [ ${network_mode} = "enhance" ] || ${iptables} -t mangle -I PREROUTING -p tcp -m socket -j DIVERT
 
-  # Disable QUIC
+  # Disable QUIC for apps. The core and dnscrypt-proxy (box_user_group) are left out,
+  # otherwise Hysteria2 / TUIC servers on port 443 and DoH over HTTP/3 stop working.
   if [ "${quic}" = "disable" ]; then
-    ${iptables} -A OUTPUT -p udp --dport 443 -j REJECT
-    ${iptables} -A OUTPUT -p udp --dport 80 -j REJECT
+    ${iptables} -A OUTPUT -p udp --dport 443 -m owner ! --gid-owner "${box_group}" -j REJECT
+    ${iptables} -A OUTPUT -p udp --dport 80 -m owner ! --gid-owner "${box_group}" -j REJECT
     # ${iptables} -A OUTPUT -p udp -m multiport --dport 443,80 -j REJECT
     [ "${iptables}" = "$IPV" ] && log Warning "Disabling QUIC"
   fi
@@ -636,6 +637,8 @@ stop_tproxy() {
   ${iptables} -t mangle -X DIVERT
 
   # flush QUIC
+  ${iptables} -D OUTPUT -p udp --dport 443 -m owner ! --gid-owner "${box_group}" -j REJECT
+  ${iptables} -D OUTPUT -p udp --dport 80 -m owner ! --gid-owner "${box_group}" -j REJECT
   ${iptables} -D OUTPUT -p udp -m multiport --dport 443,80 -j REJECT
   ${iptables} -D OUTPUT -p udp --dport 443 -j REJECT
   ${iptables} -D OUTPUT -p udp --dport 80 -j REJECT

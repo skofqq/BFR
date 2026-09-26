@@ -660,8 +660,8 @@
     <string name="dnscrypt_download_failed">dnscrypt-proxy indirilemedi</string>
     <string name="dnscrypt_config">dnscrypt-proxy yapılandırması</string>
     <string name="dnscrypt_config_sub">Sunucular, anonim aktarıcılar, engel listeleri</string>
-    <string name="dnscrypt_hint_clash">clash çekirdeğinde etkin yapılandırmanın dns.nameserver değeri otomatik olarak %1$s olur, DNSCrypt kapatılınca geri yüklenir.</string>
-    <string name="dnscrypt_hint_other">sing-box, xray ve v2fly için %1$s adresini yapılandırmanın DNS sunucularına kendiniz ekleyin.</string>
+    <string name="dnscrypt_hint_clash">clash ve sing-box çekirdeklerinde etkin yapılandırmanın DNS’i otomatik olarak %1$s adresine geçer ve DNSCrypt kapatıldığında geri alınır.</string>
+    <string name="dnscrypt_hint_other">xray ve v2fly için %1$s adresini yapılandırmanın DNS sunucularına kendiniz ekleyin.</string>
     <string name="dnscrypt_servers">DNSCrypt sunucuları</string>
     <string name="dnscrypt_servers_row_sub">Sunucu seç: filtreler, gecikmeye göre sıralama</string>
     <string name="dnscrypt_servers_summary">%2$d içinden %1$d</string>
@@ -696,4 +696,5 @@
     <string name="tools_dns">DNS</string>
     <string name="tools_dns_sub">DNS yakalama ve şifreli DNS</string>
     <string name="tools_dns_row_sub">DNS yakalama, DNSCrypt, denetim</string>
+    <string name="dnscrypt_home_failed">Hata</string>
 </resources>

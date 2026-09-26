@@ -1,5 +1,17 @@
 # Box for Root (Boxy edition)
 
+## v1.10.2-ru.6
+
+- `quic="disable"` (now a settings.ini key) blocks QUIC only for apps; the core and dnscrypt-proxy keep UDP 443,
+  so Hysteria2 / TUIC servers on port 443 and DNSCrypt servers on 443 keep working
+- DNSCrypt with sing-box: a `dnscrypt` DNS server is added to the active config and made `dns.final`
+  (1.12+ and legacy server formats), removed again when DNSCrypt is off
+
+- `quic="disable"` (теперь ключ settings.ini) блокирует QUIC только приложениям; ядро и dnscrypt-proxy сохраняют UDP 443,
+  поэтому серверы Hysteria2 / TUIC и DNSCrypt на порту 443 продолжают работать
+- DNSCrypt с sing-box: в активную конфигурацию добавляется DNS-сервер `dnscrypt` и становится `dns.final`
+  (форматы 1.12+ и старый), при выключении DNSCrypt он убирается
+
 ## v1.10.2-ru.5
 
 - Optional DNSCrypt: `dnscrypt="true"` starts dnscrypt-proxy (bin/dnscrypt-proxy, `dnscrypt/dnscrypt-proxy.toml`) on 127.0.0.1:5354 before the core;

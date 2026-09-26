@@ -191,6 +191,7 @@ box_check_bin() {
 # }
 
 prepare_singbox() {
+  dnscrypt_singbox
   # Check configuration file
   if ! [ -f "${sing_config}" ]; then
     log Error "Configuration file ${sing_config} not found"
@@ -365,6 +366,36 @@ dnscrypt_clash() {
     if ${yq} -i ".dns.nameserver = load(\"${bak}\").nameserver | .dns.fallback = load(\"${bak}\").fallback | (.dns.nameserver, .dns.nameserver[], .dns.fallback, .dns.fallback[]) style=\"\" | del(.dns.fallback | select(length == 0))" "${clash_config}"; then
       rm -f "${bak}"
       log Info "DNSCrypt is off: previous clash DNS servers restored"
+    fi
+  fi
+}
+
+# sing-box: adds a "dnscrypt" DNS server and makes it dns.final; removes it and restores dns.final when off.
+dnscrypt_singbox() {
+  local port="${dnscrypt_port:-5354}" bak="${sing_config}.dnscrypt.bak" yq="yq" server direct
+  command -v yq >/dev/null 2>&1 || yq="${box_dir}/bin/yq"
+  [ -f "${sing_config}" ] || return 0
+  if [ "${dnscrypt}" = "true" ] && kill -0 "$(cat "${dnscrypt_pid}" 2>/dev/null)" 2>/dev/null; then
+    if [ ! -x "${yq}" ] && ! command -v yq >/dev/null 2>&1; then
+      log Warning "DNSCrypt: yq is missing, add 127.0.0.1:${port} to dns.servers of ${sing_config} yourself"
+      return 0
+    fi
+    [ "$(${yq} -r '[.dns.servers[]? | select(.tag == "dnscrypt")] | length' "${sing_config}" 2>/dev/null)" = "0" ] || return 0
+    [ -f "${bak}" ] || ${yq} -o=json '{"final": (.dns.final // "")}' "${sing_config}" > "${bak}"
+    if [ "$(${yq} -r '[.dns.servers[]? | select(has("type"))] | length' "${sing_config}" 2>/dev/null)" != "0" ]; then
+      # sing-box 1.12+ server format: dials directly unless a detour is set.
+      server="{\"type\": \"udp\", \"tag\": \"dnscrypt\", \"server\": \"127.0.0.1\", \"server_port\": ${port}}"
+    else
+      # Legacy format: without a detour the query would go through the default (proxy) outbound.
+      direct=$(${yq} -r '[.outbounds[]? | select(.type == "direct") | .tag][0] // ""' "${sing_config}" 2>/dev/null)
+      server="{\"tag\": \"dnscrypt\", \"address\": \"udp://127.0.0.1:${port}\"${direct:+, \"detour\": \"${direct}\"}}"
+    fi
+    ${yq} -i -o=json ".dns.servers = [${server}] + (.dns.servers // []) | .dns.final = \"dnscrypt\"" "${sing_config}" \
+      && log Info "DNSCrypt: sing-box dns.final → 127.0.0.1:${port}"
+  elif [ -f "${bak}" ]; then
+    if ${yq} -i -o=json "del(.dns.servers[] | select(.tag == \"dnscrypt\")) | .dns.final = load(\"${bak}\").final | del(.dns.final | select(. == \"\"))" "${sing_config}"; then
+      rm -f "${bak}"
+      log Info "DNSCrypt is off: previous sing-box DNS restored"
     fi
   fi
 }
